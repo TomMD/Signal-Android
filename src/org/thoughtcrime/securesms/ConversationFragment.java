@@ -58,6 +58,7 @@ import org.thoughtcrime.securesms.database.RecipientDatabase;
 import org.thoughtcrime.securesms.database.loaders.ConversationLoader;
 import org.thoughtcrime.securesms.database.model.MediaMmsMessageRecord;
 import org.thoughtcrime.securesms.database.model.MessageRecord;
+import org.thoughtcrime.securesms.database.model.MmsMessageRecord;
 import org.thoughtcrime.securesms.mms.GlideApp;
 import org.thoughtcrime.securesms.mms.OutgoingMediaMessage;
 import org.thoughtcrime.securesms.mms.Slide;
@@ -226,6 +227,7 @@ public class ConversationFragment extends Fragment
 
     if (messageRecords.size() > 1) {
       menu.findItem(R.id.menu_context_forward).setVisible(false);
+      menu.findItem(R.id.menu_context_reply).setVisible(false);
       menu.findItem(R.id.menu_context_details).setVisible(false);
       menu.findItem(R.id.menu_context_save_attachment).setVisible(false);
       menu.findItem(R.id.menu_context_resend).setVisible(false);
@@ -414,7 +416,6 @@ public class ConversationFragment extends Fragment
     return new ConversationLoader(getActivity(), threadId, args.getLong("limit", PARTIAL_CONVERSATION_LIMIT), lastSeen);
   }
 
-
   @Override
   public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
     Log.w(TAG, "onLoadFinished");
@@ -593,7 +594,6 @@ public class ConversationFragment extends Fragment
           setCorrectMenuVisibility(actionMode.getMenu());
           actionMode.setTitle(String.valueOf(getListAdapter().getSelectedItems().size()));
         }
-
       }
     }
 
@@ -605,6 +605,34 @@ public class ConversationFragment extends Fragment
 
         actionMode = ((AppCompatActivity)getActivity()).startSupportActionMode(actionModeCallback);
       }
+    }
+
+    @Override
+    public void onQuoteClicked(MmsMessageRecord messageRecord) {
+      if (messageRecord.getQuote() == null) {
+        Log.w(TAG, "Received a 'quote clicked' event, but there's no quote...");
+        return;
+      }
+
+      new AsyncTask<Void, Void, Integer>() {
+        @Override
+        protected Integer doInBackground(Void... voids) {
+          return DatabaseFactory.getMmsSmsDatabase(getContext())
+                                .getQuotedMessagePosition(threadId, messageRecord.getQuote().getId());
+        }
+
+        @Override
+        protected void onPostExecute(Integer position) {
+          if (position >= 0 && position < getListAdapter().getItemCount()) {
+            list.scrollToPosition(position);
+            getListAdapter().pulseHighlightItem(position);
+          } else if (position < 0) {
+            Log.w(TAG, "Tried to navigate to quoted message, but it was deleted.");
+          } else {
+            Log.w(TAG, "Tried to navigate to quoted message, but it was out of the bounds of the adapter.");
+          }
+        }
+      }.execute();
     }
   }
 

@@ -11,11 +11,12 @@ import java.util.Locale;
 import java.util.Set;
 
 public interface BindableConversationItem extends Unbindable {
-  void bind(@NonNull MessageRecord messageRecord,
-            @NonNull GlideRequests glideRequests,
-            @NonNull Locale locale,
+  void bind(@NonNull MessageRecord      messageRecord,
+            @NonNull GlideRequests      glideRequests,
+            @NonNull Locale             locale,
             @NonNull Set<MessageRecord> batchSelected,
-            @NonNull Recipient recipients);
+            @NonNull Recipient          recipients,
+                     boolean            pulseHighlight);
 
   MessageRecord getMessageRecord();
 }
