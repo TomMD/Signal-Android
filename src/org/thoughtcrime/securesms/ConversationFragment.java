@@ -242,7 +242,9 @@ public class ConversationFragment extends Fragment
 
       menu.findItem(R.id.menu_context_forward).setVisible(!actionMessage);
       menu.findItem(R.id.menu_context_details).setVisible(!actionMessage);
-      menu.findItem(R.id.menu_context_reply).setVisible(!messageRecord.isPending() && !messageRecord.isFailed());
+      menu.findItem(R.id.menu_context_reply).setVisible(!messageRecord.isPending() &&
+                                                        !messageRecord.isFailed()  &&
+                                                        messageRecord.isSecure());
     }
     menu.findItem(R.id.menu_context_copy).setVisible(!actionMessage && hasText);
   }
