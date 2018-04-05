@@ -45,7 +45,8 @@ public class SQLCipherOpenHelper extends SQLiteOpenHelper {
   private static final int ATTACHMENT_DIMENSIONS            = 6;
   private static final int QUOTED_REPLIES                   = 7;
 
-  private static final int    DATABASE_VERSION = 7;
+  // TODO: DANGER DO NOT COMMIT
+  private static final int    DATABASE_VERSION = 6;
   private static final String DATABASE_NAME    = "signal.db";
 
   private final Context        context;

@@ -144,14 +144,14 @@ public class MmsSmsDatabase extends Database {
     String order     = MmsSmsColumns.NORMALIZED_DATE_RECEIVED + " DESC";
     String selection = MmsSmsColumns.THREAD_ID + " = " + threadId;
 
-   try (Cursor cursor = queryTables(new String[]{ MmsSmsColumns.NORMALIZED_DATE_SENT }, selection, order, null)) {
-     while (cursor != null && cursor.moveToNext()) {
-       if (cursor.getLong(0) == quoteId) {
-         return cursor.getPosition();
-       }
-     }
-   }
-   return -1;
+    try (Cursor cursor = queryTables(new String[]{ MmsSmsColumns.NORMALIZED_DATE_SENT }, selection, order, null)) {
+      while (cursor != null && cursor.moveToNext()) {
+        if (cursor.getLong(0) == quoteId) {
+          return cursor.getPosition();
+        }
+      }
+    }
+    return -1;
   }
 
   private Cursor queryTables(String[] projection, String selection, String order, String limit) {
