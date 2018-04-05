@@ -146,15 +146,7 @@ public abstract class PushSendJob extends SendJob {
                                                       .withStream(new ByteArrayInputStream(attachmentData.getBitmap()))
                                                       .build());
         } else {
-          quoteAttachments.add(SignalServiceAttachmentStream.newStreamBuilder()
-                                                            .withContentType(attachment.getContentType())
-                                                            .withFileName(attachment.getFileName())
-                                                            .withHeight(0)
-                                                            .withWidth(0)
-                                                            .withLength(1)
-                                                            .withStream(new ByteArrayInputStream(new byte[1]))
-                                                            .withVoiceNote(attachment.isVoiceNote())
-                                                            .build());
+          quoteAttachments.add(new SignalServiceAttachmentPointer(0, attachment.getContentType(), null, null, Optional.absent(), Optional.absent(), 0, 0, Optional.absent(), Optional.fromNullable(attachment.getFileName()), attachment.isVoiceNote()));
         }
 
       } catch (BitmapDecodingException e) {
