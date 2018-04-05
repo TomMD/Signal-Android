@@ -194,6 +194,7 @@
     <string name="ConversationFragment_sms">SMS</string>
     <string name="ConversationFragment_deleting">Deleting</string>
     <string name="ConversationFragment_deleting_messages">Deleting messages...</string>
+    <string name="ConversationFragment_quoted_message_not_found">Quoted message not found</string>
 
     <!-- ConversationListActivity -->
     <string name="ConversationListActivity_there_is_no_browser_installed_on_your_device">There is no browser installed on your device.</string>

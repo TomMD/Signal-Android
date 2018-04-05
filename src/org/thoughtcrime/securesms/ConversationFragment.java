@@ -629,10 +629,13 @@ public class ConversationFragment extends Fragment
           if (position >= 0 && position < getListAdapter().getItemCount()) {
             list.scrollToPosition(position);
             getListAdapter().pulseHighlightItem(position);
-          } else if (position < 0) {
-            Log.w(TAG, "Tried to navigate to quoted message, but it was deleted.");
           } else {
-            Log.w(TAG, "Tried to navigate to quoted message, but it was out of the bounds of the adapter.");
+            Toast.makeText(getContext(), getResources().getText(R.string.ConversationFragment_quoted_message_not_found), Toast.LENGTH_SHORT).show();
+            if (position < 0) {
+              Log.w(TAG, "Tried to navigate to quoted message, but it was deleted.");
+            } else {
+              Log.w(TAG, "Tried to navigate to quoted message, but it was out of the bounds of the adapter.");
+            }
           }
         }
       }.execute();
