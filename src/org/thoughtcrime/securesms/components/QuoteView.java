@@ -183,45 +183,37 @@ public class QuoteView extends LinearLayout implements RecipientModifiedListener
   }
 
   private void setQuoteText(@Nullable String body, @NonNull SlideDeck attachments) {
-    if (attachments.containsMediaSlide()) {
-      List<Slide> audioSlides = Stream.of(attachments.getSlides()).filter(slide -> slide instanceof AudioSlide).limit(1).toList();
-      List<Slide> documentSlides = Stream.of(attachments.getSlides()).filter(slide -> slide instanceof DocumentSlide).limit(1).toList();
-      List<Slide> imageSlides = Stream.of(attachments.getSlides()).filter(slide -> slide instanceof ImageSlide).limit(1).toList();
-      List<Slide> videoSlides = Stream.of(attachments.getSlides()).filter(slide -> slide instanceof VideoSlide).limit(1).toList();
-
-      if (TextUtils.isEmpty(body)) {
-        mediaDescriptionText.setTypeface(null, Typeface.ITALIC);
-
-        String mediaType = "";
-        if (!audioSlides.isEmpty()) {
-          mediaType = getResources().getString(R.string.QuoteView_audio);
-        } else if (!documentSlides.isEmpty()) {
-          mediaType = documentSlides.get(0).getFileName().orNull();
-          if (TextUtils.isEmpty(mediaType)) {
-            mediaType = getResources().getString(R.string.QuoteView_document);
-          } else {
-            mediaDescriptionText.setTypeface(null, Typeface.NORMAL);
-          }
-        } else if (!imageSlides.isEmpty()) {
-          mediaType = getResources().getString(R.string.QuoteView_photo);
-        } else if (!videoSlides.isEmpty()) {
-          mediaType = getResources().getString(R.string.QuoteView_video);
-        }
-        mediaDescriptionText.setVisibility(VISIBLE);
-        mediaDescriptionText.setText(mediaType);
-
-        bodyView.setVisibility(GONE);
-      } else {
-        bodyView.setVisibility(VISIBLE);
-        bodyView.setText(body);
-
-        mediaDescriptionText.setVisibility(GONE);
-      }
-    } else {
+    if (!TextUtils.isEmpty(body) || !attachments.containsMediaSlide()) {
       bodyView.setVisibility(VISIBLE);
       bodyView.setText(body == null ? "" : body);
-
       mediaDescriptionText.setVisibility(GONE);
+      return;
+    }
+
+    bodyView.setVisibility(GONE);
+    mediaDescriptionText.setVisibility(VISIBLE);
+    mediaDescriptionText.setTypeface(null, Typeface.ITALIC);
+
+    List<Slide> audioSlides    = Stream.of(attachments.getSlides()).filter(Slide::hasAudio).limit(1).toList();
+    List<Slide> documentSlides = Stream.of(attachments.getSlides()).filter(Slide::hasDocument).limit(1).toList();
+    List<Slide> imageSlides    = Stream.of(attachments.getSlides()).filter(Slide::hasImage).limit(1).toList();
+    List<Slide> videoSlides    = Stream.of(attachments.getSlides()).filter(Slide::hasVideo).limit(1).toList();
+
+    // Given that most types have images, we specifically check images last
+    if (!audioSlides.isEmpty()) {
+      mediaDescriptionText.setText(R.string.QuoteView_audio);
+    } else if (!documentSlides.isEmpty()) {
+      String filename = documentSlides.get(0).getFileName().orNull();
+      if (!TextUtils.isEmpty(filename)) {
+        mediaDescriptionText.setTypeface(null, Typeface.NORMAL);
+        mediaDescriptionText.setText(filename);
+      } else {
+        mediaDescriptionText.setText(R.string.QuoteView_document);
+      }
+    } else if (!videoSlides.isEmpty()) {
+      mediaDescriptionText.setText(R.string.QuoteView_video);
+    } else if (!imageSlides.isEmpty()) {
+      mediaDescriptionText.setText(R.string.QuoteView_photo);
     }
   }
 
