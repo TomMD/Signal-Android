@@ -133,7 +133,7 @@ public class ConversationItem extends LinearLayout
   private @NonNull  Stub<AudioView>      audioViewStub;
   private @NonNull  Stub<DocumentView>   documentViewStub;
   private @NonNull  ExpirationTimerView  expirationTimer;
-  private @Nullable OnQuoteClickListener onQuoteClickListener;
+  private @Nullable EventListener        eventListener;
 
   private int defaultBubbleColor;
 
@@ -154,10 +154,6 @@ public class ConversationItem extends LinearLayout
   @Override
   public void setOnClickListener(OnClickListener l) {
     super.setOnClickListener(new ClickListener(l));
-  }
-
-  public void setOnQuoteClickListener(@Nullable OnQuoteClickListener listener) {
-    onQuoteClickListener = listener;
   }
 
   @Override
@@ -222,6 +218,11 @@ public class ConversationItem extends LinearLayout
     setSimInfo(messageRecord);
     setExpiration(messageRecord);
     setQuote(messageRecord);
+  }
+
+  @Override
+  public void setEventListener(@Nullable EventListener eventListener) {
+    this.eventListener = eventListener;
   }
 
   @Override
@@ -555,8 +556,8 @@ public class ConversationItem extends LinearLayout
       quoteView.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
 
       quoteView.setOnClickListener(view -> {
-        if (onQuoteClickListener != null && batchSelected.isEmpty()) {
-          onQuoteClickListener.onQuoteClicked((MmsMessageRecord) messageRecord);
+        if (eventListener != null && batchSelected.isEmpty()) {
+          eventListener.onQuoteClicked((MmsMessageRecord) messageRecord);
         } else {
           passthroughClickListener.onClick(view);
         }
@@ -641,10 +642,6 @@ public class ConversationItem extends LinearLayout
       setAudioViewTint(messageRecord, conversationRecipient);
       setDocumentViewTint(messageRecord, conversationRecipient);
     });
-  }
-
-  public interface OnQuoteClickListener {
-    void onQuoteClicked(MmsMessageRecord messageRecord);
   }
 
   private class AttachmentDownloadClickListener implements SlideClickListener {

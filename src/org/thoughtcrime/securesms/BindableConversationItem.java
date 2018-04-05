@@ -1,9 +1,11 @@
 package org.thoughtcrime.securesms;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.database.model.MessageRecord;
+import org.thoughtcrime.securesms.database.model.MmsMessageRecord;
 import org.thoughtcrime.securesms.mms.GlideRequests;
 import org.thoughtcrime.securesms.recipients.Recipient;
 
@@ -19,4 +21,10 @@ public interface BindableConversationItem extends Unbindable {
                      boolean            pulseHighlight);
 
   MessageRecord getMessageRecord();
+
+  void setEventListener(@Nullable EventListener listener);
+
+  interface EventListener {
+    void onQuoteClicked(MmsMessageRecord messageRecord);
+  }
 }

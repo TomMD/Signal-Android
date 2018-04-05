@@ -79,6 +79,11 @@ public class ConversationUpdateItem extends LinearLayout
   }
 
   @Override
+  public void setEventListener(@Nullable EventListener listener) {
+    // No events to report yet
+  }
+
+  @Override
   public MessageRecord getMessageRecord() {
     return messageRecord;
   }

@@ -133,7 +133,7 @@ public class ConversationAdapter <V extends View & BindableConversationItem>
   }
 
 
-  interface ItemClickListener extends ConversationItem.OnQuoteClickListener {
+  interface ItemClickListener extends BindableConversationItem.EventListener {
     void onItemClick(MessageRecord item);
     void onItemLongClick(MessageRecord item);
   }
@@ -213,9 +213,7 @@ public class ConversationAdapter <V extends View & BindableConversationItem>
       }
       return true;
     });
-    if (itemView instanceof ConversationItem) {
-      ((ConversationItem) itemView).setOnQuoteClickListener(clickListener);
-    }
+    itemView.setEventListener(clickListener);
     Log.w(TAG, "Inflate time: " + (System.currentTimeMillis() - start));
     return new ViewHolder(itemView);
   }
