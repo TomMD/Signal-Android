@@ -53,6 +53,7 @@ public class QuoteView extends LinearLayout implements RecipientModifiedListener
   private TextView  bodyView;
   private ImageView quoteBarView;
   private ImageView attachmentView;
+  private ImageView attachmentVideoOverlayView;
   private ViewGroup attachmentIconContainerView;
   private ImageView attachmentIconView;
   private ImageView attachmentIconBackgroundView;
@@ -98,6 +99,7 @@ public class QuoteView extends LinearLayout implements RecipientModifiedListener
     this.bodyView                     = findViewById(R.id.quote_text);
     this.quoteBarView                 = findViewById(R.id.quote_bar);
     this.attachmentView               = findViewById(R.id.quote_attachment);
+    this.attachmentVideoOverlayView   = findViewById(R.id.quote_video_overlay);
     this.attachmentIconContainerView  = findViewById(R.id.quote_attachment_icon_container);
     this.attachmentIconView           = findViewById(R.id.quote_attachment_icon);
     this.attachmentIconBackgroundView = findViewById(R.id.quote_attachment_icon_background);
@@ -222,13 +224,18 @@ public class QuoteView extends LinearLayout implements RecipientModifiedListener
                                   @NonNull Recipient author)
   {
     List<Slide> imageVideoSlides = Stream.of(slideDeck.getSlides()).filter(s -> s.hasImage() || s.hasVideo()).limit(1).toList();
-    List<Slide> audioSlides = Stream.of(attachments.getSlides()).filter(slide -> slide instanceof AudioSlide).limit(1).toList();
-    List<Slide> documentSlides = Stream.of(attachments.getSlides()).filter(slide -> slide instanceof DocumentSlide).limit(1).toList();
+    List<Slide> audioSlides = Stream.of(attachments.getSlides()).filter(Slide::hasAudio).limit(1).toList();
+    List<Slide> documentSlides = Stream.of(attachments.getSlides()).filter(Slide::hasDocument).limit(1).toList();
+
+    attachmentVideoOverlayView.setVisibility(GONE);
 
     if (!imageVideoSlides.isEmpty() && imageVideoSlides.get(0).getThumbnailUri() != null) {
       attachmentView.setVisibility(VISIBLE);
       attachmentIconContainerView.setVisibility(GONE);
       dismissView.setBackgroundResource(R.drawable.dismiss_background);
+      if (imageVideoSlides.get(0).hasVideo()) {
+        attachmentVideoOverlayView.setVisibility(VISIBLE);
+      }
       glideRequests.load(new DecryptableUri(imageVideoSlides.get(0).getThumbnailUri()))
                    .centerCrop()
                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)

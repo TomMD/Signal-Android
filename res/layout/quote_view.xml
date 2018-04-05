@@ -73,13 +73,30 @@
 
             </LinearLayout>
 
-            <ImageView
-                android:id="@+id/quote_attachment"
+            <FrameLayout
                 android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:scaleType="centerCrop"
-                android:visibility="gone"
-                tools:visibility="gone" />
+                android:layout_height="60dp">
+                
+                <ImageView
+                    android:id="@+id/quote_attachment"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone"
+                    tools:visibility="gone" />
+                
+                <ImageView
+                    android:id="@+id/quote_video_overlay"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:padding="18dp"
+                    android:src="@drawable/ic_play_arrow_white_24dp"
+                    android:background="@color/transparent_black_30"
+                    android:visibility="gone"
+                    tools:visibility="gone"/>
+                
+            </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/quote_attachment_icon_container"
