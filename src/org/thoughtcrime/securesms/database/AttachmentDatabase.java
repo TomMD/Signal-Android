@@ -46,6 +46,8 @@ import org.thoughtcrime.securesms.database.helpers.SQLCipherOpenHelper;
 import org.thoughtcrime.securesms.mms.MediaStream;
 import org.thoughtcrime.securesms.mms.MmsException;
 import org.thoughtcrime.securesms.mms.PartAuthority;
+import org.thoughtcrime.securesms.util.BitmapDecodingException;
+import org.thoughtcrime.securesms.util.BitmapUtil;
 import org.thoughtcrime.securesms.util.JsonUtils;
 import org.thoughtcrime.securesms.util.MediaUtil;
 import org.thoughtcrime.securesms.util.MediaUtil.ThumbnailData;
@@ -635,8 +637,22 @@ public class AttachmentDatabase extends Database {
 
     long         rowId        = database.insert(TABLE_NAME, null, contentValues);
     AttachmentId attachmentId = new AttachmentId(rowId, uniqueId);
+    Uri          thumbnailUri = attachment.getThumbnailUri();
+    boolean      hasThumbnail = false;
 
-    if (dataInfo != null) {
+    if (thumbnailUri != null) {
+      try (InputStream attachmentStream = PartAuthority.getAttachmentStream(context, thumbnailUri)) {
+        Pair<Integer, Integer> dimens = BitmapUtil.getDimensions(attachmentStream);
+        updateAttachmentThumbnail(attachmentId,
+                                  PartAuthority.getAttachmentStream(context, thumbnailUri),
+                                  (float) dimens.first / (float) dimens.second);
+        hasThumbnail = true;
+      } catch (IOException | BitmapDecodingException e) {
+        Log.w(TAG, "Failed to save existing thumbnail.", e);
+      }
+    }
+
+    if (!hasThumbnail && dataInfo != null) {
       if (MediaUtil.hasVideoThumbnail(attachment.getDataUri())) {
         Bitmap bitmap = MediaUtil.getVideoThumbnail(context, attachment.getDataUri());
 
