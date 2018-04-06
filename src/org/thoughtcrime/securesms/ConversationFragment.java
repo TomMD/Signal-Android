@@ -621,7 +621,7 @@ public class ConversationFragment extends Fragment
         @Override
         protected Integer doInBackground(Void... voids) {
           return DatabaseFactory.getMmsSmsDatabase(getContext())
-                                .getQuotedMessagePosition(threadId, messageRecord.getQuote().getId());
+                                .getQuotedMessagePosition(threadId, messageRecord.getQuote().getId(), messageRecord.getQuote().getAuthor());
         }
 
         @Override
