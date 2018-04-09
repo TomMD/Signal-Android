@@ -315,13 +315,20 @@ public class AttachmentDatabase extends Database {
   public void insertAttachmentsForPlaceholder(long mmsId, @NonNull AttachmentId attachmentId, @NonNull InputStream inputStream)
       throws MmsException
   {
-    SQLiteDatabase database = databaseHelper.getWritableDatabase();
-    DataInfo       dataInfo = setAttachmentData(inputStream);
-    ContentValues  values   = new ContentValues();
+    DatabaseAttachment placeholder = getAttachment(attachmentId);
+    SQLiteDatabase     database    = databaseHelper.getWritableDatabase();
+    ContentValues      values      = new ContentValues();
+    DataInfo           dataInfo    = setAttachmentData(inputStream);
 
-    values.put(DATA, dataInfo.file.getAbsolutePath());
-    values.put(SIZE, dataInfo.length);
-    values.put(DATA_RANDOM, dataInfo.random);
+    if (placeholder != null && placeholder.isQuote() && !placeholder.getContentType().startsWith("image")) {
+      values.put(THUMBNAIL, dataInfo.file.getAbsolutePath());
+      values.put(THUMBNAIL_RANDOM, dataInfo.random);
+    } else {
+      values.put(DATA, dataInfo.file.getAbsolutePath());
+      values.put(SIZE, dataInfo.length);
+      values.put(DATA_RANDOM, dataInfo.random);
+    }
+
     values.put(TRANSFER_STATE, TRANSFER_PROGRESS_DONE);
     values.put(CONTENT_LOCATION, (String)null);
     values.put(CONTENT_DISPOSITION, (String)null);
