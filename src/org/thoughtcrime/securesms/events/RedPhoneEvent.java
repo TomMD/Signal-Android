@@ -2,7 +2,6 @@ package org.thoughtcrime.securesms.events;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
 import org.thoughtcrime.securesms.recipients.Recipient;
 
 public class RedPhoneEvent {
@@ -27,14 +26,14 @@ public class RedPhoneEvent {
     NO_SUCH_USER
   }
 
-  private final @NonNull  Type      type;
-  private final @NonNull  Recipient recipient;
-  private final @Nullable String    extra;
+  private final @NonNull Type type;
+  private final @NonNull Recipient recipient;
+  private final @Nullable String extra;
 
   public RedPhoneEvent(@NonNull Type type, @NonNull Recipient recipient, @Nullable String extra) {
-    this.type      = type;
+    this.type = type;
     this.recipient = recipient;
-    this.extra     = extra;
+    this.extra = extra;
   }
 
   public @NonNull Type getType() {

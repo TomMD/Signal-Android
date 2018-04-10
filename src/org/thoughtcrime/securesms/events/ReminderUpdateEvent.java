@@ -1,5 +1,3 @@
 package org.thoughtcrime.securesms.events;
 
-
-public class ReminderUpdateEvent {
-}
+public class ReminderUpdateEvent {}

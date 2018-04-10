@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms.jobs;
 
-
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
@@ -11,9 +10,14 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.util.concurrent.TimeUnit;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.thoughtcrime.securesms.BuildConfig;
 import org.thoughtcrime.securesms.service.UpdateApkReadyListener;
 import org.thoughtcrime.securesms.util.FileUtils;
@@ -23,26 +27,19 @@ import org.thoughtcrime.securesms.util.TextSecurePreferences;
 import org.whispersystems.jobqueue.JobParameters;
 import org.whispersystems.jobqueue.requirements.NetworkRequirement;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.util.concurrent.TimeUnit;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-
 public class UpdateApkJob extends ContextJob {
 
   private static final String TAG = UpdateApkJob.class.getSimpleName();
 
   public UpdateApkJob(Context context) {
-    super(context, JobParameters.newBuilder()
-                                .withGroupId(UpdateApkJob.class.getSimpleName())
-                                .withRequirement(new NetworkRequirement(context))
-                                .withWakeLock(true, 30, TimeUnit.SECONDS)
-                                .withRetryCount(2)
-                                .create());
+    super(
+        context,
+        JobParameters.newBuilder()
+            .withGroupId(UpdateApkJob.class.getSimpleName())
+            .withRequirement(new NetworkRequirement(context))
+            .withWakeLock(true, 30, TimeUnit.SECONDS)
+            .withRetryCount(2)
+            .create());
   }
 
   @Override
@@ -54,8 +51,11 @@ public class UpdateApkJob extends ContextJob {
 
     Log.w(TAG, "Checking for APK update...");
 
-    OkHttpClient client  = new OkHttpClient();
-    Request      request = new Request.Builder().url(String.format("%s/latest.json", BuildConfig.NOPLAY_UPDATE_URL)).build();
+    OkHttpClient client = new OkHttpClient();
+    Request request =
+        new Request.Builder()
+            .url(String.format("%s/latest.json", BuildConfig.NOPLAY_UPDATE_URL))
+            .build();
 
     Response response = client.newCall(request).execute();
 
@@ -63,15 +63,16 @@ public class UpdateApkJob extends ContextJob {
       throw new IOException("Bad response: " + response.message());
     }
 
-    UpdateDescriptor updateDescriptor = JsonUtils.fromJson(response.body().string(), UpdateDescriptor.class);
-    byte[]           digest           = Hex.fromStringCondensed(updateDescriptor.getDigest());
+    UpdateDescriptor updateDescriptor =
+        JsonUtils.fromJson(response.body().string(), UpdateDescriptor.class);
+    byte[] digest = Hex.fromStringCondensed(updateDescriptor.getDigest());
 
     Log.w(TAG, "Got descriptor: " + updateDescriptor);
 
     if (updateDescriptor.getVersionCode() > getVersionCode()) {
       DownloadStatus downloadStatus = getDownloadStatus(updateDescriptor.getUrl(), digest);
 
-      Log.w(TAG, "Download status: "  + downloadStatus.getStatus());
+      Log.w(TAG, "Download status: " + downloadStatus.getStatus());
 
       if (downloadStatus.getStatus() == DownloadStatus.Status.COMPLETE) {
         Log.w(TAG, "Download status complete, notifying...");
@@ -85,7 +86,7 @@ public class UpdateApkJob extends ContextJob {
 
   @Override
   public boolean onShouldRetry(Exception e) {
-    return e instanceof  IOException;
+    return e instanceof IOException;
   }
 
   @Override
@@ -95,37 +96,43 @@ public class UpdateApkJob extends ContextJob {
 
   private int getVersionCode() throws PackageManager.NameNotFoundException {
     PackageManager packageManager = context.getPackageManager();
-    PackageInfo    packageInfo    = packageManager.getPackageInfo(context.getPackageName(), 0);
+    PackageInfo packageInfo = packageManager.getPackageInfo(context.getPackageName(), 0);
 
     return packageInfo.versionCode;
   }
 
   private DownloadStatus getDownloadStatus(String uri, byte[] theirDigest) {
-    DownloadManager       downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-    DownloadManager.Query query           = new DownloadManager.Query();
+    DownloadManager downloadManager =
+        (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+    DownloadManager.Query query = new DownloadManager.Query();
 
-    query.setFilterByStatus(DownloadManager.STATUS_PAUSED | DownloadManager.STATUS_PENDING | DownloadManager.STATUS_RUNNING | DownloadManager.STATUS_SUCCESSFUL);
+    query.setFilterByStatus(
+        DownloadManager.STATUS_PAUSED
+            | DownloadManager.STATUS_PENDING
+            | DownloadManager.STATUS_RUNNING
+            | DownloadManager.STATUS_SUCCESSFUL);
 
-    long   pendingDownloadId = TextSecurePreferences.getUpdateApkDownloadId(context);
-    byte[] pendingDigest     = getPendingDigest(context);
-    Cursor cursor            = downloadManager.query(query);
+    long pendingDownloadId = TextSecurePreferences.getUpdateApkDownloadId(context);
+    byte[] pendingDigest = getPendingDigest(context);
+    Cursor cursor = downloadManager.query(query);
 
     try {
       DownloadStatus status = new DownloadStatus(DownloadStatus.Status.MISSING, -1);
 
       while (cursor != null && cursor.moveToNext()) {
-        int    jobStatus         = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS));
-        String jobRemoteUri      = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_URI));
-        long   downloadId        = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_ID));
-        byte[] digest            = getDigestForDownloadId(downloadId);
+        int jobStatus = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS));
+        String jobRemoteUri =
+            cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_URI));
+        long downloadId = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_ID));
+        byte[] digest = getDigestForDownloadId(downloadId);
 
         if (jobRemoteUri != null && jobRemoteUri.equals(uri) && downloadId == pendingDownloadId) {
 
-          if (jobStatus == DownloadManager.STATUS_SUCCESSFUL    &&
-              digest != null && pendingDigest != null           &&
-              MessageDigest.isEqual(pendingDigest, theirDigest) &&
-              MessageDigest.isEqual(digest, theirDigest))
-          {
+          if (jobStatus == DownloadManager.STATUS_SUCCESSFUL
+              && digest != null
+              && pendingDigest != null
+              && MessageDigest.isEqual(pendingDigest, theirDigest)
+              && MessageDigest.isEqual(digest, theirDigest)) {
             return new DownloadStatus(DownloadStatus.Status.COMPLETE, downloadId);
           } else if (jobStatus != DownloadManager.STATUS_SUCCESSFUL) {
             status = new DownloadStatus(DownloadStatus.Status.PENDING, downloadId);
@@ -140,7 +147,8 @@ public class UpdateApkJob extends ContextJob {
   }
 
   private void handleDownloadStart(String uri, String versionName, byte[] digest) {
-    DownloadManager         downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+    DownloadManager downloadManager =
+        (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
     DownloadManager.Request downloadRequest = new DownloadManager.Request(Uri.parse(uri));
 
     downloadRequest.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI);
@@ -167,9 +175,11 @@ public class UpdateApkJob extends ContextJob {
 
   private @Nullable byte[] getDigestForDownloadId(long downloadId) {
     try {
-      DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-      FileInputStream fin             = new FileInputStream(downloadManager.openDownloadedFile(downloadId).getFileDescriptor());
-      byte[]          digest          = FileUtils.getFileDigest(fin);
+      DownloadManager downloadManager =
+          (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+      FileInputStream fin =
+          new FileInputStream(downloadManager.openDownloadedFile(downloadId).getFileDescriptor());
+      byte[] digest = FileUtils.getFileDigest(fin);
 
       fin.close();
 
@@ -194,18 +204,13 @@ public class UpdateApkJob extends ContextJob {
   }
 
   private static class UpdateDescriptor {
-    @JsonProperty
-    private int versionCode;
+    @JsonProperty private int versionCode;
 
-    @JsonProperty
-    private String versionName;
+    @JsonProperty private String versionName;
 
-    @JsonProperty
-    private String url;
+    @JsonProperty private String url;
 
-    @JsonProperty
-    private String sha256sum;
-
+    @JsonProperty private String sha256sum;
 
     public int getVersionCode() {
       return versionCode;
@@ -220,7 +225,7 @@ public class UpdateApkJob extends ContextJob {
     }
 
     public String toString() {
-      return "["  + versionCode + ", " + versionName + ", " + url + "]";
+      return "[" + versionCode + ", " + versionName + ", " + url + "]";
     }
 
     public String getDigest() {
@@ -236,10 +241,10 @@ public class UpdateApkJob extends ContextJob {
     }
 
     private final Status status;
-    private final long   downloadId;
+    private final long downloadId;
 
     DownloadStatus(Status status, long downloadId) {
-      this.status     = status;
+      this.status = status;
       this.downloadId = downloadId;
     }
 

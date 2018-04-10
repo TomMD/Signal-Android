@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.Toast;
-
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.ThreadDatabase;
@@ -12,10 +11,12 @@ import org.thoughtcrime.securesms.database.ThreadDatabase;
 public class Trimmer {
 
   public static void trimAllThreads(Context context, int threadLengthLimit) {
-    new TrimmingProgressTask(context).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, threadLengthLimit);
+    new TrimmingProgressTask(context)
+        .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, threadLengthLimit);
   }
 
-  private static class TrimmingProgressTask extends AsyncTask<Integer, Integer, Void> implements ThreadDatabase.ProgressListener {
+  private static class TrimmingProgressTask extends AsyncTask<Integer, Integer, Void>
+      implements ThreadDatabase.ProgressListener {
     private ProgressDialog progressDialog;
     private Context context;
 
@@ -46,15 +47,15 @@ public class Trimmer {
       double count = progress[1];
       double index = progress[0];
 
-      progressDialog.setProgress((int)Math.round((index / count) * 100.0));
+      progressDialog.setProgress((int) Math.round((index / count) * 100.0));
     }
 
     @Override
     protected void onPostExecute(Void result) {
       progressDialog.dismiss();
-      Toast.makeText(context,
-                     R.string.trimmer__old_messages_successfully_deleted,
-                     Toast.LENGTH_LONG).show();
+      Toast.makeText(
+              context, R.string.trimmer__old_messages_successfully_deleted, Toast.LENGTH_LONG)
+          .show();
     }
 
     @Override

@@ -1,30 +1,27 @@
 package org.thoughtcrime.securesms.glide;
 
 import android.support.annotation.Nullable;
-
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
-
+import java.io.InputStream;
+import okhttp3.OkHttpClient;
 import org.thoughtcrime.securesms.giph.model.GiphyPaddedUrl;
 import org.thoughtcrime.securesms.giph.net.GiphyProxySelector;
-
-import java.io.InputStream;
-
-import okhttp3.OkHttpClient;
 
 public class GiphyPaddedUrlLoader implements ModelLoader<GiphyPaddedUrl, InputStream> {
 
   private final OkHttpClient client;
 
   private GiphyPaddedUrlLoader(OkHttpClient client) {
-    this.client  = client;
+    this.client = client;
   }
 
   @Nullable
   @Override
-  public LoadData<InputStream> buildLoadData(GiphyPaddedUrl url, int width, int height, Options options) {
+  public LoadData<InputStream> buildLoadData(
+      GiphyPaddedUrl url, int width, int height, Options options) {
     return new LoadData<>(url, new GiphyPaddedUrlFetcher(client, url));
   }
 
@@ -38,7 +35,7 @@ public class GiphyPaddedUrlLoader implements ModelLoader<GiphyPaddedUrl, InputSt
     private final OkHttpClient client;
 
     public Factory() {
-      this.client  = new OkHttpClient.Builder().proxySelector(new GiphyProxySelector()).build();
+      this.client = new OkHttpClient.Builder().proxySelector(new GiphyProxySelector()).build();
     }
 
     @Override

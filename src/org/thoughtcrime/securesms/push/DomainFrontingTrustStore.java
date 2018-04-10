@@ -1,12 +1,9 @@
 package org.thoughtcrime.securesms.push;
 
-
 import android.content.Context;
-
+import java.io.InputStream;
 import org.thoughtcrime.securesms.R;
 import org.whispersystems.signalservice.api.push.TrustStore;
-
-import java.io.InputStream;
 
 public class DomainFrontingTrustStore implements TrustStore {
 
@@ -25,5 +22,4 @@ public class DomainFrontingTrustStore implements TrustStore {
   public String getKeyStorePassword() {
     return "whisper";
   }
-
 }

@@ -1,10 +1,8 @@
 package org.thoughtcrime.securesms.util;
 
-
 import android.os.Build;
 import android.os.MemoryFile;
 import android.os.ParcelFileDescriptor;
-
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -15,10 +13,10 @@ public class MemoryFileUtil {
 
   public static ParcelFileDescriptor getParcelFileDescriptor(MemoryFile file) throws IOException {
     try {
-      Method         method         = MemoryFile.class.getDeclaredMethod("getFileDescriptor");
+      Method method = MemoryFile.class.getDeclaredMethod("getFileDescriptor");
       FileDescriptor fileDescriptor = (FileDescriptor) method.invoke(file);
 
-      Field  field  = fileDescriptor.getClass().getDeclaredField("descriptor");
+      Field field = fileDescriptor.getClass().getDeclaredField("descriptor");
       field.setAccessible(true);
 
       int fd = field.getInt(fileDescriptor);

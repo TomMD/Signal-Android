@@ -19,5 +19,4 @@ public class IncomingJoinedMessage extends IncomingTextMessage {
   public boolean isSecureMessage() {
     return true;
   }
-
 }

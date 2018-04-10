@@ -2,12 +2,11 @@ package org.thoughtcrime.securesms.mms;
 
 import android.content.Context;
 import android.os.Bundle;
-
 import com.android.mms.service_alt.MmsConfig;
 
 class MmsMediaConstraints extends MediaConstraints {
 
-  private static final int DEFAULT_MAX_IMAGE_DIMEN  = 1024;
+  private static final int DEFAULT_MAX_IMAGE_DIMEN = 1024;
   private static final int DEFAULT_MAX_MESSAGE_SIZE = 280 * 1024;
 
   private final int subscriptionId;

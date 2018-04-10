@@ -1,12 +1,9 @@
 package org.thoughtcrime.securesms.util;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
-
 import java.io.IOException;
 
 public class VersionTracker {
-
 
   public static int getLastSeenVersion(Context context) {
     return TextSecurePreferences.getLastVersionCode(context);

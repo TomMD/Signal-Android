@@ -2,12 +2,11 @@ package org.thoughtcrime.securesms.util;
 
 import android.app.Activity;
 import android.content.Intent;
-
 import org.thoughtcrime.securesms.R;
 
 public class DynamicTheme {
 
-  public static final String DARK  = "dark";
+  public static final String DARK = "dark";
   public static final String LIGHT = "light";
 
   private int currentTheme;

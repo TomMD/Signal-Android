@@ -1,8 +1,6 @@
 package org.thoughtcrime.securesms.profiles;
 
-
 import android.content.Context;
-
 import org.thoughtcrime.securesms.mms.MediaConstraints;
 
 public class ProfileMediaConstraints extends MediaConstraints {

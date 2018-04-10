@@ -10,11 +10,9 @@ public abstract class Reminder {
   private OnClickListener okListener;
   private OnClickListener dismissListener;
 
-  public Reminder(@NonNull CharSequence title,
-                  @NonNull CharSequence text)
-  {
-    this.title      = title;
-    this.text       = text;
+  public Reminder(@NonNull CharSequence title, @NonNull CharSequence text) {
+    this.title = title;
+    this.text = text;
   }
 
   public CharSequence getTitle() {

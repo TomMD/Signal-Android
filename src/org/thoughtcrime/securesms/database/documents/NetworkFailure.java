@@ -2,7 +2,6 @@ package org.thoughtcrime.securesms.database.documents;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import org.thoughtcrime.securesms.database.Address;
 
 public class NetworkFailure {
@@ -25,7 +24,7 @@ public class NetworkFailure {
   public boolean equals(Object other) {
     if (other == null || !(other instanceof NetworkFailure)) return false;
 
-    NetworkFailure that = (NetworkFailure)other;
+    NetworkFailure that = (NetworkFailure) other;
     return this.address.equals(that.address);
   }
 

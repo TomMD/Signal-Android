@@ -1,53 +1,63 @@
 package org.thoughtcrime.securesms.mms;
 
 import android.text.TextUtils;
-
+import java.util.List;
 import org.thoughtcrime.securesms.attachments.Attachment;
 import org.thoughtcrime.securesms.recipients.Recipient;
 
-import java.util.List;
-
 public class OutgoingMediaMessage {
 
-  private   final Recipient        recipient;
-  protected final String           body;
+  private final Recipient recipient;
+  protected final String body;
   protected final List<Attachment> attachments;
-  private   final long             sentTimeMillis;
-  private   final int              distributionType;
-  private   final int              subscriptionId;
-  private   final long             expiresIn;
+  private final long sentTimeMillis;
+  private final int distributionType;
+  private final int subscriptionId;
+  private final long expiresIn;
 
-  public OutgoingMediaMessage(Recipient recipient, String message,
-                              List<Attachment> attachments, long sentTimeMillis,
-                              int subscriptionId, long expiresIn,
-                              int distributionType)
-  {
-    this.recipient        = recipient;
-    this.body             = message;
-    this.sentTimeMillis   = sentTimeMillis;
+  public OutgoingMediaMessage(
+      Recipient recipient,
+      String message,
+      List<Attachment> attachments,
+      long sentTimeMillis,
+      int subscriptionId,
+      long expiresIn,
+      int distributionType) {
+    this.recipient = recipient;
+    this.body = message;
+    this.sentTimeMillis = sentTimeMillis;
     this.distributionType = distributionType;
-    this.attachments      = attachments;
-    this.subscriptionId   = subscriptionId;
-    this.expiresIn        = expiresIn;
+    this.attachments = attachments;
+    this.subscriptionId = subscriptionId;
+    this.expiresIn = expiresIn;
   }
 
-  public OutgoingMediaMessage(Recipient recipient, SlideDeck slideDeck, String message, long sentTimeMillis, int subscriptionId, long expiresIn, int distributionType)
-  {
-    this(recipient,
-         buildMessage(slideDeck, message),
-         slideDeck.asAttachments(),
-         sentTimeMillis, subscriptionId,
-         expiresIn, distributionType);
+  public OutgoingMediaMessage(
+      Recipient recipient,
+      SlideDeck slideDeck,
+      String message,
+      long sentTimeMillis,
+      int subscriptionId,
+      long expiresIn,
+      int distributionType) {
+    this(
+        recipient,
+        buildMessage(slideDeck, message),
+        slideDeck.asAttachments(),
+        sentTimeMillis,
+        subscriptionId,
+        expiresIn,
+        distributionType);
   }
 
   public OutgoingMediaMessage(OutgoingMediaMessage that) {
-    this.recipient        = that.getRecipient();
-    this.body             = that.body;
+    this.recipient = that.getRecipient();
+    this.body = that.body;
     this.distributionType = that.distributionType;
-    this.attachments      = that.attachments;
-    this.sentTimeMillis   = that.sentTimeMillis;
-    this.subscriptionId   = that.subscriptionId;
-    this.expiresIn        = that.expiresIn;
+    this.attachments = that.attachments;
+    this.sentTimeMillis = that.sentTimeMillis;
+    this.subscriptionId = that.subscriptionId;
+    this.expiresIn = that.expiresIn;
   }
 
   public Recipient getRecipient() {

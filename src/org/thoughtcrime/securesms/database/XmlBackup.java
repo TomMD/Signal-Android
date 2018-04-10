@@ -1,11 +1,6 @@
 package org.thoughtcrime.securesms.database;
 
 import android.text.TextUtils;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -15,25 +10,29 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
 
 public class XmlBackup {
 
-  private static final String PROTOCOL       = "protocol";
-  private static final String ADDRESS        = "address";
-  private static final String CONTACT_NAME   = "contact_name";
-  private static final String DATE           = "date";
-  private static final String READABLE_DATE  = "readable_date";
-  private static final String TYPE           = "type";
-  private static final String SUBJECT        = "subject";
-  private static final String BODY           = "body";
+  private static final String PROTOCOL = "protocol";
+  private static final String ADDRESS = "address";
+  private static final String CONTACT_NAME = "contact_name";
+  private static final String DATE = "date";
+  private static final String READABLE_DATE = "readable_date";
+  private static final String TYPE = "type";
+  private static final String SUBJECT = "subject";
+  private static final String BODY = "body";
   private static final String SERVICE_CENTER = "service_center";
-  private static final String READ           = "read";
-  private static final String STATUS         = "status";
-  private static final String TOA            = "toa";
-  private static final String SC_TOA         = "sc_toa";
-  private static final String LOCKED         = "locked";
+  private static final String READ = "read";
+  private static final String STATUS = "status";
+  private static final String TOA = "toa";
+  private static final String SC_TOA = "sc_toa";
+  private static final String LOCKED = "locked";
 
-  private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+  private static final SimpleDateFormat dateFormatter =
+      new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
 
   private final XmlPullParser parser;
 
@@ -63,20 +62,27 @@ public class XmlBackup {
 
       XmlBackupItem item = new XmlBackupItem();
 
-      for (int i=0;i<attributeCount;i++) {
+      for (int i = 0; i < attributeCount; i++) {
         String attributeName = parser.getAttributeName(i);
 
-        if      (attributeName.equals(PROTOCOL      )) item.protocol      = Integer.parseInt(parser.getAttributeValue(i));
-        else if (attributeName.equals(ADDRESS       )) item.address       = parser.getAttributeValue(i);
-        else if (attributeName.equals(CONTACT_NAME  )) item.contactName   = parser.getAttributeValue(i);
-        else if (attributeName.equals(DATE          )) item.date          = Long.parseLong(parser.getAttributeValue(i));
-        else if (attributeName.equals(READABLE_DATE )) item.readableDate  = parser.getAttributeValue(i);
-        else if (attributeName.equals(TYPE          )) item.type          = Integer.parseInt(parser.getAttributeValue(i));
-        else if (attributeName.equals(SUBJECT       )) item.subject       = parser.getAttributeValue(i);
-        else if (attributeName.equals(BODY          )) item.body          = parser.getAttributeValue(i);
-        else if (attributeName.equals(SERVICE_CENTER)) item.serviceCenter = parser.getAttributeValue(i);
-        else if (attributeName.equals(READ          )) item.read          = Integer.parseInt(parser.getAttributeValue(i));
-        else if (attributeName.equals(STATUS        )) item.status        = Integer.parseInt(parser.getAttributeValue(i));
+        if (attributeName.equals(PROTOCOL))
+          item.protocol = Integer.parseInt(parser.getAttributeValue(i));
+        else if (attributeName.equals(ADDRESS)) item.address = parser.getAttributeValue(i);
+        else if (attributeName.equals(CONTACT_NAME)) item.contactName = parser.getAttributeValue(i);
+        else if (attributeName.equals(DATE))
+          item.date = Long.parseLong(parser.getAttributeValue(i));
+        else if (attributeName.equals(READABLE_DATE))
+          item.readableDate = parser.getAttributeValue(i);
+        else if (attributeName.equals(TYPE))
+          item.type = Integer.parseInt(parser.getAttributeValue(i));
+        else if (attributeName.equals(SUBJECT)) item.subject = parser.getAttributeValue(i);
+        else if (attributeName.equals(BODY)) item.body = parser.getAttributeValue(i);
+        else if (attributeName.equals(SERVICE_CENTER))
+          item.serviceCenter = parser.getAttributeValue(i);
+        else if (attributeName.equals(READ))
+          item.read = Integer.parseInt(parser.getAttributeValue(i));
+        else if (attributeName.equals(STATUS))
+          item.status = Integer.parseInt(parser.getAttributeValue(i));
       }
 
       return item;
@@ -86,34 +92,42 @@ public class XmlBackup {
   }
 
   public static class XmlBackupItem {
-    private int    protocol;
+    private int protocol;
     private String address;
     private String contactName;
-    private long   date;
+    private long date;
     private String readableDate;
-    private int    type;
+    private int type;
     private String subject;
     private String body;
     private String serviceCenter;
-    private int    read;
-    private int    status;
+    private int read;
+    private int status;
 
     public XmlBackupItem() {}
 
-    public XmlBackupItem(int protocol, String address, String contactName, long date, int type,
-                         String subject, String body, String serviceCenter, int read, int status)
-    {
-      this.protocol      = protocol;
-      this.address       = address;
-      this.contactName   = contactName;
-      this.date          = date;
-      this.readableDate  = dateFormatter.format(date);
-      this.type          = type;
-      this.subject       = subject;
-      this.body          = body;
+    public XmlBackupItem(
+        int protocol,
+        String address,
+        String contactName,
+        long date,
+        int type,
+        String subject,
+        String body,
+        String serviceCenter,
+        int read,
+        int status) {
+      this.protocol = protocol;
+      this.address = address;
+      this.contactName = contactName;
+      this.date = date;
+      this.readableDate = dateFormatter.format(date);
+      this.type = type;
+      this.subject = subject;
+      this.body = body;
       this.serviceCenter = serviceCenter;
-      this.read          = read;
-      this.status        = status;
+      this.read = read;
+      this.status = status;
     }
 
     public int getProtocol() {
@@ -163,16 +177,17 @@ public class XmlBackup {
 
   public static class Writer {
 
-    private static final String  XML_HEADER      = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>";
-    private static final String  CREATED_BY      = "<!-- File Created By Signal -->";
-    private static final String  OPEN_TAG_SMSES  = "<smses count=\"%d\">";
-    private static final String  CLOSE_TAG_SMSES = "</smses>";
-    private static final String  OPEN_TAG_SMS    = " <sms ";
-    private static final String  CLOSE_EMPTYTAG  = "/>";
-    private static final String  OPEN_ATTRIBUTE  = "=\"";
-    private static final String  CLOSE_ATTRIBUTE = "\" ";
+    private static final String XML_HEADER =
+        "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>";
+    private static final String CREATED_BY = "<!-- File Created By Signal -->";
+    private static final String OPEN_TAG_SMSES = "<smses count=\"%d\">";
+    private static final String CLOSE_TAG_SMSES = "</smses>";
+    private static final String OPEN_TAG_SMS = " <sms ";
+    private static final String CLOSE_EMPTYTAG = "/>";
+    private static final String OPEN_ATTRIBUTE = "=\"";
+    private static final String CLOSE_ATTRIBUTE = "\" ";
 
-    private static final Pattern PATTERN         = Pattern.compile("[^\u0020-\uD7FF]");
+    private static final Pattern PATTERN = Pattern.compile("[^\u0020-\uD7FF]");
 
     private final BufferedWriter bufferedWriter;
 
@@ -223,16 +238,18 @@ public class XmlBackup {
     private String escapeXML(String s) {
       if (TextUtils.isEmpty(s)) return s;
 
-      Matcher matcher = PATTERN.matcher( s.replace("&",  "&amp;")
-                                          .replace("<",  "&lt;")
-                                          .replace(">",  "&gt;")
-                                          .replace("\"", "&quot;")
-                                          .replace("'",  "&apos;"));
+      Matcher matcher =
+          PATTERN.matcher(
+              s.replace("&", "&amp;")
+                  .replace("<", "&lt;")
+                  .replace(">", "&gt;")
+                  .replace("\"", "&quot;")
+                  .replace("'", "&apos;"));
       StringBuffer st = new StringBuffer();
 
       while (matcher.find()) {
-        String escaped="";
-        for (char ch: matcher.group(0).toCharArray()) {
+        String escaped = "";
+        for (char ch : matcher.group(0).toCharArray()) {
           escaped += ("&#" + ((int) ch) + ";");
         }
         matcher.appendReplacement(st, escaped);
@@ -240,6 +257,5 @@ public class XmlBackup {
       matcher.appendTail(st);
       return st.toString();
     }
-
   }
 }

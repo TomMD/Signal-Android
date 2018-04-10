@@ -1,31 +1,27 @@
-/** 
+/**
  * Copyright (C) 2011 Whisper Systems
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * <p>This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * <p>You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  */
 package org.thoughtcrime.securesms.mms;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
+import java.util.LinkedList;
+import java.util.List;
 import org.thoughtcrime.securesms.attachments.Attachment;
 import org.thoughtcrime.securesms.util.MediaUtil;
 import org.whispersystems.libsignal.util.guava.Optional;
-
-import java.util.LinkedList;
-import java.util.List;
 
 public class SlideDeck {
 
@@ -43,8 +39,7 @@ public class SlideDeck {
     if (slide != null) slides.add(slide);
   }
 
-  public SlideDeck() {
-  }
+  public SlideDeck() {}
 
   public void clear() {
     slides.clear();
@@ -106,7 +101,7 @@ public class SlideDeck {
   public @Nullable AudioSlide getAudioSlide() {
     for (Slide slide : slides) {
       if (slide.hasAudio()) {
-        return (AudioSlide)slide;
+        return (AudioSlide) slide;
       }
     }
 
@@ -114,9 +109,9 @@ public class SlideDeck {
   }
 
   public @Nullable DocumentSlide getDocumentSlide() {
-    for (Slide slide: slides) {
+    for (Slide slide : slides) {
       if (slide.hasDocument()) {
-        return (DocumentSlide)slide;
+        return (DocumentSlide) slide;
       }
     }
 

@@ -3,18 +3,15 @@ package org.thoughtcrime.securesms.webrtc.locks;
 import android.os.Build;
 import android.os.PowerManager;
 import android.util.Log;
-
-import org.whispersystems.libsignal.util.guava.Optional;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import org.whispersystems.libsignal.util.guava.Optional;
 
 /**
- * Controls access to the proximity lock.
- * The proximity lock is not part of the public API.
+ * Controls access to the proximity lock. The proximity lock is not part of the public API.
  *
  * @author Stuart O. Anderson
-*/
+ */
 class ProximityLock {
 
   private static final String TAG = ProximityLock.class.getSimpleName();
@@ -23,7 +20,7 @@ class ProximityLock {
   private final Optional<PowerManager.WakeLock> proximityLock;
 
   private static final int PROXIMITY_SCREEN_OFF_WAKE_LOCK = 32;
-  private static final int WAIT_FOR_PROXIMITY_NEGATIVE    = 1;
+  private static final int WAIT_FOR_PROXIMITY_NEGATIVE = 1;
 
   ProximityLock(PowerManager pm) {
     proximityLock = getProximityLock(pm);
@@ -32,14 +29,15 @@ class ProximityLock {
   private Optional<PowerManager.WakeLock> getProximityLock(PowerManager pm) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
       if (pm.isWakeLockLevelSupported(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK)) {
-        return Optional.fromNullable(pm.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK,
-                                                    "Signal Proximity Lock"));
+        return Optional.fromNullable(
+            pm.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, "Signal Proximity Lock"));
       } else {
         return Optional.absent();
       }
     } else {
       try {
-        return Optional.fromNullable(pm.newWakeLock(PROXIMITY_SCREEN_OFF_WAKE_LOCK, "RedPhone Incall"));
+        return Optional.fromNullable(
+            pm.newWakeLock(PROXIMITY_SCREEN_OFF_WAKE_LOCK, "RedPhone Incall"));
       } catch (Throwable t) {
         Log.e(TAG, "Failed to create proximity lock", t);
         return Optional.absent();

@@ -14,9 +14,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
-
 import com.astuetz.PagerSlidingTabStrip;
-
+import java.util.LinkedList;
+import java.util.List;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.components.InputAwareLayout.InputView;
 import org.thoughtcrime.securesms.components.RepeatableImageKey;
@@ -24,18 +24,16 @@ import org.thoughtcrime.securesms.components.RepeatableImageKey.KeyEventListener
 import org.thoughtcrime.securesms.components.emoji.EmojiPageView.EmojiSelectionListener;
 import org.thoughtcrime.securesms.util.ResUtil;
 
-import java.util.LinkedList;
-import java.util.List;
-
 public class EmojiDrawer extends LinearLayout implements InputView {
-  private static final KeyEvent DELETE_KEY_EVENT = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL);
+  private static final KeyEvent DELETE_KEY_EVENT =
+      new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL);
 
-  private ViewPager            pager;
+  private ViewPager pager;
   private List<EmojiPageModel> models;
   private PagerSlidingTabStrip strip;
   private RecentEmojiPageModel recentModel;
-  private EmojiEventListener   listener;
-  private EmojiDrawerListener  drawerListener;
+  private EmojiEventListener listener;
+  private EmojiDrawerListener drawerListener;
 
   public EmojiDrawer(Context context) {
     this(context, null);
@@ -63,16 +61,17 @@ public class EmojiDrawer extends LinearLayout implements InputView {
 
   private void initializeResources(View v) {
     Log.w("EmojiDrawer", "initializeResources()");
-    this.pager     = (ViewPager)            v.findViewById(R.id.emoji_pager);
-    this.strip     = (PagerSlidingTabStrip) v.findViewById(R.id.tabs);
+    this.pager = (ViewPager) v.findViewById(R.id.emoji_pager);
+    this.strip = (PagerSlidingTabStrip) v.findViewById(R.id.tabs);
 
-    RepeatableImageKey backspace = (RepeatableImageKey)v.findViewById(R.id.backspace);
-    backspace.setOnKeyEventListener(new KeyEventListener() {
-      @Override
-      public void onKeyEvent() {
-        if (listener != null) listener.onKeyEvent(DELETE_KEY_EVENT);
-      }
-    });
+    RepeatableImageKey backspace = (RepeatableImageKey) v.findViewById(R.id.backspace);
+    backspace.setOnKeyEventListener(
+        new KeyEventListener() {
+          @Override
+          public void onKeyEvent() {
+            if (listener != null) listener.onKeyEvent(DELETE_KEY_EVENT);
+          }
+        });
   }
 
   @Override
@@ -99,16 +98,18 @@ public class EmojiDrawer extends LinearLayout implements InputView {
   }
 
   private void initializeEmojiGrid() {
-    pager.setAdapter(new EmojiPagerAdapter(getContext(),
-                                           models,
-                                           new EmojiSelectionListener() {
-                                             @Override
-                                             public void onEmojiSelected(String emoji) {
-                                               Log.w("EmojiDrawer", "onEmojiSelected()");
-                                               recentModel.onCodePointSelected(emoji);
-                                               if (listener != null) listener.onEmojiSelected(emoji);
-                                             }
-                                           }));
+    pager.setAdapter(
+        new EmojiPagerAdapter(
+            getContext(),
+            models,
+            new EmojiSelectionListener() {
+              @Override
+              public void onEmojiSelected(String emoji) {
+                Log.w("EmojiDrawer", "onEmojiSelected()");
+                recentModel.onCodePointSelected(emoji);
+                if (listener != null) listener.onEmojiSelected(emoji);
+              }
+            }));
 
     if (recentModel.getEmoji().length == 0) {
       pager.setCurrentItem(1);
@@ -124,19 +125,18 @@ public class EmojiDrawer extends LinearLayout implements InputView {
   }
 
   public static class EmojiPagerAdapter extends PagerAdapter
-      implements PagerSlidingTabStrip.CustomTabProvider
-  {
-    private Context                context;
-    private List<EmojiPageModel>   pages;
+      implements PagerSlidingTabStrip.CustomTabProvider {
+    private Context context;
+    private List<EmojiPageModel> pages;
     private EmojiSelectionListener listener;
 
-    public EmojiPagerAdapter(@NonNull Context context,
-                             @NonNull List<EmojiPageModel> pages,
-                             @Nullable EmojiSelectionListener listener)
-    {
+    public EmojiPagerAdapter(
+        @NonNull Context context,
+        @NonNull List<EmojiPageModel> pages,
+        @Nullable EmojiSelectionListener listener) {
       super();
-      this.context  = context;
-      this.pages    = pages;
+      this.context = context;
+      this.pages = pages;
       this.listener = listener;
     }
 
@@ -156,7 +156,7 @@ public class EmojiDrawer extends LinearLayout implements InputView {
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
-      container.removeView((View)object);
+      container.removeView((View) object);
     }
 
     @Override
@@ -173,7 +173,7 @@ public class EmojiDrawer extends LinearLayout implements InputView {
 
     @Override
     public View getCustomTabView(ViewGroup viewGroup, int i) {
-      ImageView  image = new ImageView(context);
+      ImageView image = new ImageView(context);
       image.setScaleType(ScaleType.CENTER_INSIDE);
       image.setImageResource(ResUtil.getDrawableRes(context, pages.get(i).getIconAttr()));
       return image;
@@ -186,6 +186,7 @@ public class EmojiDrawer extends LinearLayout implements InputView {
 
   public interface EmojiDrawerListener {
     void onShown();
+
     void onHidden();
   }
 }

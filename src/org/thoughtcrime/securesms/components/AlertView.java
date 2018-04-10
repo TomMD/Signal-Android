@@ -9,7 +9,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-
 import org.thoughtcrime.securesms.R;
 
 public class AlertView extends LinearLayout {
@@ -38,15 +37,17 @@ public class AlertView extends LinearLayout {
     inflate(getContext(), R.layout.alert_view, this);
 
     approvalIndicator = (ImageView) findViewById(R.id.pending_approval_indicator);
-    failedIndicator   = (ImageView) findViewById(R.id.sms_failed_indicator);
+    failedIndicator = (ImageView) findViewById(R.id.sms_failed_indicator);
 
     if (attrs != null) {
-      TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.AlertView, 0, 0);
+      TypedArray typedArray =
+          getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.AlertView, 0, 0);
       boolean useSmallIcon = typedArray.getBoolean(R.styleable.AlertView_useSmallIcon, false);
       typedArray.recycle();
 
       if (useSmallIcon) {
-        failedIndicator.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_error_red_18dp));
+        failedIndicator.setImageDrawable(
+            ContextCompat.getDrawable(getContext(), R.drawable.ic_error_red_18dp));
       }
     }
   }

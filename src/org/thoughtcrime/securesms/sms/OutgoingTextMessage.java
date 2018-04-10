@@ -6,26 +6,27 @@ import org.thoughtcrime.securesms.recipients.Recipient;
 public class OutgoingTextMessage {
 
   private final Recipient recipient;
-  private final String    message;
-  private final int       subscriptionId;
-  private final long      expiresIn;
+  private final String message;
+  private final int subscriptionId;
+  private final long expiresIn;
 
   public OutgoingTextMessage(Recipient recipient, String message, int subscriptionId) {
     this(recipient, message, 0, subscriptionId);
   }
 
-  public OutgoingTextMessage(Recipient recipient, String message, long expiresIn, int subscriptionId) {
-    this.recipient      = recipient;
-    this.message        = message;
-    this.expiresIn      = expiresIn;
+  public OutgoingTextMessage(
+      Recipient recipient, String message, long expiresIn, int subscriptionId) {
+    this.recipient = recipient;
+    this.message = message;
+    this.expiresIn = expiresIn;
     this.subscriptionId = subscriptionId;
   }
 
   protected OutgoingTextMessage(OutgoingTextMessage base, String body) {
-    this.recipient      = base.getRecipient();
+    this.recipient = base.getRecipient();
     this.subscriptionId = base.getSubscriptionId();
-    this.expiresIn      = base.getExpiresIn();
-    this.message        = body;
+    this.expiresIn = base.getExpiresIn();
+    this.message = body;
   }
 
   public long getExpiresIn() {
@@ -70,13 +71,19 @@ public class OutgoingTextMessage {
 
   public static OutgoingTextMessage from(SmsMessageRecord record) {
     if (record.isSecure()) {
-      return new OutgoingEncryptedMessage(record.getRecipient(), record.getBody(), record.getExpiresIn());
+      return new OutgoingEncryptedMessage(
+          record.getRecipient(), record.getBody(), record.getExpiresIn());
     } else if (record.isKeyExchange()) {
       return new OutgoingKeyExchangeMessage(record.getRecipient(), record.getBody());
     } else if (record.isEndSession()) {
-      return new OutgoingEndSessionMessage(new OutgoingTextMessage(record.getRecipient(), record.getBody(), 0, -1));
+      return new OutgoingEndSessionMessage(
+          new OutgoingTextMessage(record.getRecipient(), record.getBody(), 0, -1));
     } else {
-      return new OutgoingTextMessage(record.getRecipient(), record.getBody(), record.getExpiresIn(), record.getSubscriptionId());
+      return new OutgoingTextMessage(
+          record.getRecipient(),
+          record.getBody(),
+          record.getExpiresIn(),
+          record.getSubscriptionId());
     }
   }
 

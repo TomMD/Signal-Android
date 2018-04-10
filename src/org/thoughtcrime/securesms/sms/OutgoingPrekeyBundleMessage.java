@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms.sms;
 
-
 public class OutgoingPrekeyBundleMessage extends OutgoingTextMessage {
 
   public OutgoingPrekeyBundleMessage(OutgoingTextMessage message, String body) {

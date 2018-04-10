@@ -2,7 +2,6 @@ package org.thoughtcrime.securesms.database.documents;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,7 +21,7 @@ public class IdentityKeyMismatchList implements Document<IdentityKeyMismatch> {
   @Override
   public int size() {
     if (mismatches == null) return 0;
-    else                    return mismatches.size();
+    else return mismatches.size();
   }
 
   @Override

@@ -10,5 +10,4 @@ public class IncomingIdentityUpdateMessage extends IncomingTextMessage {
   public boolean isIdentityUpdate() {
     return true;
   }
-
 }

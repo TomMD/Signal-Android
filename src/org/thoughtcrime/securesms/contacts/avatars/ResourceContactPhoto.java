@@ -8,7 +8,6 @@ import android.graphics.drawable.LayerDrawable;
 import android.support.annotation.DrawableRes;
 import android.support.v7.content.res.AppCompatResources;
 import android.widget.ImageView;
-
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.makeramen.roundedimageview.RoundedDrawable;
 
@@ -22,7 +21,7 @@ public class ResourceContactPhoto implements FallbackContactPhoto {
   }
 
   public ResourceContactPhoto(@DrawableRes int resourceId, @DrawableRes int callCardResourceId) {
-    this.resourceId         = resourceId;
+    this.resourceId = resourceId;
     this.callCardResourceId = callCardResourceId;
   }
 
@@ -33,8 +32,10 @@ public class ResourceContactPhoto implements FallbackContactPhoto {
 
   @Override
   public Drawable asDrawable(Context context, int color, boolean inverted) {
-    Drawable        background = TextDrawable.builder().buildRound(" ", inverted ? Color.WHITE : color);
-    RoundedDrawable foreground = (RoundedDrawable) RoundedDrawable.fromDrawable(context.getResources().getDrawable(resourceId));
+    Drawable background = TextDrawable.builder().buildRound(" ", inverted ? Color.WHITE : color);
+    RoundedDrawable foreground =
+        (RoundedDrawable)
+            RoundedDrawable.fromDrawable(context.getResources().getDrawable(resourceId));
 
     foreground.setScaleType(ImageView.ScaleType.CENTER);
 
@@ -65,5 +66,4 @@ public class ResourceContactPhoto implements FallbackContactPhoto {
       return -1;
     }
   }
-
 }

@@ -8,9 +8,11 @@ public abstract class InfiniteScrollListener extends RecyclerView.OnScrollListen
 
   public static String TAG = InfiniteScrollListener.class.getSimpleName();
 
-  private int     previousTotal    = 0;    // The total number of items in the dataset after the last load
-  private boolean loading          = true; // True if we are still waiting for the last set of data to load.
-  private int     visibleThreshold = 5;    // The minimum amount of items to have below your current scroll position before loading more.
+  private int previousTotal = 0; // The total number of items in the dataset after the last load
+  private boolean loading = true; // True if we are still waiting for the last set of data to load.
+  private int visibleThreshold =
+      5; // The minimum amount of items to have below your current scroll position before loading
+         // more.
 
   int firstVisibleItem, visibleItemCount, totalItemCount;
 
@@ -20,10 +22,11 @@ public abstract class InfiniteScrollListener extends RecyclerView.OnScrollListen
   public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
     super.onScrolled(recyclerView, dx, dy);
 
-    RecyclerViewPositionHelper recyclerViewPositionHelper = RecyclerViewPositionHelper.createHelper(recyclerView);
+    RecyclerViewPositionHelper recyclerViewPositionHelper =
+        RecyclerViewPositionHelper.createHelper(recyclerView);
 
     visibleItemCount = recyclerView.getChildCount();
-    totalItemCount   = recyclerViewPositionHelper.getItemCount();
+    totalItemCount = recyclerViewPositionHelper.getItemCount();
     firstVisibleItem = recyclerViewPositionHelper.findFirstVisibleItemPosition();
 
     if (loading) {
@@ -32,8 +35,7 @@ public abstract class InfiniteScrollListener extends RecyclerView.OnScrollListen
         previousTotal = totalItemCount;
       }
     }
-    if (!loading && (totalItemCount - visibleItemCount)
-        <= (firstVisibleItem + visibleThreshold)) {
+    if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
       // End has been reached
       // Do something
       currentPage++;

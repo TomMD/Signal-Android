@@ -5,11 +5,9 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
-
-import org.whispersystems.libsignal.util.guava.Optional;
-
 import java.util.LinkedList;
 import java.util.List;
+import org.whispersystems.libsignal.util.guava.Optional;
 
 public class SubscriptionManagerCompat {
 
@@ -32,11 +30,16 @@ public class SubscriptionManagerCompat {
       return Optional.absent();
     }
 
-    SubscriptionInfo subscriptionInfo = SubscriptionManager.from(context).getActiveSubscriptionInfo(subscriptionId);
+    SubscriptionInfo subscriptionInfo =
+        SubscriptionManager.from(context).getActiveSubscriptionInfo(subscriptionId);
 
     if (subscriptionInfo != null) {
-      return Optional.of(new SubscriptionInfoCompat(subscriptionId, subscriptionInfo.getDisplayName(),
-                                                    subscriptionInfo.getMcc(), subscriptionInfo.getMnc()));
+      return Optional.of(
+          new SubscriptionInfoCompat(
+              subscriptionId,
+              subscriptionInfo.getDisplayName(),
+              subscriptionInfo.getMcc(),
+              subscriptionInfo.getMnc()));
     } else {
       return Optional.absent();
     }
@@ -47,7 +50,8 @@ public class SubscriptionManagerCompat {
       return new LinkedList<>();
     }
 
-    List<SubscriptionInfo> subscriptionInfos = SubscriptionManager.from(context).getActiveSubscriptionInfoList();
+    List<SubscriptionInfo> subscriptionInfos =
+        SubscriptionManager.from(context).getActiveSubscriptionInfoList();
 
     if (subscriptionInfos == null || subscriptionInfos.isEmpty()) {
       return new LinkedList<>();
@@ -56,13 +60,14 @@ public class SubscriptionManagerCompat {
     List<SubscriptionInfoCompat> compatList = new LinkedList<>();
 
     for (SubscriptionInfo subscriptionInfo : subscriptionInfos) {
-      compatList.add(new SubscriptionInfoCompat(subscriptionInfo.getSubscriptionId(),
-                                                subscriptionInfo.getDisplayName(),
-                                                subscriptionInfo.getMcc(),
-                                                subscriptionInfo.getMnc()));
+      compatList.add(
+          new SubscriptionInfoCompat(
+              subscriptionInfo.getSubscriptionId(),
+              subscriptionInfo.getDisplayName(),
+              subscriptionInfo.getMcc(),
+              subscriptionInfo.getMnc()));
     }
 
     return compatList;
   }
-
 }

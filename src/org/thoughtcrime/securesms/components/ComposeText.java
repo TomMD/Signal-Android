@@ -22,7 +22,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
-
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.TransportOption;
 import org.thoughtcrime.securesms.components.emoji.EmojiEditText;
@@ -30,7 +29,7 @@ import org.thoughtcrime.securesms.util.TextSecurePreferences;
 
 public class ComposeText extends EmojiEditText {
 
-  private CharSequence    hint;
+  private CharSequence hint;
   private SpannableString subHint;
 
   @Nullable private InputPanel.MediaListener mediaListener;
@@ -50,7 +49,7 @@ public class ComposeText extends EmojiEditText {
     initialize();
   }
 
-  public String getTextTrimmed(){
+  public String getTextTrimmed() {
     return getText().toString().trim();
   }
 
@@ -60,9 +59,11 @@ public class ComposeText extends EmojiEditText {
 
     if (!TextUtils.isEmpty(hint)) {
       if (!TextUtils.isEmpty(subHint)) {
-        setHint(new SpannableStringBuilder().append(ellipsizeToWidth(hint))
-                                            .append("\n")
-                                            .append(ellipsizeToWidth(subHint)));
+        setHint(
+            new SpannableStringBuilder()
+                .append(ellipsizeToWidth(hint))
+                .append("\n")
+                .append(ellipsizeToWidth(subHint)));
       } else {
         setHint(ellipsizeToWidth(hint));
       }
@@ -70,10 +71,8 @@ public class ComposeText extends EmojiEditText {
   }
 
   private CharSequence ellipsizeToWidth(CharSequence text) {
-    return TextUtils.ellipsize(text,
-                               getPaint(),
-                               getWidth() - getPaddingLeft() - getPaddingRight(),
-                               TruncateAt.END);
+    return TextUtils.ellipsize(
+        text, getPaint(), getWidth() - getPaddingLeft() - getPaddingRight(), TruncateAt.END);
   }
 
   public void setHint(@NonNull String hint, @Nullable CharSequence subHint) {
@@ -81,15 +80,18 @@ public class ComposeText extends EmojiEditText {
 
     if (subHint != null) {
       this.subHint = new SpannableString(subHint);
-      this.subHint.setSpan(new RelativeSizeSpan(0.5f), 0, subHint.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+      this.subHint.setSpan(
+          new RelativeSizeSpan(0.5f), 0, subHint.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
     } else {
       this.subHint = null;
     }
 
     if (this.subHint != null) {
-      super.setHint(new SpannableStringBuilder().append(ellipsizeToWidth(this.hint))
-                                                .append("\n")
-                                                .append(ellipsizeToWidth(this.subHint)));
+      super.setHint(
+          new SpannableStringBuilder()
+              .append(ellipsizeToWidth(this.hint))
+              .append("\n")
+              .append(ellipsizeToWidth(this.subHint)));
     } else {
       super.setHint(ellipsizeToWidth(this.hint));
     }
@@ -110,40 +112,47 @@ public class ComposeText extends EmojiEditText {
 
   public void setTransport(TransportOption transport) {
     final boolean useSystemEmoji = TextSecurePreferences.isSystemEmojiPreferred(getContext());
-    final boolean isIncognito    = TextSecurePreferences.isIncognitoKeyboardEnabled(getContext());
+    final boolean isIncognito = TextSecurePreferences.isIncognitoKeyboardEnabled(getContext());
 
     int imeOptions = (getImeOptions() & ~EditorInfo.IME_MASK_ACTION) | EditorInfo.IME_ACTION_SEND;
-    int inputType  = getInputType();
+    int inputType = getInputType();
 
     if (isLandscape()) setImeActionLabel(transport.getComposeHint(), EditorInfo.IME_ACTION_SEND);
-    else               setImeActionLabel(null, 0);
+    else setImeActionLabel(null, 0);
 
     if (useSystemEmoji) {
-      inputType = (inputType & ~InputType.TYPE_MASK_VARIATION) | InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE;
+      inputType =
+          (inputType & ~InputType.TYPE_MASK_VARIATION)
+              | InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE;
     }
 
     setInputType(inputType);
     setImeOptions(imeOptions);
-    setHint(transport.getComposeHint(),
-            transport.getSimName().isPresent()
-                ? getContext().getString(R.string.conversation_activity__from_sim_name, transport.getSimName().get())
-                : null);
+    setHint(
+        transport.getComposeHint(),
+        transport.getSimName().isPresent()
+            ? getContext()
+                .getString(
+                    R.string.conversation_activity__from_sim_name, transport.getSimName().get())
+            : null);
   }
 
   @Override
   public InputConnection onCreateInputConnection(EditorInfo editorInfo) {
     InputConnection inputConnection = super.onCreateInputConnection(editorInfo);
 
-    if(TextSecurePreferences.isEnterSendsEnabled(getContext())) {
+    if (TextSecurePreferences.isEnterSendsEnabled(getContext())) {
       editorInfo.imeOptions &= ~EditorInfo.IME_FLAG_NO_ENTER_ACTION;
     }
 
     if (Build.VERSION.SDK_INT < 21) return inputConnection;
-    if (mediaListener == null)      return inputConnection;
-    if (inputConnection == null)    return null;
+    if (mediaListener == null) return inputConnection;
+    if (inputConnection == null) return null;
 
-    EditorInfoCompat.setContentMimeTypes(editorInfo, new String[] {"image/jpeg", "image/png", "image/gif"});
-    return InputConnectionCompat.createWrapper(inputConnection, editorInfo, new CommitContentListener(mediaListener));
+    EditorInfoCompat.setContentMimeTypes(
+        editorInfo, new String[] {"image/jpeg", "image/png", "image/gif"});
+    return InputConnectionCompat.createWrapper(
+        inputConnection, editorInfo, new CommitContentListener(mediaListener));
   }
 
   public void setMediaListener(@Nullable InputPanel.MediaListener mediaListener) {
@@ -157,7 +166,8 @@ public class ComposeText extends EmojiEditText {
   }
 
   @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB_MR2)
-  private static class CommitContentListener implements InputConnectionCompat.OnCommitContentListener {
+  private static class CommitContentListener
+      implements InputConnectionCompat.OnCommitContentListener {
 
     private static final String TAG = CommitContentListener.class.getName();
 
@@ -168,8 +178,10 @@ public class ComposeText extends EmojiEditText {
     }
 
     @Override
-    public boolean onCommitContent(InputContentInfoCompat inputContentInfo, int flags, Bundle opts) {
-      if (BuildCompat.isAtLeastNMR1() && (flags & InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0) {
+    public boolean onCommitContent(
+        InputContentInfoCompat inputContentInfo, int flags, Bundle opts) {
+      if (BuildCompat.isAtLeastNMR1()
+          && (flags & InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0) {
         try {
           inputContentInfo.requestPermission();
         } catch (Exception e) {
@@ -179,8 +191,8 @@ public class ComposeText extends EmojiEditText {
       }
 
       if (inputContentInfo.getDescription().getMimeTypeCount() > 0) {
-        mediaListener.onMediaSelected(inputContentInfo.getContentUri(),
-                                      inputContentInfo.getDescription().getMimeType(0));
+        mediaListener.onMediaSelected(
+            inputContentInfo.getContentUri(), inputContentInfo.getDescription().getMimeType(0));
 
         return true;
       }
@@ -188,5 +200,4 @@ public class ComposeText extends EmojiEditText {
       return false;
     }
   }
-
 }

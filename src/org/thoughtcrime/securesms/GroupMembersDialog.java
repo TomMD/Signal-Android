@@ -8,24 +8,22 @@ import android.os.AsyncTask;
 import android.provider.ContactsContract;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
-
+import java.util.LinkedList;
+import java.util.List;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.util.Util;
-
-import java.util.LinkedList;
-import java.util.List;
 
 public class GroupMembersDialog extends AsyncTask<Void, Void, List<Recipient>> {
 
   private static final String TAG = GroupMembersDialog.class.getSimpleName();
 
-  private final Recipient  recipient;
-  private final Context    context;
+  private final Recipient recipient;
+  private final Context context;
 
   public GroupMembersDialog(Context context, Recipient recipient) {
     this.recipient = recipient;
-    this.context   = context;
+    this.context = context;
   }
 
   @Override
@@ -33,7 +31,8 @@ public class GroupMembersDialog extends AsyncTask<Void, Void, List<Recipient>> {
 
   @Override
   protected List<Recipient> doInBackground(Void... params) {
-    return DatabaseFactory.getGroupDatabase(context).getGroupMembers(recipient.getAddress().toGroupString(), true);
+    return DatabaseFactory.getGroupDatabase(context)
+        .getGroupMembers(recipient.getAddress().toGroupString(), true);
   }
 
   @Override
@@ -43,7 +42,8 @@ public class GroupMembersDialog extends AsyncTask<Void, Void, List<Recipient>> {
     builder.setTitle(R.string.ConversationActivity_group_members);
     builder.setIconAttribute(R.attr.group_members_dialog_icon);
     builder.setCancelable(true);
-    builder.setItems(groupMembers.getRecipientStrings(), new GroupMembersOnClickListener(context, groupMembers));
+    builder.setItems(
+        groupMembers.getRecipientStrings(), new GroupMembersOnClickListener(context, groupMembers));
     builder.setPositiveButton(android.R.string.ok, null);
     builder.show();
   }
@@ -54,10 +54,10 @@ public class GroupMembersDialog extends AsyncTask<Void, Void, List<Recipient>> {
 
   private static class GroupMembersOnClickListener implements DialogInterface.OnClickListener {
     private final GroupMembers groupMembers;
-    private final Context      context;
+    private final Context context;
 
     public GroupMembersOnClickListener(Context context, GroupMembers members) {
-      this.context      = context;
+      this.context = context;
       this.groupMembers = members;
     }
 
@@ -66,15 +66,20 @@ public class GroupMembersDialog extends AsyncTask<Void, Void, List<Recipient>> {
       Recipient recipient = groupMembers.get(item);
 
       if (recipient.getContactUri() != null) {
-        ContactsContract.QuickContact.showQuickContact(context, new Rect(0,0,0,0),
-                                                       recipient.getContactUri(),
-                                                       ContactsContract.QuickContact.MODE_LARGE, null);
+        ContactsContract.QuickContact.showQuickContact(
+            context,
+            new Rect(0, 0, 0, 0),
+            recipient.getContactUri(),
+            ContactsContract.QuickContact.MODE_LARGE,
+            null);
       } else {
         final Intent intent = new Intent(Intent.ACTION_INSERT_OR_EDIT);
         if (recipient.getAddress().isEmail()) {
-          intent.putExtra(ContactsContract.Intents.Insert.EMAIL, recipient.getAddress().toEmailString());
+          intent.putExtra(
+              ContactsContract.Intents.Insert.EMAIL, recipient.getAddress().toEmailString());
         } else {
-          intent.putExtra(ContactsContract.Intents.Insert.PHONE, recipient.getAddress().toPhoneString());
+          intent.putExtra(
+              ContactsContract.Intents.Insert.PHONE, recipient.getAddress().toPhoneString());
         }
         intent.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
         context.startActivity(intent);
@@ -83,10 +88,8 @@ public class GroupMembersDialog extends AsyncTask<Void, Void, List<Recipient>> {
   }
 
   /**
-   * Wraps a List of Recipient (just like @class Recipients),
-   * but with focus on the order of the Recipients.
-   * So that the order of the RecipientStrings[] matches
-   * the internal order.
+   * Wraps a List of Recipient (just like @class Recipients), but with focus on the order of the
+   * Recipients. So that the order of the RecipientStrings[] matches the internal order.
    *
    * @author Christoph Haefner
    */

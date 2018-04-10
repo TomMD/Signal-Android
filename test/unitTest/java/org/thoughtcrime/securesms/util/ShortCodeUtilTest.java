@@ -1,9 +1,9 @@
 package org.thoughtcrime.securesms.util;
 
-import org.junit.Test;
-
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+
+import org.junit.Test;
 
 public class ShortCodeUtilTest {
 
@@ -37,5 +37,4 @@ public class ShortCodeUtilTest {
     assertTrue(ShortCodeUtil.isShortCode("+79166503388", "431"));
     assertFalse(ShortCodeUtil.isShortCode("+79166503388", "111-22-33"));
   }
-
 }

@@ -1,7 +1,6 @@
 package org.thoughtcrime.securesms.jobs;
 
 import android.content.Context;
-
 import org.whispersystems.jobqueue.Job;
 import org.whispersystems.jobqueue.JobParameters;
 import org.whispersystems.jobqueue.dependencies.ContextDependent;

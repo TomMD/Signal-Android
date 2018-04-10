@@ -7,15 +7,14 @@ import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
+import java.util.Locale;
+import java.util.Set;
 import org.thoughtcrime.securesms.database.model.ThreadRecord;
 import org.thoughtcrime.securesms.mms.GlideRequests;
 import org.thoughtcrime.securesms.util.ViewUtil;
 
-import java.util.Locale;
-import java.util.Set;
-
-public class ConversationListItemAction extends LinearLayout implements BindableConversationListItem {
+public class ConversationListItemAction extends LinearLayout
+    implements BindableConversationListItem {
 
   private TextView description;
 
@@ -39,12 +38,18 @@ public class ConversationListItemAction extends LinearLayout implements Bindable
   }
 
   @Override
-  public void bind(@NonNull ThreadRecord thread, @NonNull GlideRequests glideRequests, @NonNull Locale locale, @NonNull Set<Long> selectedThreads, boolean batchMode) {
-    this.description.setText(getContext().getString(R.string.ConversationListItemAction_archived_conversations_d, thread.getCount()));
+  public void bind(
+      @NonNull ThreadRecord thread,
+      @NonNull GlideRequests glideRequests,
+      @NonNull Locale locale,
+      @NonNull Set<Long> selectedThreads,
+      boolean batchMode) {
+    this.description.setText(
+        getContext()
+            .getString(
+                R.string.ConversationListItemAction_archived_conversations_d, thread.getCount()));
   }
 
   @Override
-  public void unbind() {
-
-  }
+  public void unbind() {}
 }

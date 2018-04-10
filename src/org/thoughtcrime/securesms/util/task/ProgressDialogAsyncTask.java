@@ -3,21 +3,21 @@ package org.thoughtcrime.securesms.util.task;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
-
 import java.lang.ref.WeakReference;
 
-public abstract class ProgressDialogAsyncTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> {
+public abstract class ProgressDialogAsyncTask<Params, Progress, Result>
+    extends AsyncTask<Params, Progress, Result> {
 
   private final WeakReference<Context> contextReference;
-  private       ProgressDialog         progress;
-  private final String                 title;
-  private final String                 message;
+  private ProgressDialog progress;
+  private final String title;
+  private final String message;
 
   public ProgressDialogAsyncTask(Context context, String title, String message) {
     super();
     this.contextReference = new WeakReference<>(context);
-    this.title            = title;
-    this.message          = message;
+    this.title = title;
+    this.message = message;
   }
 
   public ProgressDialogAsyncTask(Context context, int title, int message) {
@@ -39,4 +39,3 @@ public abstract class ProgressDialogAsyncTask<Params, Progress, Result> extends 
     return contextReference.get();
   }
 }
-

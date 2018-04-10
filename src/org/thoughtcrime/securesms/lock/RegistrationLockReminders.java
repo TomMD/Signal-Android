@@ -1,24 +1,24 @@
 package org.thoughtcrime.securesms.lock;
 
-
 import android.content.Context;
 import android.support.annotation.NonNull;
-
-import org.thoughtcrime.securesms.util.TextSecurePreferences;
-
 import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
+import org.thoughtcrime.securesms.util.TextSecurePreferences;
 
 public class RegistrationLockReminders {
 
-  private static final NavigableSet<Long> INTERVALS = new TreeSet<Long>() {{
-    add(TimeUnit.HOURS.toMillis(6));
-    add(TimeUnit.HOURS.toMillis(12));
-    add(TimeUnit.DAYS.toMillis(1));
-    add(TimeUnit.DAYS.toMillis(3));
-    add(TimeUnit.DAYS.toMillis(7));
-  }};
+  private static final NavigableSet<Long> INTERVALS =
+      new TreeSet<Long>() {
+        {
+          add(TimeUnit.HOURS.toMillis(6));
+          add(TimeUnit.HOURS.toMillis(12));
+          add(TimeUnit.DAYS.toMillis(1));
+          add(TimeUnit.DAYS.toMillis(3));
+          add(TimeUnit.DAYS.toMillis(7));
+        }
+      };
 
   public static final long INITIAL_INTERVAL = INTERVALS.first();
 
@@ -35,11 +35,14 @@ public class RegistrationLockReminders {
     Long nextReminderInterval;
 
     if (success) {
-      long timeSinceLastReminder = System.currentTimeMillis() - TextSecurePreferences.getRegistrationLockLastReminderTime(context);
+      long timeSinceLastReminder =
+          System.currentTimeMillis()
+              - TextSecurePreferences.getRegistrationLockLastReminderTime(context);
       nextReminderInterval = INTERVALS.higher(timeSinceLastReminder);
       if (nextReminderInterval == null) nextReminderInterval = INTERVALS.last();
     } else {
-      long lastReminderInterval = TextSecurePreferences.getRegistrationLockNextReminderInterval(context);
+      long lastReminderInterval =
+          TextSecurePreferences.getRegistrationLockNextReminderInterval(context);
       nextReminderInterval = INTERVALS.lower(lastReminderInterval);
       if (nextReminderInterval == null) nextReminderInterval = INTERVALS.first();
     }
@@ -47,5 +50,4 @@ public class RegistrationLockReminders {
     TextSecurePreferences.setRegistrationLockLastReminderTime(context, System.currentTimeMillis());
     TextSecurePreferences.setRegistrationLockNextReminderInterval(context, nextReminderInterval);
   }
-
 }

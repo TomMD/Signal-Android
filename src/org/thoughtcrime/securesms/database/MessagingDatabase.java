@@ -5,20 +5,17 @@ import android.content.Context;
 import android.database.Cursor;
 import android.text.TextUtils;
 import android.util.Log;
-
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import net.sqlcipher.database.SQLiteDatabase;
-
 import org.thoughtcrime.securesms.database.documents.Document;
 import org.thoughtcrime.securesms.database.documents.IdentityKeyMismatch;
 import org.thoughtcrime.securesms.database.documents.IdentityKeyMismatchList;
 import org.thoughtcrime.securesms.database.helpers.SQLCipherOpenHelper;
 import org.thoughtcrime.securesms.util.JsonUtils;
 import org.whispersystems.libsignal.IdentityKey;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 public abstract class MessagingDatabase extends Database implements MmsSmsColumns {
 
@@ -31,14 +28,19 @@ public abstract class MessagingDatabase extends Database implements MmsSmsColumn
   protected abstract String getTableName();
 
   public abstract void markExpireStarted(long messageId);
+
   public abstract void markExpireStarted(long messageId, long startTime);
 
   public abstract void markAsSent(long messageId, boolean secure);
 
-  public void setMismatchedIdentity(long messageId, final Address address, final IdentityKey identityKey) {
-    List<IdentityKeyMismatch> items = new ArrayList<IdentityKeyMismatch>() {{
-      add(new IdentityKeyMismatch(address, identityKey));
-    }};
+  public void setMismatchedIdentity(
+      long messageId, final Address address, final IdentityKey identityKey) {
+    List<IdentityKeyMismatch> items =
+        new ArrayList<IdentityKeyMismatch>() {
+          {
+            add(new IdentityKeyMismatch(address, identityKey));
+          }
+        };
 
     IdentityKeyMismatchList document = new IdentityKeyMismatchList(items);
 
@@ -58,9 +60,11 @@ public abstract class MessagingDatabase extends Database implements MmsSmsColumn
 
   public void addMismatchedIdentity(long messageId, Address address, IdentityKey identityKey) {
     try {
-      addToDocument(messageId, MISMATCHED_IDENTITIES,
-                    new IdentityKeyMismatch(address, identityKey),
-                    IdentityKeyMismatchList.class);
+      addToDocument(
+          messageId,
+          MISMATCHED_IDENTITIES,
+          new IdentityKeyMismatch(address, identityKey),
+          IdentityKeyMismatchList.class);
     } catch (IOException e) {
       Log.w(TAG, e);
     }
@@ -68,20 +72,23 @@ public abstract class MessagingDatabase extends Database implements MmsSmsColumn
 
   public void removeMismatchedIdentity(long messageId, Address address, IdentityKey identityKey) {
     try {
-      removeFromDocument(messageId, MISMATCHED_IDENTITIES,
-                         new IdentityKeyMismatch(address, identityKey),
-                         IdentityKeyMismatchList.class);
+      removeFromDocument(
+          messageId,
+          MISMATCHED_IDENTITIES,
+          new IdentityKeyMismatch(address, identityKey),
+          IdentityKeyMismatchList.class);
     } catch (IOException e) {
       Log.w(TAG, e);
     }
   }
 
-  protected <D extends Document<I>, I> void removeFromDocument(long messageId, String column, I object, Class<D> clazz) throws IOException {
+  protected <D extends Document<I>, I> void removeFromDocument(
+      long messageId, String column, I object, Class<D> clazz) throws IOException {
     SQLiteDatabase database = databaseHelper.getWritableDatabase();
     database.beginTransaction();
 
     try {
-      D           document = getDocument(database, messageId, column, clazz);
+      D document = getDocument(database, messageId, column, clazz);
       Iterator<I> iterator = document.getList().iterator();
 
       while (iterator.hasNext()) {
@@ -100,15 +107,20 @@ public abstract class MessagingDatabase extends Database implements MmsSmsColumn
     }
   }
 
-  protected <T extends Document<I>, I> void addToDocument(long messageId, String column, final I object, Class<T> clazz) throws IOException {
-    List<I> list = new ArrayList<I>() {{
-      add(object);
-    }};
+  protected <T extends Document<I>, I> void addToDocument(
+      long messageId, String column, final I object, Class<T> clazz) throws IOException {
+    List<I> list =
+        new ArrayList<I>() {
+          {
+            add(object);
+          }
+        };
 
     addToDocument(messageId, column, list, clazz);
   }
 
-  protected <T extends Document<I>, I> void addToDocument(long messageId, String column, List<I> objects, Class<T> clazz) throws IOException {
+  protected <T extends Document<I>, I> void addToDocument(
+      long messageId, String column, List<I> objects, Class<T> clazz) throws IOException {
     SQLiteDatabase database = databaseHelper.getWritableDatabase();
     database.beginTransaction();
 
@@ -123,27 +135,35 @@ public abstract class MessagingDatabase extends Database implements MmsSmsColumn
     }
   }
 
-  private void setDocument(SQLiteDatabase database, long messageId, String column, Document document) throws IOException {
+  private void setDocument(
+      SQLiteDatabase database, long messageId, String column, Document document)
+      throws IOException {
     ContentValues contentValues = new ContentValues();
 
     if (document == null || document.size() == 0) {
-      contentValues.put(column, (String)null);
+      contentValues.put(column, (String) null);
     } else {
       contentValues.put(column, JsonUtils.toJson(document));
     }
 
-    database.update(getTableName(), contentValues, ID_WHERE, new String[] {String.valueOf(messageId)});
+    database.update(
+        getTableName(), contentValues, ID_WHERE, new String[] {String.valueOf(messageId)});
   }
 
-  private <D extends Document> D getDocument(SQLiteDatabase database, long messageId,
-                                             String column, Class<D> clazz)
-  {
+  private <D extends Document> D getDocument(
+      SQLiteDatabase database, long messageId, String column, Class<D> clazz) {
     Cursor cursor = null;
 
     try {
-      cursor = database.query(getTableName(), new String[] {column},
-                              ID_WHERE, new String[] {String.valueOf(messageId)},
-                              null, null, null);
+      cursor =
+          database.query(
+              getTableName(),
+              new String[] {column},
+              ID_WHERE,
+              new String[] {String.valueOf(messageId)},
+              null,
+              null,
+              null);
 
       if (cursor != null && cursor.moveToNext()) {
         String document = cursor.getString(cursor.getColumnIndexOrThrow(column));
@@ -166,18 +186,17 @@ public abstract class MessagingDatabase extends Database implements MmsSmsColumn
       }
 
     } finally {
-      if (cursor != null)
-        cursor.close();
+      if (cursor != null) cursor.close();
     }
   }
 
   public static class SyncMessageId {
 
     private final Address address;
-    private final long   timetamp;
+    private final long timetamp;
 
     public SyncMessageId(Address address, long timetamp) {
-      this.address  = address;
+      this.address = address;
       this.timetamp = timetamp;
     }
 
@@ -192,16 +211,16 @@ public abstract class MessagingDatabase extends Database implements MmsSmsColumn
 
   public static class ExpirationInfo {
 
-    private final long    id;
-    private final long    expiresIn;
-    private final long    expireStarted;
+    private final long id;
+    private final long expiresIn;
+    private final long expireStarted;
     private final boolean mms;
 
     public ExpirationInfo(long id, long expiresIn, long expireStarted, boolean mms) {
-      this.id            = id;
-      this.expiresIn     = expiresIn;
+      this.id = id;
+      this.expiresIn = expiresIn;
       this.expireStarted = expireStarted;
-      this.mms           = mms;
+      this.mms = mms;
     }
 
     public long getId() {
@@ -223,11 +242,11 @@ public abstract class MessagingDatabase extends Database implements MmsSmsColumn
 
   public static class MarkedMessageInfo {
 
-    private final SyncMessageId  syncMessageId;
+    private final SyncMessageId syncMessageId;
     private final ExpirationInfo expirationInfo;
 
     public MarkedMessageInfo(SyncMessageId syncMessageId, ExpirationInfo expirationInfo) {
-      this.syncMessageId  = syncMessageId;
+      this.syncMessageId = syncMessageId;
       this.expirationInfo = expirationInfo;
     }
 

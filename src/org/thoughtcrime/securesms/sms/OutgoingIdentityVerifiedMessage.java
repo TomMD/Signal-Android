@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms.sms;
 
-
 import org.thoughtcrime.securesms.recipients.Recipient;
 
 public class OutgoingIdentityVerifiedMessage extends OutgoingTextMessage {

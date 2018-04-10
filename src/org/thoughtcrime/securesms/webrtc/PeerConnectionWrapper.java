@@ -1,11 +1,12 @@
 package org.thoughtcrime.securesms.webrtc;
 
-
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 import org.thoughtcrime.securesms.util.concurrent.SettableFuture;
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
@@ -26,39 +27,36 @@ import org.webrtc.VideoRenderer;
 import org.webrtc.VideoSource;
 import org.webrtc.VideoTrack;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-
 public class PeerConnectionWrapper {
   private static final String TAG = PeerConnectionWrapper.class.getSimpleName();
 
-  private static final PeerConnection.IceServer STUN_SERVER = new PeerConnection.IceServer("stun:stun1.l.google.com:19302");
+  private static final PeerConnection.IceServer STUN_SERVER =
+      new PeerConnection.IceServer("stun:stun1.l.google.com:19302");
 
-  @NonNull  private final PeerConnection peerConnection;
-  @NonNull  private final AudioTrack     audioTrack;
-  @NonNull  private final AudioSource    audioSource;
+  @NonNull private final PeerConnection peerConnection;
+  @NonNull private final AudioTrack audioTrack;
+  @NonNull private final AudioSource audioSource;
 
-  @Nullable private final VideoCapturer  videoCapturer;
-  @Nullable private final VideoSource    videoSource;
-  @Nullable private final VideoTrack     videoTrack;
+  @Nullable private final VideoCapturer videoCapturer;
+  @Nullable private final VideoSource videoSource;
+  @Nullable private final VideoTrack videoTrack;
 
-  public PeerConnectionWrapper(@NonNull Context context,
-                               @NonNull PeerConnectionFactory factory,
-                               @NonNull PeerConnection.Observer observer,
-                               @NonNull VideoRenderer.Callbacks localRenderer,
-                               @NonNull List<PeerConnection.IceServer> turnServers,
-                               boolean hideIp)
-  {
+  public PeerConnectionWrapper(
+      @NonNull Context context,
+      @NonNull PeerConnectionFactory factory,
+      @NonNull PeerConnection.Observer observer,
+      @NonNull VideoRenderer.Callbacks localRenderer,
+      @NonNull List<PeerConnection.IceServer> turnServers,
+      boolean hideIp) {
     List<PeerConnection.IceServer> iceServers = new LinkedList<>();
     iceServers.add(STUN_SERVER);
     iceServers.addAll(turnServers);
 
-    MediaConstraints                constraints      = new MediaConstraints();
-    MediaConstraints                audioConstraints = new MediaConstraints();
-    PeerConnection.RTCConfiguration configuration    = new PeerConnection.RTCConfiguration(iceServers);
+    MediaConstraints constraints = new MediaConstraints();
+    MediaConstraints audioConstraints = new MediaConstraints();
+    PeerConnection.RTCConfiguration configuration = new PeerConnection.RTCConfiguration(iceServers);
 
-    configuration.bundlePolicy  = PeerConnection.BundlePolicy.MAXBUNDLE;
+    configuration.bundlePolicy = PeerConnection.BundlePolicy.MAXBUNDLE;
     configuration.rtcpMuxPolicy = PeerConnection.RtcpMuxPolicy.REQUIRE;
 
     if (hideIp) {
@@ -66,17 +64,18 @@ public class PeerConnectionWrapper {
     }
 
     constraints.optional.add(new MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true"));
-    audioConstraints.optional.add(new MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true"));
+    audioConstraints.optional.add(
+        new MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true"));
 
     this.peerConnection = factory.createPeerConnection(configuration, constraints, observer);
     this.peerConnection.setAudioPlayout(false);
     this.peerConnection.setAudioRecording(false);
 
-    this.videoCapturer  = createVideoCapturer(context);
+    this.videoCapturer = createVideoCapturer(context);
 
     MediaStream mediaStream = factory.createLocalMediaStream("ARDAMS");
     this.audioSource = factory.createAudioSource(audioConstraints);
-    this.audioTrack  = factory.createAudioTrack("ARDAMSa0", audioSource);
+    this.audioTrack = factory.createAudioTrack("ARDAMSa0", audioSource);
     this.audioTrack.setEnabled(false);
     mediaStream.addTrack(audioTrack);
 
@@ -89,7 +88,7 @@ public class PeerConnectionWrapper {
       mediaStream.addTrack(videoTrack);
     } else {
       this.videoSource = null;
-      this.videoTrack  = null;
+      this.videoTrack = null;
     }
 
     this.peerConnection.addStream(mediaStream);
@@ -103,7 +102,7 @@ public class PeerConnectionWrapper {
     if (this.videoCapturer != null) {
       try {
         if (enabled) this.videoCapturer.startCapture(1280, 720, 30);
-        else         this.videoCapturer.stopCapture();
+        else this.videoCapturer.stopCapture();
       } catch (InterruptedException e) {
         Log.w(TAG, e);
       }
@@ -126,30 +125,33 @@ public class PeerConnectionWrapper {
     return this.peerConnection.createDataChannel(name, dataChannelConfiguration);
   }
 
-  public SessionDescription createOffer(MediaConstraints mediaConstraints) throws PeerConnectionException {
+  public SessionDescription createOffer(MediaConstraints mediaConstraints)
+      throws PeerConnectionException {
     final SettableFuture<SessionDescription> future = new SettableFuture<>();
 
-    peerConnection.createOffer(new SdpObserver() {
-      @Override
-      public void onCreateSuccess(SessionDescription sdp) {
-        future.set(sdp);
-      }
+    peerConnection.createOffer(
+        new SdpObserver() {
+          @Override
+          public void onCreateSuccess(SessionDescription sdp) {
+            future.set(sdp);
+          }
 
-      @Override
-      public void onCreateFailure(String error) {
-        future.setException(new PeerConnectionException(error));
-      }
+          @Override
+          public void onCreateFailure(String error) {
+            future.setException(new PeerConnectionException(error));
+          }
 
-      @Override
-      public void onSetSuccess() {
-        throw new AssertionError();
-      }
+          @Override
+          public void onSetSuccess() {
+            throw new AssertionError();
+          }
 
-      @Override
-      public void onSetFailure(String error) {
-        throw new AssertionError();
-      }
-    }, mediaConstraints);
+          @Override
+          public void onSetFailure(String error) {
+            throw new AssertionError();
+          }
+        },
+        mediaConstraints);
 
     try {
       return correctSessionDescription(future.get());
@@ -160,30 +162,33 @@ public class PeerConnectionWrapper {
     }
   }
 
-  public SessionDescription createAnswer(MediaConstraints mediaConstraints) throws PeerConnectionException {
+  public SessionDescription createAnswer(MediaConstraints mediaConstraints)
+      throws PeerConnectionException {
     final SettableFuture<SessionDescription> future = new SettableFuture<>();
 
-    peerConnection.createAnswer(new SdpObserver() {
-      @Override
-      public void onCreateSuccess(SessionDescription sdp) {
-        future.set(sdp);
-      }
+    peerConnection.createAnswer(
+        new SdpObserver() {
+          @Override
+          public void onCreateSuccess(SessionDescription sdp) {
+            future.set(sdp);
+          }
 
-      @Override
-      public void onCreateFailure(String error) {
-        future.setException(new PeerConnectionException(error));
-      }
+          @Override
+          public void onCreateFailure(String error) {
+            future.setException(new PeerConnectionException(error));
+          }
 
-      @Override
-      public void onSetSuccess() {
-        throw new AssertionError();
-      }
+          @Override
+          public void onSetSuccess() {
+            throw new AssertionError();
+          }
 
-      @Override
-      public void onSetFailure(String error) {
-        throw new AssertionError();
-      }
-    }, mediaConstraints);
+          @Override
+          public void onSetFailure(String error) {
+            throw new AssertionError();
+          }
+        },
+        mediaConstraints);
 
     try {
       return correctSessionDescription(future.get());
@@ -197,23 +202,25 @@ public class PeerConnectionWrapper {
   public void setRemoteDescription(SessionDescription sdp) throws PeerConnectionException {
     final SettableFuture<Boolean> future = new SettableFuture<>();
 
-    peerConnection.setRemoteDescription(new SdpObserver() {
-      @Override
-      public void onCreateSuccess(SessionDescription sdp) {}
+    peerConnection.setRemoteDescription(
+        new SdpObserver() {
+          @Override
+          public void onCreateSuccess(SessionDescription sdp) {}
 
-      @Override
-      public void onCreateFailure(String error) {}
+          @Override
+          public void onCreateFailure(String error) {}
 
-      @Override
-      public void onSetSuccess() {
-        future.set(true);
-      }
+          @Override
+          public void onSetSuccess() {
+            future.set(true);
+          }
 
-      @Override
-      public void onSetFailure(String error) {
-        future.setException(new PeerConnectionException(error));
-      }
-    }, sdp);
+          @Override
+          public void onSetFailure(String error) {
+            future.setException(new PeerConnectionException(error));
+          }
+        },
+        sdp);
 
     try {
       future.get();
@@ -227,27 +234,29 @@ public class PeerConnectionWrapper {
   public void setLocalDescription(SessionDescription sdp) throws PeerConnectionException {
     final SettableFuture<Boolean> future = new SettableFuture<>();
 
-    peerConnection.setLocalDescription(new SdpObserver() {
-      @Override
-      public void onCreateSuccess(SessionDescription sdp) {
-        throw new AssertionError();
-      }
+    peerConnection.setLocalDescription(
+        new SdpObserver() {
+          @Override
+          public void onCreateSuccess(SessionDescription sdp) {
+            throw new AssertionError();
+          }
 
-      @Override
-      public void onCreateFailure(String error) {
-        throw new AssertionError();
-      }
+          @Override
+          public void onCreateFailure(String error) {
+            throw new AssertionError();
+          }
 
-      @Override
-      public void onSetSuccess() {
-        future.set(true);
-      }
+          @Override
+          public void onSetSuccess() {
+            future.set(true);
+          }
 
-      @Override
-      public void onSetFailure(String error) {
-        future.setException(new PeerConnectionException(error));
-      }
-    }, sdp);
+          @Override
+          public void onSetFailure(String error) {
+            future.setException(new PeerConnectionException(error));
+          }
+        },
+        sdp);
 
     try {
       future.get();
@@ -293,7 +302,7 @@ public class PeerConnectionWrapper {
     CameraEnumerator enumerator;
 
     if (camera2EnumeratorIsSupported) enumerator = new Camera2Enumerator(context);
-    else                              enumerator = new Camera1Enumerator(true);
+    else enumerator = new Camera1Enumerator(true);
 
     String[] deviceNames = enumerator.getDeviceNames();
 
@@ -327,7 +336,8 @@ public class PeerConnectionWrapper {
   }
 
   private SessionDescription correctSessionDescription(SessionDescription sessionDescription) {
-    String updatedSdp = sessionDescription.description.replaceAll("(a=fmtp:111 ((?!cbr=).)*)\r?\n", "$1;cbr=1\r\n");
+    String updatedSdp =
+        sessionDescription.description.replaceAll("(a=fmtp:111 ((?!cbr=).)*)\r?\n", "$1;cbr=1\r\n");
     updatedSdp = updatedSdp.replaceAll(".+urn:ietf:params:rtp-hdrext:ssrc-audio-level.*\r?\n", "");
 
     return new SessionDescription(sessionDescription.type, updatedSdp);

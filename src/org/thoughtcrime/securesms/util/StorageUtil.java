@@ -2,13 +2,10 @@ package org.thoughtcrime.securesms.util;
 
 import android.os.Environment;
 import android.support.annotation.Nullable;
-
+import java.io.File;
 import org.thoughtcrime.securesms.database.NoExternalStorageException;
 
-import java.io.File;
-
-public class StorageUtil
-{
+public class StorageUtil {
 
   public static File getBackupDirectory() throws NoExternalStorageException {
     File storage = Environment.getExternalStorageDirectory();
@@ -25,7 +22,6 @@ public class StorageUtil
         throw new NoExternalStorageException("Unable to create backup directory...");
       }
     }
-
 
     return backups;
   }

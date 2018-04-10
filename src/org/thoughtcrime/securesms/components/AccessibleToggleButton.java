@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms.components;
 
-
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
@@ -12,7 +11,8 @@ public class AccessibleToggleButton extends ToggleButton {
   private OnCheckedChangeListener listener;
 
   @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-  public AccessibleToggleButton(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+  public AccessibleToggleButton(
+      Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
     super(context, attrs, defStyleAttr, defStyleRes);
   }
 
@@ -49,5 +49,4 @@ public class AccessibleToggleButton extends ToggleButton {
   public OnCheckedChangeListener getOnCheckedChangeListener() {
     return this.listener;
   }
-
 }

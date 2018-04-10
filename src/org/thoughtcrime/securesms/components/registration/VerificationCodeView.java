@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms.components.registration;
 
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -20,21 +19,18 @@ import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
-
+import java.util.ArrayList;
+import java.util.List;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.util.ViewUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class VerificationCodeView extends FrameLayout {
 
-  private final List<View>     spaces     = new ArrayList<>(6);
-  private final List<TextView> codes      = new ArrayList<>(6);
-  private final List<View>     containers = new ArrayList<>(7);
+  private final List<View> spaces = new ArrayList<>(6);
+  private final List<TextView> codes = new ArrayList<>(6);
+  private final List<View> containers = new ArrayList<>(7);
 
   private OnCodeEnteredListener listener;
   private int index = 0;
@@ -55,7 +51,8 @@ public class VerificationCodeView extends FrameLayout {
   }
 
   @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-  public VerificationCodeView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+  public VerificationCodeView(
+      Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
     super(context, attrs, defStyleAttr, defStyleRes);
     initialize(context, attrs);
   }
@@ -90,20 +87,53 @@ public class VerificationCodeView extends FrameLayout {
       this.containers.add(findViewById(R.id.container_four));
       this.containers.add(findViewById(R.id.container_five));
 
-      Stream.of(spaces).forEach(view -> view.setBackgroundColor(typedArray.getColor(R.styleable.VerificationCodeView_vcv_inputColor, Color.BLACK)));
-      Stream.of(spaces).forEach(view -> view.setLayoutParams(new LinearLayout.LayoutParams(typedArray.getDimensionPixelSize(R.styleable.VerificationCodeView_vcv_inputWidth, ViewUtil.dpToPx(context, 20)),
-                                                                                           typedArray.getDimensionPixelSize(R.styleable.VerificationCodeView_vcv_inputHeight, ViewUtil.dpToPx(context, 1)))));
-      Stream.of(codes).forEach(textView -> textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, typedArray.getDimension(R.styleable.VerificationCodeView_vcv_textSize, 30)));
-      Stream.of(codes).forEach(textView -> textView.setTextColor(typedArray.getColor(R.styleable.VerificationCodeView_vcv_textColor, Color.GRAY)));
+      Stream.of(spaces)
+          .forEach(
+              view ->
+                  view.setBackgroundColor(
+                      typedArray.getColor(
+                          R.styleable.VerificationCodeView_vcv_inputColor, Color.BLACK)));
+      Stream.of(spaces)
+          .forEach(
+              view ->
+                  view.setLayoutParams(
+                      new LinearLayout.LayoutParams(
+                          typedArray.getDimensionPixelSize(
+                              R.styleable.VerificationCodeView_vcv_inputWidth,
+                              ViewUtil.dpToPx(context, 20)),
+                          typedArray.getDimensionPixelSize(
+                              R.styleable.VerificationCodeView_vcv_inputHeight,
+                              ViewUtil.dpToPx(context, 1)))));
+      Stream.of(codes)
+          .forEach(
+              textView ->
+                  textView.setTextSize(
+                      TypedValue.COMPLEX_UNIT_SP,
+                      typedArray.getDimension(R.styleable.VerificationCodeView_vcv_textSize, 30)));
+      Stream.of(codes)
+          .forEach(
+              textView ->
+                  textView.setTextColor(
+                      typedArray.getColor(
+                          R.styleable.VerificationCodeView_vcv_textColor, Color.GRAY)));
 
-      Stream.of(containers).forEach(view -> {
-        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)view.getLayoutParams();
-        params.setMargins(typedArray.getDimensionPixelSize(R.styleable.VerificationCodeView_vcv_spacing, ViewUtil.dpToPx(context, 5)),
-                          params.topMargin, params.rightMargin, params.bottomMargin);
-        view.setLayoutParams(params);
-      });
+      Stream.of(containers)
+          .forEach(
+              view -> {
+                LinearLayout.LayoutParams params =
+                    (LinearLayout.LayoutParams) view.getLayoutParams();
+                params.setMargins(
+                    typedArray.getDimensionPixelSize(
+                        R.styleable.VerificationCodeView_vcv_spacing, ViewUtil.dpToPx(context, 5)),
+                    params.topMargin,
+                    params.rightMargin,
+                    params.bottomMargin);
+                view.setLayoutParams(params);
+              });
 
-      separator.setTextSize(TypedValue.COMPLEX_UNIT_SP, typedArray.getDimension(R.styleable.VerificationCodeView_vcv_textSize, 30));
+      separator.setTextSize(
+          TypedValue.COMPLEX_UNIT_SP,
+          typedArray.getDimension(R.styleable.VerificationCodeView_vcv_textSize, 30));
     } finally {
       if (typedArray != null) typedArray.recycle();
     }
@@ -138,7 +168,8 @@ public class VerificationCodeView extends FrameLayout {
     codeView.startAnimation(animationSet);
 
     if (index == codes.size() && listener != null) {
-      listener.onCodeComplete(Stream.of(codes).map(TextView::getText).collect(Collectors.joining()));
+      listener.onCodeComplete(
+          Stream.of(codes).map(TextView::getText).collect(Collectors.joining()));
     }
   }
 

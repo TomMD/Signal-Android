@@ -13,7 +13,9 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
+import java.util.Locale;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import org.thoughtcrime.securesms.crypto.IdentityKeyParcelable;
 import org.thoughtcrime.securesms.database.IdentityDatabase;
 import org.thoughtcrime.securesms.database.IdentityDatabase.IdentityRecord;
@@ -28,23 +30,18 @@ import org.thoughtcrime.securesms.util.Util;
 import org.thoughtcrime.securesms.util.concurrent.ListenableFuture;
 import org.whispersystems.libsignal.util.guava.Optional;
 
-import java.util.Locale;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-
 public class ConversationUpdateItem extends LinearLayout
-    implements RecipientModifiedListener, BindableConversationItem
-{
+    implements RecipientModifiedListener, BindableConversationItem {
   private static final String TAG = ConversationUpdateItem.class.getSimpleName();
 
   private Set<MessageRecord> batchSelected;
 
-  private ImageView     icon;
-  private TextView      body;
-  private TextView      date;
-  private Recipient     sender;
+  private ImageView icon;
+  private TextView body;
+  private TextView date;
+  private Recipient sender;
   private MessageRecord messageRecord;
-  private Locale        locale;
+  private Locale locale;
 
   public ConversationUpdateItem(Context context) {
     super(context);
@@ -66,12 +63,12 @@ public class ConversationUpdateItem extends LinearLayout
   }
 
   @Override
-  public void bind(@NonNull MessageRecord messageRecord,
-                   @NonNull GlideRequests glideRequests,
-                   @NonNull Locale locale,
-                   @NonNull Set<MessageRecord> batchSelected,
-                   @NonNull Recipient conversationRecipient)
-  {
+  public void bind(
+      @NonNull MessageRecord messageRecord,
+      @NonNull GlideRequests glideRequests,
+      @NonNull Locale locale,
+      @NonNull Set<MessageRecord> batchSelected,
+      @NonNull Recipient conversationRecipient) {
     this.batchSelected = batchSelected;
 
     bind(messageRecord, locale);
@@ -84,42 +81,48 @@ public class ConversationUpdateItem extends LinearLayout
 
   private void bind(@NonNull MessageRecord messageRecord, @NonNull Locale locale) {
     this.messageRecord = messageRecord;
-    this.sender        = messageRecord.getIndividualRecipient();
-    this.locale        = locale;
+    this.sender = messageRecord.getIndividualRecipient();
+    this.locale = locale;
 
     this.sender.addListener(this);
 
-    if      (messageRecord.isGroupAction())           setGroupRecord(messageRecord);
-    else if (messageRecord.isCallLog())               setCallRecord(messageRecord);
-    else if (messageRecord.isJoined())                setJoinedRecord(messageRecord);
+    if (messageRecord.isGroupAction()) setGroupRecord(messageRecord);
+    else if (messageRecord.isCallLog()) setCallRecord(messageRecord);
+    else if (messageRecord.isJoined()) setJoinedRecord(messageRecord);
     else if (messageRecord.isExpirationTimerUpdate()) setTimerRecord(messageRecord);
-    else if (messageRecord.isEndSession())            setEndSessionRecord(messageRecord);
-    else if (messageRecord.isIdentityUpdate())        setIdentityRecord(messageRecord);
-    else if (messageRecord.isIdentityVerified() ||
-             messageRecord.isIdentityDefault())       setIdentityVerifyUpdate(messageRecord);
-    else                                              throw new AssertionError("Neither group nor log nor joined.");
+    else if (messageRecord.isEndSession()) setEndSessionRecord(messageRecord);
+    else if (messageRecord.isIdentityUpdate()) setIdentityRecord(messageRecord);
+    else if (messageRecord.isIdentityVerified() || messageRecord.isIdentityDefault())
+      setIdentityVerifyUpdate(messageRecord);
+    else throw new AssertionError("Neither group nor log nor joined.");
 
     if (batchSelected.contains(messageRecord)) setSelected(true);
-    else                                       setSelected(false);
+    else setSelected(false);
   }
 
   private void setCallRecord(MessageRecord messageRecord) {
-    if      (messageRecord.isIncomingCall()) icon.setImageResource(R.drawable.ic_call_received_grey600_24dp);
-    else if (messageRecord.isOutgoingCall()) icon.setImageResource(R.drawable.ic_call_made_grey600_24dp);
-    else                                     icon.setImageResource(R.drawable.ic_call_missed_grey600_24dp);
+    if (messageRecord.isIncomingCall())
+      icon.setImageResource(R.drawable.ic_call_received_grey600_24dp);
+    else if (messageRecord.isOutgoingCall())
+      icon.setImageResource(R.drawable.ic_call_made_grey600_24dp);
+    else icon.setImageResource(R.drawable.ic_call_missed_grey600_24dp);
 
     body.setText(messageRecord.getDisplayBody());
-    date.setText(DateUtils.getExtendedRelativeTimeSpanString(getContext(), locale, messageRecord.getDateReceived()));
+    date.setText(
+        DateUtils.getExtendedRelativeTimeSpanString(
+            getContext(), locale, messageRecord.getDateReceived()));
     date.setVisibility(View.VISIBLE);
   }
 
   private void setTimerRecord(final MessageRecord messageRecord) {
     if (messageRecord.getExpiresIn() > 0) {
       icon.setImageResource(R.drawable.ic_timer_white_24dp);
-      icon.setColorFilter(new PorterDuffColorFilter(Color.parseColor("#757575"), PorterDuff.Mode.MULTIPLY));
+      icon.setColorFilter(
+          new PorterDuffColorFilter(Color.parseColor("#757575"), PorterDuff.Mode.MULTIPLY));
     } else {
       icon.setImageResource(R.drawable.ic_timer_off_white_24dp);
-      icon.setColorFilter(new PorterDuffColorFilter(Color.parseColor("#757575"), PorterDuff.Mode.MULTIPLY));
+      icon.setColorFilter(
+          new PorterDuffColorFilter(Color.parseColor("#757575"), PorterDuff.Mode.MULTIPLY));
     }
 
     body.setText(messageRecord.getDisplayBody());
@@ -128,16 +131,18 @@ public class ConversationUpdateItem extends LinearLayout
 
   private void setIdentityRecord(final MessageRecord messageRecord) {
     icon.setImageResource(R.drawable.ic_security_white_24dp);
-    icon.setColorFilter(new PorterDuffColorFilter(Color.parseColor("#757575"), PorterDuff.Mode.MULTIPLY));
+    icon.setColorFilter(
+        new PorterDuffColorFilter(Color.parseColor("#757575"), PorterDuff.Mode.MULTIPLY));
     body.setText(messageRecord.getDisplayBody());
     date.setVisibility(View.GONE);
   }
 
   private void setIdentityVerifyUpdate(final MessageRecord messageRecord) {
     if (messageRecord.isIdentityVerified()) icon.setImageResource(R.drawable.ic_check_white_24dp);
-    else                                    icon.setImageResource(R.drawable.ic_info_outline_white_24dp);
+    else icon.setImageResource(R.drawable.ic_info_outline_white_24dp);
 
-    icon.setColorFilter(new PorterDuffColorFilter(Color.parseColor("#757575"), PorterDuff.Mode.MULTIPLY));
+    icon.setColorFilter(
+        new PorterDuffColorFilter(Color.parseColor("#757575"), PorterDuff.Mode.MULTIPLY));
     body.setText(messageRecord.getDisplayBody());
     date.setVisibility(View.GONE);
   }
@@ -161,11 +166,12 @@ public class ConversationUpdateItem extends LinearLayout
 
   private void setEndSessionRecord(MessageRecord messageRecord) {
     icon.setImageResource(R.drawable.ic_refresh_white_24dp);
-    icon.setColorFilter(new PorterDuffColorFilter(Color.parseColor("#757575"), PorterDuff.Mode.MULTIPLY));
+    icon.setColorFilter(
+        new PorterDuffColorFilter(Color.parseColor("#757575"), PorterDuff.Mode.MULTIPLY));
     body.setText(messageRecord.getDisplayBody());
     date.setVisibility(View.GONE);
   }
-  
+
   @Override
   public void onModified(Recipient recipient) {
     Util.runOnMain(() -> bind(messageRecord, locale));
@@ -193,36 +199,41 @@ public class ConversationUpdateItem extends LinearLayout
 
     @Override
     public void onClick(View v) {
-      if ((!messageRecord.isIdentityUpdate()  &&
-           !messageRecord.isIdentityDefault() &&
-           !messageRecord.isIdentityVerified()) ||
-          !batchSelected.isEmpty())
-      {
+      if ((!messageRecord.isIdentityUpdate()
+              && !messageRecord.isIdentityDefault()
+              && !messageRecord.isIdentityVerified())
+          || !batchSelected.isEmpty()) {
         if (parent != null) parent.onClick(v);
         return;
       }
 
       final Recipient sender = ConversationUpdateItem.this.sender;
 
-      IdentityUtil.getRemoteIdentityKey(getContext(), sender).addListener(new ListenableFuture.Listener<Optional<IdentityRecord>>() {
-        @Override
-        public void onSuccess(Optional<IdentityRecord> result) {
-          if (result.isPresent()) {
-            Intent intent = new Intent(getContext(), VerifyIdentityActivity.class);
-            intent.putExtra(VerifyIdentityActivity.ADDRESS_EXTRA, sender.getAddress());
-            intent.putExtra(VerifyIdentityActivity.IDENTITY_EXTRA, new IdentityKeyParcelable(result.get().getIdentityKey()));
-            intent.putExtra(VerifyIdentityActivity.VERIFIED_EXTRA, result.get().getVerifiedStatus() == IdentityDatabase.VerifiedStatus.VERIFIED);
+      IdentityUtil.getRemoteIdentityKey(getContext(), sender)
+          .addListener(
+              new ListenableFuture.Listener<Optional<IdentityRecord>>() {
+                @Override
+                public void onSuccess(Optional<IdentityRecord> result) {
+                  if (result.isPresent()) {
+                    Intent intent = new Intent(getContext(), VerifyIdentityActivity.class);
+                    intent.putExtra(VerifyIdentityActivity.ADDRESS_EXTRA, sender.getAddress());
+                    intent.putExtra(
+                        VerifyIdentityActivity.IDENTITY_EXTRA,
+                        new IdentityKeyParcelable(result.get().getIdentityKey()));
+                    intent.putExtra(
+                        VerifyIdentityActivity.VERIFIED_EXTRA,
+                        result.get().getVerifiedStatus()
+                            == IdentityDatabase.VerifiedStatus.VERIFIED);
 
-            getContext().startActivity(intent);
-          }
-        }
+                    getContext().startActivity(intent);
+                  }
+                }
 
-        @Override
-        public void onFailure(ExecutionException e) {
-          Log.w(TAG, e);
-        }
-      });
+                @Override
+                public void onFailure(ExecutionException e) {
+                  Log.w(TAG, e);
+                }
+              });
     }
   }
-
 }

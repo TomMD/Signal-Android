@@ -7,33 +7,33 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
-
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import org.thoughtcrime.securesms.database.model.MessageRecord;
 import org.thoughtcrime.securesms.mms.GlideRequests;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.util.Conversions;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-
 class MessageDetailsRecipientAdapter extends BaseAdapter implements AbsListView.RecyclerListener {
 
-  private final Context                       context;
-  private final GlideRequests                 glideRequests;
-  private final MessageRecord                 record;
+  private final Context context;
+  private final GlideRequests glideRequests;
+  private final MessageRecord record;
   private final List<RecipientDeliveryStatus> members;
-  private final boolean                       isPushGroup;
+  private final boolean isPushGroup;
 
-  MessageDetailsRecipientAdapter(@NonNull Context context, @NonNull GlideRequests glideRequests,
-                                 @NonNull MessageRecord record, @NonNull List<RecipientDeliveryStatus> members,
-                                 boolean isPushGroup)
-  {
-    this.context       = context;
+  MessageDetailsRecipientAdapter(
+      @NonNull Context context,
+      @NonNull GlideRequests glideRequests,
+      @NonNull MessageRecord record,
+      @NonNull List<RecipientDeliveryStatus> members,
+      boolean isPushGroup) {
+    this.context = context;
     this.glideRequests = glideRequests;
-    this.record        = record;
-    this.isPushGroup   = isPushGroup;
-    this.members       = members;
+    this.record = record;
+    this.isPushGroup = isPushGroup;
+    this.members = members;
   }
 
   @Override
@@ -49,7 +49,9 @@ class MessageDetailsRecipientAdapter extends BaseAdapter implements AbsListView.
   @Override
   public long getItemId(int position) {
     try {
-      return Conversions.byteArrayToLong(MessageDigest.getInstance("SHA1").digest(members.get(position).recipient.getAddress().serialize().getBytes()));
+      return Conversions.byteArrayToLong(
+          MessageDigest.getInstance("SHA1")
+              .digest(members.get(position).recipient.getAddress().serialize().getBytes()));
     } catch (NoSuchAlgorithmException e) {
       throw new AssertionError(e);
     }
@@ -58,35 +60,39 @@ class MessageDetailsRecipientAdapter extends BaseAdapter implements AbsListView.
   @Override
   public View getView(int position, View convertView, ViewGroup parent) {
     if (convertView == null) {
-      convertView = LayoutInflater.from(context).inflate(R.layout.message_recipient_list_item, parent, false);
+      convertView =
+          LayoutInflater.from(context).inflate(R.layout.message_recipient_list_item, parent, false);
     }
 
     RecipientDeliveryStatus member = members.get(position);
 
-    ((MessageRecipientListItem)convertView).set(glideRequests, record, member, isPushGroup);
+    ((MessageRecipientListItem) convertView).set(glideRequests, record, member, isPushGroup);
     return convertView;
   }
 
   @Override
   public void onMovedToScrapHeap(View view) {
-    ((MessageRecipientListItem)view).unbind();
+    ((MessageRecipientListItem) view).unbind();
   }
-
 
   static class RecipientDeliveryStatus {
 
     enum Status {
-      UNKNOWN, PENDING, SENT, DELIVERED, READ
+      UNKNOWN,
+      PENDING,
+      SENT,
+      DELIVERED,
+      READ
     }
 
     private final Recipient recipient;
-    private final Status    deliveryStatus;
-    private final long      timestamp;
+    private final Status deliveryStatus;
+    private final long timestamp;
 
     RecipientDeliveryStatus(Recipient recipient, Status deliveryStatus, long timestamp) {
-      this.recipient      = recipient;
+      this.recipient = recipient;
       this.deliveryStatus = deliveryStatus;
-      this.timestamp      = timestamp;
+      this.timestamp = timestamp;
     }
 
     Status getDeliveryStatus() {
@@ -100,7 +106,5 @@ class MessageDetailsRecipientAdapter extends BaseAdapter implements AbsListView.
     public Recipient getRecipient() {
       return recipient;
     }
-
   }
-
 }

@@ -13,10 +13,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-
-import org.thoughtcrime.securesms.util.concurrent.ListenableFuture;
-
 import java.util.concurrent.ExecutionException;
+import org.thoughtcrime.securesms.util.concurrent.ListenableFuture;
 
 public class ConversationPopupActivity extends ConversationActivity {
 
@@ -30,21 +28,22 @@ public class ConversationPopupActivity extends ConversationActivity {
 
   @Override
   protected void onCreate(Bundle bundle, boolean ready) {
-    getWindow().setFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND,
-                         WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+    getWindow()
+        .setFlags(
+            WindowManager.LayoutParams.FLAG_DIM_BEHIND, WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
     WindowManager.LayoutParams params = getWindow().getAttributes();
-    params.alpha     = 1.0f;
+    params.alpha = 1.0f;
     params.dimAmount = 0.1f;
-    params.gravity   = Gravity.TOP;
+    params.gravity = Gravity.TOP;
     getWindow().setAttributes(params);
 
     Display display = getWindowManager().getDefaultDisplay();
-    int     width   = display.getWidth();
-    int     height  = display.getHeight();
+    int width = display.getWidth();
+    int height = display.getHeight();
 
     if (height > width) getWindow().setLayout((int) (width * .85), (int) (height * .5));
-    else                getWindow().setLayout((int) (width * .7), (int) (height * .75));
+    else getWindow().setLayout((int) (width * .7), (int) (height * .75));
 
     super.onCreate(bundle, ready);
 
@@ -77,29 +76,39 @@ public class ConversationPopupActivity extends ConversationActivity {
   public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
       case R.id.menu_expand:
-        saveDraft().addListener(new ListenableFuture.Listener<Long>() {
-          @Override
-          public void onSuccess(Long result) {
-            ActivityOptionsCompat transition = ActivityOptionsCompat.makeScaleUpAnimation(getWindow().getDecorView(), 0, 0, getWindow().getAttributes().width, getWindow().getAttributes().height);
-            Intent intent = new Intent(ConversationPopupActivity.this, ConversationActivity.class);
-            intent.putExtra(ConversationActivity.ADDRESS_EXTRA, getRecipient().getAddress());
-            intent.putExtra(ConversationActivity.THREAD_ID_EXTRA, result);
+        saveDraft()
+            .addListener(
+                new ListenableFuture.Listener<Long>() {
+                  @Override
+                  public void onSuccess(Long result) {
+                    ActivityOptionsCompat transition =
+                        ActivityOptionsCompat.makeScaleUpAnimation(
+                            getWindow().getDecorView(),
+                            0,
+                            0,
+                            getWindow().getAttributes().width,
+                            getWindow().getAttributes().height);
+                    Intent intent =
+                        new Intent(ConversationPopupActivity.this, ConversationActivity.class);
+                    intent.putExtra(
+                        ConversationActivity.ADDRESS_EXTRA, getRecipient().getAddress());
+                    intent.putExtra(ConversationActivity.THREAD_ID_EXTRA, result);
 
-            if (VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
-              startActivity(intent, transition.toBundle());
-            } else {
-              startActivity(intent);
-              overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
-            }
+                    if (VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
+                      startActivity(intent, transition.toBundle());
+                    } else {
+                      startActivity(intent);
+                      overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
+                    }
 
-            finish();
-          }
+                    finish();
+                  }
 
-          @Override
-          public void onFailure(ExecutionException e) {
-            Log.w(TAG, e);
-          }
-        });
+                  @Override
+                  public void onFailure(ExecutionException e) {
+                    Log.w(TAG, e);
+                  }
+                });
         return true;
     }
 

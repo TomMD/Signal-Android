@@ -1,12 +1,10 @@
 package org.thoughtcrime.securesms.preferences.widgets;
 
-
 import android.content.Context;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceViewHolder;
 import android.util.AttributeSet;
 import android.widget.TextView;
-
 import org.thoughtcrime.securesms.R;
 
 public class SignalPreference extends Preference {
@@ -42,7 +40,7 @@ public class SignalPreference extends Preference {
   public void onBindViewHolder(PreferenceViewHolder view) {
     super.onBindViewHolder(view);
 
-    this.rightSummary = (TextView)view.findViewById(R.id.right_summary);
+    this.rightSummary = (TextView) view.findViewById(R.id.right_summary);
     setSummary(this.summary);
   }
 
@@ -56,5 +54,4 @@ public class SignalPreference extends Preference {
       this.rightSummary.setText(summary);
     }
   }
-
 }

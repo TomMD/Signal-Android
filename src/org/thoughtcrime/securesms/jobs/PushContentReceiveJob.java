@@ -2,13 +2,11 @@ package org.thoughtcrime.securesms.jobs;
 
 import android.content.Context;
 import android.util.Log;
-
+import java.io.IOException;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
 import org.whispersystems.jobqueue.JobParameters;
 import org.whispersystems.libsignal.InvalidVersionException;
 import org.whispersystems.signalservice.api.messages.SignalServiceEnvelope;
-
-import java.io.IOException;
 
 public class PushContentReceiveJob extends PushReceivedJob {
 
@@ -22,10 +20,7 @@ public class PushContentReceiveJob extends PushReceivedJob {
   }
 
   public PushContentReceiveJob(Context context, String data) {
-    super(context, JobParameters.newBuilder()
-                                .withPersistence()
-                                .withWakeLock(true)
-                                .create());
+    super(context, JobParameters.newBuilder().withPersistence().withWakeLock(true).create());
 
     this.data = data;
   }
@@ -36,8 +31,8 @@ public class PushContentReceiveJob extends PushReceivedJob {
   @Override
   public void onRun() {
     try {
-      String                sessionKey = TextSecurePreferences.getSignalingKey(context);
-      SignalServiceEnvelope envelope   = new SignalServiceEnvelope(data, sessionKey);
+      String sessionKey = TextSecurePreferences.getSignalingKey(context);
+      SignalServiceEnvelope envelope = new SignalServiceEnvelope(data, sessionKey);
 
       handle(envelope);
     } catch (IOException | InvalidVersionException e) {
@@ -46,9 +41,7 @@ public class PushContentReceiveJob extends PushReceivedJob {
   }
 
   @Override
-  public void onCanceled() {
-
-  }
+  public void onCanceled() {}
 
   @Override
   public boolean onShouldRetry(Exception exception) {

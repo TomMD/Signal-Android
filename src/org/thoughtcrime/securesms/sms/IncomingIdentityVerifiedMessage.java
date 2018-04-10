@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms.sms;
 
-
 public class IncomingIdentityVerifiedMessage extends IncomingTextMessage {
 
   public IncomingIdentityVerifiedMessage(IncomingTextMessage base) {
@@ -11,5 +10,4 @@ public class IncomingIdentityVerifiedMessage extends IncomingTextMessage {
   public boolean isIdentityVerified() {
     return true;
   }
-
 }

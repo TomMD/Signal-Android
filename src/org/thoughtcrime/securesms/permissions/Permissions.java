@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms.permissions;
 
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -18,18 +17,15 @@ import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-
 import com.annimon.stream.Stream;
 import com.annimon.stream.function.Consumer;
-
-import org.thoughtcrime.securesms.R;
-import org.thoughtcrime.securesms.util.LRUCache;
-import org.thoughtcrime.securesms.util.ServiceUtil;
-
 import java.lang.ref.WeakReference;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
+import org.thoughtcrime.securesms.R;
+import org.thoughtcrime.securesms.util.LRUCache;
+import org.thoughtcrime.securesms.util.ServiceUtil;
 
 public class Permissions {
 
@@ -59,8 +55,8 @@ public class Permissions {
     private Consumer<List<String>> someDeniedListener;
     private Consumer<List<String>> somePermanentlyDeniedListener;
 
-    private @DrawableRes int[]  rationalDialogHeader;
-    private              String rationaleDialogMessage;
+    private @DrawableRes int[] rationalDialogHeader;
+    private String rationaleDialogMessage;
 
     private boolean ifNecesary;
 
@@ -82,18 +78,20 @@ public class Permissions {
 
     public PermissionsBuilder ifNecessary(boolean condition) {
       this.ifNecesary = true;
-      this.condition  = condition;
+      this.condition = condition;
       return this;
     }
 
-    public PermissionsBuilder withRationaleDialog(@NonNull String message, @NonNull @DrawableRes int... headers) {
-      this.rationalDialogHeader   = headers;
+    public PermissionsBuilder withRationaleDialog(
+        @NonNull String message, @NonNull @DrawableRes int... headers) {
+      this.rationalDialogHeader = headers;
       this.rationaleDialogMessage = message;
       return this;
     }
 
     public PermissionsBuilder withPermanentDenialDialog(@NonNull String message) {
-      return onAnyPermanentlyDenied(new SettingsDialogListener(permissionObject.getContext(), message));
+      return onAnyPermanentlyDenied(
+          new SettingsDialogListener(permissionObject.getContext(), message));
     }
 
     public PermissionsBuilder onAllGranted(Runnable allGrantedListener) {
@@ -127,14 +125,22 @@ public class Permissions {
       return this;
     }
 
-    public PermissionsBuilder onSomePermanentlyDenied(Consumer<List<String>> somePermanentlyDeniedListener) {
+    public PermissionsBuilder onSomePermanentlyDenied(
+        Consumer<List<String>> somePermanentlyDeniedListener) {
       this.somePermanentlyDeniedListener = somePermanentlyDeniedListener;
       return this;
     }
 
     public void execute() {
-      PermissionsRequest request = new PermissionsRequest(allGrantedListener, anyDeniedListener, anyPermanentlyDeniedListener, anyResultListener,
-                                                          someGrantedListener, someDeniedListener, somePermanentlyDeniedListener);
+      PermissionsRequest request =
+          new PermissionsRequest(
+              allGrantedListener,
+              anyDeniedListener,
+              anyPermanentlyDeniedListener,
+              anyResultListener,
+              someGrantedListener,
+              someDeniedListener,
+              somePermanentlyDeniedListener);
 
       if (ifNecesary && (permissionObject.hasAll(requestedPermissions) || !condition)) {
         executePreGrantedPermissionsRequest(request);
@@ -147,19 +153,24 @@ public class Permissions {
 
     private void executePreGrantedPermissionsRequest(PermissionsRequest request) {
       int[] grantResults = new int[requestedPermissions.length];
-      for (int i=0;i<grantResults.length;i++) grantResults[i] = PackageManager.PERMISSION_GRANTED;
+      for (int i = 0; i < grantResults.length; i++)
+        grantResults[i] = PackageManager.PERMISSION_GRANTED;
 
-      request.onResult(requestedPermissions, grantResults, new boolean[requestedPermissions.length]);
+      request.onResult(
+          requestedPermissions, grantResults, new boolean[requestedPermissions.length]);
     }
 
     @SuppressWarnings("ConstantConditions")
     private void executePermissionsRequestWithRationale(PermissionsRequest request) {
-      RationaleDialog.createFor(permissionObject.getContext(), rationaleDialogMessage, rationalDialogHeader)
-                     .setPositiveButton(R.string.Permissions_continue, (dialog, which) -> executePermissionsRequest(request))
-                     .setNegativeButton(R.string.Permissions_not_now, null)
-                     .show()
-                     .getWindow()
-                     .setLayout((int)(permissionObject.getWindowWidth() * .75), ViewGroup.LayoutParams.WRAP_CONTENT);
+      RationaleDialog.createFor(
+              permissionObject.getContext(), rationaleDialogMessage, rationalDialogHeader)
+          .setPositiveButton(
+              R.string.Permissions_continue, (dialog, which) -> executePermissionsRequest(request))
+          .setNegativeButton(R.string.Permissions_not_now, null)
+          .show()
+          .getWindow()
+          .setLayout(
+              (int) (permissionObject.getWindowWidth() * .75), ViewGroup.LayoutParams.WRAP_CONTENT);
     }
 
     private void executePermissionsRequest(PermissionsRequest request) {
@@ -170,50 +181,76 @@ public class Permissions {
       }
 
       for (String permission : requestedPermissions) {
-        request.addMapping(permission, permissionObject.shouldShouldPermissionRationale(permission));
+        request.addMapping(
+            permission, permissionObject.shouldShouldPermissionRationale(permission));
       }
 
       permissionObject.requestPermissions(requestCode, requestedPermissions);
     }
-
   }
 
-  private static void requestPermissions(@NonNull Activity activity, int requestCode, String... permissions) {
-    ActivityCompat.requestPermissions(activity, filterNotGranted(activity, permissions), requestCode);
+  private static void requestPermissions(
+      @NonNull Activity activity, int requestCode, String... permissions) {
+    ActivityCompat.requestPermissions(
+        activity, filterNotGranted(activity, permissions), requestCode);
   }
 
-  private static void requestPermissions(@NonNull Fragment fragment, int requestCode, String... permissions) {
+  private static void requestPermissions(
+      @NonNull Fragment fragment, int requestCode, String... permissions) {
     fragment.requestPermissions(filterNotGranted(fragment.getContext(), permissions), requestCode);
   }
 
   private static String[] filterNotGranted(@NonNull Context context, String... permissions) {
     return Stream.of(permissions)
-                 .filter(permission -> ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED)
-                 .toList()
-                 .toArray(new String[0]);
+        .filter(
+            permission ->
+                ContextCompat.checkSelfPermission(context, permission)
+                    != PackageManager.PERMISSION_GRANTED)
+        .toList()
+        .toArray(new String[0]);
   }
 
   public static boolean hasAny(@NonNull Context context, String... permissions) {
-    return Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
-        Stream.of(permissions).anyMatch(permission -> ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED);
-
+    return Build.VERSION.SDK_INT < Build.VERSION_CODES.M
+        || Stream.of(permissions)
+            .anyMatch(
+                permission ->
+                    ContextCompat.checkSelfPermission(context, permission)
+                        == PackageManager.PERMISSION_GRANTED);
   }
 
   public static boolean hasAll(@NonNull Context context, String... permissions) {
-    return Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
-        Stream.of(permissions).allMatch(permission -> ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED);
-
+    return Build.VERSION.SDK_INT < Build.VERSION_CODES.M
+        || Stream.of(permissions)
+            .allMatch(
+                permission ->
+                    ContextCompat.checkSelfPermission(context, permission)
+                        == PackageManager.PERMISSION_GRANTED);
   }
 
-  public static void onRequestPermissionsResult(Fragment fragment, int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-    onRequestPermissionsResult(new FragmentPermissionObject(fragment), requestCode, permissions, grantResults);
+  public static void onRequestPermissionsResult(
+      Fragment fragment,
+      int requestCode,
+      @NonNull String[] permissions,
+      @NonNull int[] grantResults) {
+    onRequestPermissionsResult(
+        new FragmentPermissionObject(fragment), requestCode, permissions, grantResults);
   }
 
-  public static void onRequestPermissionsResult(Activity activity, int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-    onRequestPermissionsResult(new ActivityPermissionObject(activity), requestCode, permissions, grantResults);
+  public static void onRequestPermissionsResult(
+      Activity activity,
+      int requestCode,
+      @NonNull String[] permissions,
+      @NonNull int[] grantResults) {
+    onRequestPermissionsResult(
+        new ActivityPermissionObject(activity), requestCode, permissions, grantResults);
   }
 
-  private static void onRequestPermissionsResult(@NonNull PermissionObject context, int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+  private static void onRequestPermissionsResult(
+      @NonNull PermissionObject context,
+      int requestCode,
+      @NonNull String[] permissions,
+      @NonNull int[] grantResults) {
     PermissionsRequest resultListener;
 
     synchronized (OUTSTANDING) {
@@ -224,7 +261,7 @@ public class Permissions {
 
     boolean[] shouldShowRationaleDialog = new boolean[permissions.length];
 
-    for (int i=0;i<permissions.length;i++) {
+    for (int i = 0; i < permissions.length; i++) {
       if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
         shouldShowRationaleDialog[i] = context.shouldShouldPermissionRationale(permissions[i]);
       }
@@ -245,14 +282,17 @@ public class Permissions {
   private abstract static class PermissionObject {
 
     abstract Context getContext();
+
     abstract boolean shouldShouldPermissionRationale(String permission);
+
     abstract boolean hasAll(String... permissions);
+
     abstract void requestPermissions(int requestCode, String... permissions);
 
     int getWindowWidth() {
-      WindowManager  windowManager = ServiceUtil.getWindowManager(getContext());
-      Display        display       = windowManager.getDefaultDisplay();
-      DisplayMetrics metrics       = new DisplayMetrics();
+      WindowManager windowManager = ServiceUtil.getWindowManager(getContext());
+      Display display = windowManager.getDefaultDisplay();
+      DisplayMetrics metrics = new DisplayMetrics();
       display.getMetrics(metrics);
 
       return metrics.widthPixels;
@@ -320,7 +360,7 @@ public class Permissions {
   private static class SettingsDialogListener implements Runnable {
 
     private final WeakReference<Context> context;
-    private final String                 message;
+    private final String message;
 
     SettingsDialogListener(Context context, String message) {
       this.message = message;
@@ -335,7 +375,9 @@ public class Permissions {
         new AlertDialog.Builder(context)
             .setTitle(R.string.Permissions_permission_required)
             .setMessage(message)
-            .setPositiveButton(R.string.Permissions_continue, (dialog, which) -> context.startActivity(getApplicationSettingsIntent(context)))
+            .setPositiveButton(
+                R.string.Permissions_continue,
+                (dialog, which) -> context.startActivity(getApplicationSettingsIntent(context)))
             .setNegativeButton(android.R.string.cancel, null)
             .show();
       }

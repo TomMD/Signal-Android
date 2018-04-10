@@ -5,26 +5,33 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.Nullable;
-
-import net.sqlcipher.database.SQLiteDatabase;
-
-import org.thoughtcrime.securesms.R;
-import org.thoughtcrime.securesms.database.helpers.SQLCipherOpenHelper;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import net.sqlcipher.database.SQLiteDatabase;
+import org.thoughtcrime.securesms.R;
+import org.thoughtcrime.securesms.database.helpers.SQLCipherOpenHelper;
 
 public class DraftDatabase extends Database {
 
-  private static final String TABLE_NAME  = "drafts";
-  public  static final String ID          = "_id";
-  public  static final String THREAD_ID   = "thread_id";
-  public  static final String DRAFT_TYPE  = "type";
-  public  static final String DRAFT_VALUE = "value";
+  private static final String TABLE_NAME = "drafts";
+  public static final String ID = "_id";
+  public static final String THREAD_ID = "thread_id";
+  public static final String DRAFT_TYPE = "type";
+  public static final String DRAFT_VALUE = "value";
 
-  public static final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " (" + ID + " INTEGER PRIMARY KEY, " +
-                                            THREAD_ID + " INTEGER, " + DRAFT_TYPE + " TEXT, " + DRAFT_VALUE + " TEXT);";
+  public static final String CREATE_TABLE =
+      "CREATE TABLE "
+          + TABLE_NAME
+          + " ("
+          + ID
+          + " INTEGER PRIMARY KEY, "
+          + THREAD_ID
+          + " INTEGER, "
+          + DRAFT_TYPE
+          + " TEXT, "
+          + DRAFT_VALUE
+          + " TEXT);";
 
   public static final String[] CREATE_INDEXS = {
     "CREATE INDEX IF NOT EXISTS draft_thread_index ON " + TABLE_NAME + " (" + THREAD_ID + ");",
@@ -35,7 +42,7 @@ public class DraftDatabase extends Database {
   }
 
   public void insertDrafts(long threadId, List<Draft> drafts) {
-    SQLiteDatabase db    = databaseHelper.getWritableDatabase();
+    SQLiteDatabase db = databaseHelper.getWritableDatabase();
 
     for (Draft draft : drafts) {
       ContentValues values = new ContentValues(3);
@@ -49,18 +56,16 @@ public class DraftDatabase extends Database {
 
   public void clearDrafts(long threadId) {
     SQLiteDatabase db = databaseHelper.getWritableDatabase();
-    db.delete(TABLE_NAME, THREAD_ID + " = ?", new String[] {threadId+""});
+    db.delete(TABLE_NAME, THREAD_ID + " = ?", new String[] {threadId + ""});
   }
 
   void clearDrafts(Set<Long> threadIds) {
-    SQLiteDatabase db        = databaseHelper.getWritableDatabase();
-    StringBuilder  where     = new StringBuilder();
-    List<String>   arguments = new LinkedList<>();
+    SQLiteDatabase db = databaseHelper.getWritableDatabase();
+    StringBuilder where = new StringBuilder();
+    List<String> arguments = new LinkedList<>();
 
     for (long threadId : threadIds) {
-      where.append(" OR ")
-           .append(THREAD_ID)
-           .append(" = ?");
+      where.append(" OR ").append(THREAD_ID).append(" = ?");
 
       arguments.add(String.valueOf(threadId));
     }
@@ -74,15 +79,17 @@ public class DraftDatabase extends Database {
   }
 
   public List<Draft> getDrafts(long threadId) {
-    SQLiteDatabase db   = databaseHelper.getReadableDatabase();
+    SQLiteDatabase db = databaseHelper.getReadableDatabase();
     List<Draft> results = new LinkedList<>();
-    Cursor cursor       = null;
+    Cursor cursor = null;
 
     try {
-      cursor = db.query(TABLE_NAME, null, THREAD_ID + " = ?", new String[] {threadId+""}, null, null, null);
+      cursor =
+          db.query(
+              TABLE_NAME, null, THREAD_ID + " = ?", new String[] {threadId + ""}, null, null, null);
 
       while (cursor != null && cursor.moveToNext()) {
-        String type  = cursor.getString(cursor.getColumnIndexOrThrow(DRAFT_TYPE));
+        String type = cursor.getString(cursor.getColumnIndexOrThrow(DRAFT_TYPE));
         String value = cursor.getString(cursor.getColumnIndexOrThrow(DRAFT_VALUE));
 
         results.add(new Draft(type, value));
@@ -90,23 +97,22 @@ public class DraftDatabase extends Database {
 
       return results;
     } finally {
-      if (cursor != null)
-        cursor.close();
+      if (cursor != null) cursor.close();
     }
   }
 
   public static class Draft {
-    public static final String TEXT     = "text";
-    public static final String IMAGE    = "image";
-    public static final String VIDEO    = "video";
-    public static final String AUDIO    = "audio";
+    public static final String TEXT = "text";
+    public static final String IMAGE = "image";
+    public static final String VIDEO = "video";
+    public static final String AUDIO = "audio";
     public static final String LOCATION = "location";
 
     private final String type;
     private final String value;
 
     public Draft(String type, String value) {
-      this.type  = type;
+      this.type = type;
       this.value = value;
     }
 
@@ -120,12 +126,18 @@ public class DraftDatabase extends Database {
 
     String getSnippet(Context context) {
       switch (type) {
-      case TEXT:     return value;
-      case IMAGE:    return context.getString(R.string.DraftDatabase_Draft_image_snippet);
-      case VIDEO:    return context.getString(R.string.DraftDatabase_Draft_video_snippet);
-      case AUDIO:    return context.getString(R.string.DraftDatabase_Draft_audio_snippet);
-      case LOCATION: return context.getString(R.string.DraftDatabase_Draft_location_snippet);
-      default:       return null;
+        case TEXT:
+          return value;
+        case IMAGE:
+          return context.getString(R.string.DraftDatabase_Draft_image_snippet);
+        case VIDEO:
+          return context.getString(R.string.DraftDatabase_Draft_video_snippet);
+        case AUDIO:
+          return context.getString(R.string.DraftDatabase_Draft_audio_snippet);
+        case LOCATION:
+          return context.getString(R.string.DraftDatabase_Draft_location_snippet);
+        default:
+          return null;
       }
     }
   }

@@ -13,10 +13,10 @@ import android.support.annotation.StringRes;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-
 import com.melnykov.fab.FloatingActionButton;
 import com.nineoldandroids.animation.ArgbEvaluator;
-
+import java.util.Collections;
+import java.util.List;
 import org.thoughtcrime.securesms.IntroPagerAdapter.IntroPage;
 import org.thoughtcrime.securesms.util.ServiceUtil;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
@@ -24,80 +24,98 @@ import org.thoughtcrime.securesms.util.Util;
 import org.thoughtcrime.securesms.util.ViewUtil;
 import org.whispersystems.libsignal.util.guava.Optional;
 
-import java.util.Collections;
-import java.util.List;
-
 public class ExperienceUpgradeActivity extends BaseActionBarActivity {
-  private static final String TAG             = ExperienceUpgradeActivity.class.getSimpleName();
-  private static final String DISMISS_ACTION  = "org.thoughtcrime.securesms.ExperienceUpgradeActivity.DISMISS_ACTION";
-  private static final int    NOTIFICATION_ID = 1339;
+  private static final String TAG = ExperienceUpgradeActivity.class.getSimpleName();
+  private static final String DISMISS_ACTION =
+      "org.thoughtcrime.securesms.ExperienceUpgradeActivity.DISMISS_ACTION";
+  private static final int NOTIFICATION_ID = 1339;
 
   private enum ExperienceUpgrade {
-    SIGNAL_REBRANDING(157,
-                      new IntroPage(0xFF2090EA,
-                                    BasicIntroFragment.newInstance(R.drawable.splash_logo,
-                                                                   R.string.ExperienceUpgradeActivity_welcome_to_signal_dgaf,
-                                                                   R.string.ExperienceUpgradeActivity_textsecure_is_now_called_signal)),
-                      R.string.ExperienceUpgradeActivity_welcome_to_signal_excited,
-                      R.string.ExperienceUpgradeActivity_textsecure_is_now_signal,
-                      R.string.ExperienceUpgradeActivity_textsecure_is_now_signal_long,
-                      null),
-    VIDEO_CALLS(245,
-                      new IntroPage(0xFF2090EA,
-                                    BasicIntroFragment.newInstance(R.drawable.video_splash,
-                                                                   R.string.ExperienceUpgradeActivity_say_hello_to_video_calls,
-                                                                   R.string.ExperienceUpgradeActivity_signal_now_supports_secure_video_calls)),
-                      R.string.ExperienceUpgradeActivity_say_hello_to_video_calls,
-                      R.string.ExperienceUpgradeActivity_signal_now_supports_secure_video_calling,
-                      R.string.ExperienceUpgradeActivity_signal_now_supports_secure_video_calling_long,
-                null),
-    PROFILES(286,
-                 new IntroPage(0xFF2090EA,
-                               BasicIntroFragment.newInstance(R.drawable.profile_splash,
-                                                              R.string.ExperienceUpgradeActivity_ready_for_your_closeup,
-                                                              R.string.ExperienceUpgradeActivity_now_you_can_share_a_profile_photo_and_name_with_friends_on_signal)),
-             R.string.ExperienceUpgradeActivity_signal_profiles_are_here,
-             R.string.ExperienceUpgradeActivity_now_you_can_share_a_profile_photo_and_name_with_friends_on_signal,
-             R.string.ExperienceUpgradeActivity_now_you_can_share_a_profile_photo_and_name_with_friends_on_signal,
-             CreateProfileActivity.class),
-    READ_RECEIPTS(299,
-                  new IntroPage(0xFF2090EA,
-                                ReadReceiptsIntroFragment.newInstance()),
-                  R.string.experience_upgrade_preference_fragment__read_receipts_are_here,
-                  R.string.experience_upgrade_preference_fragment__optionally_see_and_share_when_messages_have_been_read,
-                  R.string.experience_upgrade_preference_fragment__optionally_see_and_share_when_messages_have_been_read,
-                  null);
+    SIGNAL_REBRANDING(
+        157,
+        new IntroPage(
+            0xFF2090EA,
+            BasicIntroFragment.newInstance(
+                R.drawable.splash_logo,
+                R.string.ExperienceUpgradeActivity_welcome_to_signal_dgaf,
+                R.string.ExperienceUpgradeActivity_textsecure_is_now_called_signal)),
+        R.string.ExperienceUpgradeActivity_welcome_to_signal_excited,
+        R.string.ExperienceUpgradeActivity_textsecure_is_now_signal,
+        R.string.ExperienceUpgradeActivity_textsecure_is_now_signal_long,
+        null),
+    VIDEO_CALLS(
+        245,
+        new IntroPage(
+            0xFF2090EA,
+            BasicIntroFragment.newInstance(
+                R.drawable.video_splash,
+                R.string.ExperienceUpgradeActivity_say_hello_to_video_calls,
+                R.string.ExperienceUpgradeActivity_signal_now_supports_secure_video_calls)),
+        R.string.ExperienceUpgradeActivity_say_hello_to_video_calls,
+        R.string.ExperienceUpgradeActivity_signal_now_supports_secure_video_calling,
+        R.string.ExperienceUpgradeActivity_signal_now_supports_secure_video_calling_long,
+        null),
+    PROFILES(
+        286,
+        new IntroPage(
+            0xFF2090EA,
+            BasicIntroFragment.newInstance(
+                R.drawable.profile_splash,
+                R.string.ExperienceUpgradeActivity_ready_for_your_closeup,
+                R.string
+                    .ExperienceUpgradeActivity_now_you_can_share_a_profile_photo_and_name_with_friends_on_signal)),
+        R.string.ExperienceUpgradeActivity_signal_profiles_are_here,
+        R.string
+            .ExperienceUpgradeActivity_now_you_can_share_a_profile_photo_and_name_with_friends_on_signal,
+        R.string
+            .ExperienceUpgradeActivity_now_you_can_share_a_profile_photo_and_name_with_friends_on_signal,
+        CreateProfileActivity.class),
+    READ_RECEIPTS(
+        299,
+        new IntroPage(0xFF2090EA, ReadReceiptsIntroFragment.newInstance()),
+        R.string.experience_upgrade_preference_fragment__read_receipts_are_here,
+        R.string
+            .experience_upgrade_preference_fragment__optionally_see_and_share_when_messages_have_been_read,
+        R.string
+            .experience_upgrade_preference_fragment__optionally_see_and_share_when_messages_have_been_read,
+        null);
 
-    private            int             version;
-    private            List<IntroPage> pages;
-    private @StringRes int             notificationTitle;
-    private @StringRes int             notificationText;
-    private @StringRes int             notificationBigText;
-    private @Nullable  Class           nextIntent;
+    private int version;
+    private List<IntroPage> pages;
+    private @StringRes int notificationTitle;
+    private @StringRes int notificationText;
+    private @StringRes int notificationBigText;
+    private @Nullable Class nextIntent;
 
-    ExperienceUpgrade(int version,
-                      @NonNull List<IntroPage> pages,
-                      @StringRes int notificationTitle,
-                      @StringRes int notificationText,
-                      @StringRes int notificationBigText,
-                      @Nullable  Class nextIntent)
-    {
-      this.version             = version;
-      this.pages               = pages;
-      this.notificationTitle   = notificationTitle;
-      this.notificationText    = notificationText;
+    ExperienceUpgrade(
+        int version,
+        @NonNull List<IntroPage> pages,
+        @StringRes int notificationTitle,
+        @StringRes int notificationText,
+        @StringRes int notificationBigText,
+        @Nullable Class nextIntent) {
+      this.version = version;
+      this.pages = pages;
+      this.notificationTitle = notificationTitle;
+      this.notificationText = notificationText;
       this.notificationBigText = notificationBigText;
-      this.nextIntent          = nextIntent;
+      this.nextIntent = nextIntent;
     }
 
-    ExperienceUpgrade(int version,
-                      @NonNull IntroPage page,
-                      @StringRes int notificationTitle,
-                      @StringRes int notificationText,
-                      @StringRes int notificationBigText,
-                      @Nullable Class nextIntent)
-    {
-      this(version, Collections.singletonList(page), notificationTitle, notificationText, notificationBigText, nextIntent);
+    ExperienceUpgrade(
+        int version,
+        @NonNull IntroPage page,
+        @StringRes int notificationTitle,
+        @StringRes int notificationText,
+        @StringRes int notificationBigText,
+        @Nullable Class nextIntent) {
+      this(
+          version,
+          Collections.singletonList(page),
+          notificationTitle,
+          notificationText,
+          notificationBigText,
+          nextIntent);
     }
 
     public int getVersion() {
@@ -137,8 +155,8 @@ public class ExperienceUpgradeActivity extends BaseActionBarActivity {
     }
 
     setContentView(R.layout.experience_upgrade_activity);
-    final ViewPager            pager = ViewUtil.findById(this, R.id.pager);
-    final FloatingActionButton fab   = ViewUtil.findById(this, R.id.fab);
+    final ViewPager pager = ViewUtil.findById(this, R.id.pager);
+    final FloatingActionButton fab = ViewUtil.findById(this, R.id.fab);
 
     pager.setAdapter(new IntroPagerAdapter(getSupportFragmentManager(), upgrade.get().getPages()));
 
@@ -150,11 +168,13 @@ public class ExperienceUpgradeActivity extends BaseActionBarActivity {
 
   private void onContinue(Optional<ExperienceUpgrade> seenUpgrade) {
     ServiceUtil.getNotificationManager(this).cancel(NOTIFICATION_ID);
-    int latestVersion = seenUpgrade.isPresent() ? seenUpgrade.get().getVersion()
-                                                : Util.getCurrentApkReleaseVersion(this);
+    int latestVersion =
+        seenUpgrade.isPresent()
+            ? seenUpgrade.get().getVersion()
+            : Util.getCurrentApkReleaseVersion(this);
     TextSecurePreferences.setLastExperienceVersionCode(this, latestVersion);
     if (seenUpgrade.isPresent() && seenUpgrade.get().nextIntent != null) {
-      Intent intent     = new Intent(this, seenUpgrade.get().nextIntent);
+      Intent intent = new Intent(this, seenUpgrade.get().nextIntent);
       Intent nextIntent = new Intent(this, ConversationListActivity.class);
       intent.putExtra("next_intent", nextIntent);
       startActivity(intent);
@@ -171,7 +191,7 @@ public class ExperienceUpgradeActivity extends BaseActionBarActivity {
 
   public static Optional<ExperienceUpgrade> getExperienceUpgrade(Context context) {
     final int currentVersionCode = Util.getCurrentApkReleaseVersion(context);
-    final int lastSeenVersion    = TextSecurePreferences.getLastExperienceVersionCode(context);
+    final int lastSeenVersion = TextSecurePreferences.getLastExperienceVersionCode(context);
     Log.w(TAG, "getExperienceUpgrade(" + lastSeenVersion + ")");
 
     if (lastSeenVersion >= currentVersionCode) {
@@ -188,7 +208,7 @@ public class ExperienceUpgradeActivity extends BaseActionBarActivity {
   }
 
   private final class OnPageChangeListener implements ViewPager.OnPageChangeListener {
-    private final ArgbEvaluator     evaluator = new ArgbEvaluator();
+    private final ArgbEvaluator evaluator = new ArgbEvaluator();
     private final ExperienceUpgrade upgrade;
 
     public OnPageChangeListener(ExperienceUpgrade upgrade) {
@@ -205,9 +225,12 @@ public class ExperienceUpgradeActivity extends BaseActionBarActivity {
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
       final int nextPosition = (position + 1) % upgrade.getPages().size();
 
-      final int color = (Integer)evaluator.evaluate(positionOffset,
-                                                    upgrade.getPage(position).backgroundColor,
-                                                    upgrade.getPage(nextPosition).backgroundColor);
+      final int color =
+          (Integer)
+              evaluator.evaluate(
+                  positionOffset,
+                  upgrade.getPage(position).backgroundColor,
+                  upgrade.getPage(nextPosition).backgroundColor);
       getWindow().setBackgroundDrawable(new ColorDrawable(color));
     }
   }
@@ -215,23 +238,37 @@ public class ExperienceUpgradeActivity extends BaseActionBarActivity {
   public static class AppUpgradeReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-      if (Intent.ACTION_MY_PACKAGE_REPLACED.equals(intent.getAction()) &&
-          intent.getData().getSchemeSpecificPart().equals(context.getPackageName()))
-      {
-        if (TextSecurePreferences.getLastExperienceVersionCode(context) < 339 &&
-            !TextSecurePreferences.isPasswordDisabled(context))
-        {
-          Notification notification = new NotificationCompat.Builder(context)
-              .setSmallIcon(R.drawable.icon_notification)
-              .setColor(context.getResources().getColor(R.color.signal_primary))
-              .setContentTitle(context.getString(R.string.ExperienceUpgradeActivity_unlock_to_complete_update))
-              .setContentText(context.getString(R.string.ExperienceUpgradeActivity_please_unlock_signal_to_complete_update))
-              .setStyle(new NotificationCompat.BigTextStyle().bigText(context.getString(R.string.ExperienceUpgradeActivity_please_unlock_signal_to_complete_update)))
-              .setAutoCancel(true)
-              .setContentIntent(PendingIntent.getActivity(context, 0,
-                                                          context.getPackageManager().getLaunchIntentForPackage(context.getPackageName()),
-                                                          PendingIntent.FLAG_UPDATE_CURRENT))
-              .build();
+      if (Intent.ACTION_MY_PACKAGE_REPLACED.equals(intent.getAction())
+          && intent.getData().getSchemeSpecificPart().equals(context.getPackageName())) {
+        if (TextSecurePreferences.getLastExperienceVersionCode(context) < 339
+            && !TextSecurePreferences.isPasswordDisabled(context)) {
+          Notification notification =
+              new NotificationCompat.Builder(context)
+                  .setSmallIcon(R.drawable.icon_notification)
+                  .setColor(context.getResources().getColor(R.color.signal_primary))
+                  .setContentTitle(
+                      context.getString(
+                          R.string.ExperienceUpgradeActivity_unlock_to_complete_update))
+                  .setContentText(
+                      context.getString(
+                          R.string
+                              .ExperienceUpgradeActivity_please_unlock_signal_to_complete_update))
+                  .setStyle(
+                      new NotificationCompat.BigTextStyle()
+                          .bigText(
+                              context.getString(
+                                  R.string
+                                      .ExperienceUpgradeActivity_please_unlock_signal_to_complete_update)))
+                  .setAutoCancel(true)
+                  .setContentIntent(
+                      PendingIntent.getActivity(
+                          context,
+                          0,
+                          context
+                              .getPackageManager()
+                              .getLaunchIntentForPackage(context.getPackageName()),
+                          PendingIntent.FLAG_UPDATE_CURRENT))
+                  .build();
 
           ServiceUtil.getNotificationManager(context).notify(NOTIFICATION_ID, notification);
         }
@@ -242,32 +279,38 @@ public class ExperienceUpgradeActivity extends BaseActionBarActivity {
           return;
         }
 
-        if (experienceUpgrade.get().getVersion() == TextSecurePreferences.getExperienceDismissedVersionCode(context)) {
+        if (experienceUpgrade.get().getVersion()
+            == TextSecurePreferences.getExperienceDismissedVersionCode(context)) {
           return;
         }
 
-        Intent targetIntent  = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+        Intent targetIntent =
+            context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
         Intent dismissIntent = new Intent(context, AppUpgradeReceiver.class);
         dismissIntent.setAction(DISMISS_ACTION);
 
-        Notification notification = new NotificationCompat.Builder(context)
-                                        .setSmallIcon(R.drawable.icon_notification)
-                                        .setColor(context.getResources().getColor(R.color.signal_primary))
-                                        .setContentTitle(context.getString(experienceUpgrade.get().getNotificationTitle()))
-                                        .setContentText(context.getString(experienceUpgrade.get().getNotificationText()))
-                                        .setStyle(new NotificationCompat.BigTextStyle().bigText(context.getString(experienceUpgrade.get().getNotificationBigText())))
-                                        .setAutoCancel(true)
-                                        .setContentIntent(PendingIntent.getActivity(context, 0,
-                                                                                    targetIntent,
-                                                                                    PendingIntent.FLAG_UPDATE_CURRENT))
-
-                                        .setDeleteIntent(PendingIntent.getBroadcast(context, 0,
-                                                                                    dismissIntent,
-                                                                                    PendingIntent.FLAG_UPDATE_CURRENT))
-                                        .build();
+        Notification notification =
+            new NotificationCompat.Builder(context)
+                .setSmallIcon(R.drawable.icon_notification)
+                .setColor(context.getResources().getColor(R.color.signal_primary))
+                .setContentTitle(context.getString(experienceUpgrade.get().getNotificationTitle()))
+                .setContentText(context.getString(experienceUpgrade.get().getNotificationText()))
+                .setStyle(
+                    new NotificationCompat.BigTextStyle()
+                        .bigText(
+                            context.getString(experienceUpgrade.get().getNotificationBigText())))
+                .setAutoCancel(true)
+                .setContentIntent(
+                    PendingIntent.getActivity(
+                        context, 0, targetIntent, PendingIntent.FLAG_UPDATE_CURRENT))
+                .setDeleteIntent(
+                    PendingIntent.getBroadcast(
+                        context, 0, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT))
+                .build();
         ServiceUtil.getNotificationManager(context).notify(NOTIFICATION_ID, notification);
       } else if (DISMISS_ACTION.equals(intent.getAction())) {
-        TextSecurePreferences.setExperienceDismissedVersionCode(context, Util.getCurrentApkReleaseVersion(context));
+        TextSecurePreferences.setExperienceDismissedVersionCode(
+            context, Util.getCurrentApkReleaseVersion(context));
       }
     }
   }

@@ -1,10 +1,13 @@
 package org.thoughtcrime.securesms.jobs;
 
-
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
-
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.inject.Inject;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.RecipientDatabase;
 import org.thoughtcrime.securesms.dependencies.InjectableType;
@@ -16,13 +19,6 @@ import org.whispersystems.jobqueue.requirements.NetworkRequirement;
 import org.whispersystems.signalservice.api.SignalServiceMessageReceiver;
 import org.whispersystems.signalservice.api.push.exceptions.PushNetworkException;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.inject.Inject;
-
 public class RetrieveProfileAvatarJob extends ContextJob implements InjectableType {
 
   private static final String TAG = RetrieveProfileAvatarJob.class.getSimpleName();
@@ -31,16 +27,19 @@ public class RetrieveProfileAvatarJob extends ContextJob implements InjectableTy
 
   @Inject SignalServiceMessageReceiver receiver;
 
-  private final String    profileAvatar;
+  private final String profileAvatar;
   private final Recipient recipient;
 
   public RetrieveProfileAvatarJob(Context context, Recipient recipient, String profileAvatar) {
-    super(context, JobParameters.newBuilder()
-                                .withGroupId(RetrieveProfileAvatarJob.class.getSimpleName() + recipient.getAddress().serialize())
-                                .withRequirement(new NetworkRequirement(context))
-                                .create());
+    super(
+        context,
+        JobParameters.newBuilder()
+            .withGroupId(
+                RetrieveProfileAvatarJob.class.getSimpleName() + recipient.getAddress().serialize())
+            .withRequirement(new NetworkRequirement(context))
+            .create());
 
-    this.recipient     = recipient;
+    this.recipient = recipient;
     this.profileAvatar = profileAvatar;
   }
 
@@ -49,8 +48,8 @@ public class RetrieveProfileAvatarJob extends ContextJob implements InjectableTy
 
   @Override
   public void onRun() throws IOException {
-    RecipientDatabase database   = DatabaseFactory.getRecipientDatabase(context);
-    byte[]            profileKey = recipient.resolve().getProfileKey();
+    RecipientDatabase database = DatabaseFactory.getRecipientDatabase(context);
+    byte[] profileKey = recipient.resolve().getProfileKey();
 
     if (profileKey == null) {
       Log.w(TAG, "Recipient profile key is gone!");
@@ -72,8 +71,10 @@ public class RetrieveProfileAvatarJob extends ContextJob implements InjectableTy
     File downloadDestination = File.createTempFile("avatar", "jpg", context.getCacheDir());
 
     try {
-      InputStream avatarStream       = receiver.retrieveProfileAvatar(profileAvatar, downloadDestination, profileKey, MAX_PROFILE_SIZE_BYTES);
-      File        decryptDestination = File.createTempFile("avatar", "jpg", context.getCacheDir());
+      InputStream avatarStream =
+          receiver.retrieveProfileAvatar(
+              profileAvatar, downloadDestination, profileKey, MAX_PROFILE_SIZE_BYTES);
+      File decryptDestination = File.createTempFile("avatar", "jpg", context.getCacheDir());
 
       Util.copy(avatarStream, new FileOutputStream(decryptDestination));
       decryptDestination.renameTo(AvatarHelper.getAvatarFile(context, recipient.getAddress()));
@@ -92,7 +93,5 @@ public class RetrieveProfileAvatarJob extends ContextJob implements InjectableTy
   }
 
   @Override
-  public void onCanceled() {
-
-  }
+  public void onCanceled() {}
 }

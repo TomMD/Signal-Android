@@ -8,7 +8,6 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.components.AvatarImageView;
 import org.thoughtcrime.securesms.database.Address;
@@ -25,13 +24,13 @@ public class ContactSelectionListItem extends LinearLayout implements RecipientM
   private static final String TAG = ContactSelectionListItem.class.getSimpleName();
 
   private AvatarImageView contactPhotoImage;
-  private TextView        numberView;
-  private TextView        nameView;
-  private TextView        labelView;
-  private CheckBox        checkBox;
+  private TextView numberView;
+  private TextView nameView;
+  private TextView labelView;
+  private CheckBox checkBox;
 
-  private String        number;
-  private Recipient     recipient;
+  private String number;
+  private Recipient recipient;
   private GlideRequests glideRequests;
 
   public ContactSelectionListItem(Context context) {
@@ -46,21 +45,29 @@ public class ContactSelectionListItem extends LinearLayout implements RecipientM
   protected void onFinishInflate() {
     super.onFinishInflate();
     this.contactPhotoImage = findViewById(R.id.contact_photo_image);
-    this.numberView        = findViewById(R.id.number);
-    this.labelView         = findViewById(R.id.label);
-    this.nameView          = findViewById(R.id.name);
-    this.checkBox          = findViewById(R.id.check_box);
+    this.numberView = findViewById(R.id.number);
+    this.labelView = findViewById(R.id.label);
+    this.nameView = findViewById(R.id.name);
+    this.checkBox = findViewById(R.id.check_box);
 
     ViewUtil.setTextViewGravityStart(this.nameView, getContext());
   }
 
-  public void set(@NonNull GlideRequests glideRequests, int type, String name, String number, String label, int color, boolean multiSelect) {
+  public void set(
+      @NonNull GlideRequests glideRequests,
+      int type,
+      String name,
+      String number,
+      String label,
+      int color,
+      boolean multiSelect) {
     this.glideRequests = glideRequests;
-    this.number        = number;
+    this.number = number;
 
     if (type == ContactsDatabase.NEW_TYPE) {
       this.recipient = null;
-      this.contactPhotoImage.setAvatar(glideRequests, Recipient.from(getContext(), Address.UNKNOWN, true), false);
+      this.contactPhotoImage.setAvatar(
+          glideRequests, Recipient.from(getContext(), Address.UNKNOWN, true), false);
     } else if (!TextUtils.isEmpty(number)) {
       Address address = Address.fromExternal(getContext(), number);
       this.recipient = Recipient.from(getContext(), address, true);
@@ -78,7 +85,7 @@ public class ContactSelectionListItem extends LinearLayout implements RecipientM
     setText(type, name, number, label);
 
     if (multiSelect) this.checkBox.setVisibility(View.VISIBLE);
-    else             this.checkBox.setVisibility(View.GONE);
+    else this.checkBox.setVisibility(View.GONE);
   }
 
   public void setChecked(boolean selected) {
@@ -120,10 +127,11 @@ public class ContactSelectionListItem extends LinearLayout implements RecipientM
   @Override
   public void onModified(final Recipient recipient) {
     if (this.recipient == recipient) {
-      Util.runOnMain(() -> {
-        contactPhotoImage.setAvatar(glideRequests, recipient, false);
-        nameView.setText(recipient.toShortString());
-      });
+      Util.runOnMain(
+          () -> {
+            contactPhotoImage.setAvatar(glideRequests, recipient, false);
+            nameView.setText(recipient.toShortString());
+          });
     }
   }
 }

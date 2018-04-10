@@ -1,18 +1,16 @@
 /**
  * Copyright (C) 2011 Whisper Systems
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * <p>This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * <p>You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  */
 package org.thoughtcrime.securesms.service;
 
@@ -27,60 +25,59 @@ import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.telephony.SmsMessage;
 import android.util.Log;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.thoughtcrime.securesms.ApplicationContext;
 import org.thoughtcrime.securesms.RegistrationActivity;
 import org.thoughtcrime.securesms.jobs.SmsReceiveJob;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
 import org.thoughtcrime.securesms.util.Util;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class SmsListener extends BroadcastReceiver {
 
-  private static final String SMS_RECEIVED_ACTION  = Telephony.Sms.Intents.SMS_RECEIVED_ACTION;
+  private static final String SMS_RECEIVED_ACTION = Telephony.Sms.Intents.SMS_RECEIVED_ACTION;
   private static final String SMS_DELIVERED_ACTION = Telephony.Sms.Intents.SMS_DELIVER_ACTION;
 
-  private static final Pattern CHALLENGE_PATTERN = Pattern.compile(".*Your (Signal|TextSecure) verification code:? ([0-9]{3,4})-([0-9]{3,4}).*", Pattern.DOTALL);
+  private static final Pattern CHALLENGE_PATTERN =
+      Pattern.compile(
+          ".*Your (Signal|TextSecure) verification code:? ([0-9]{3,4})-([0-9]{3,4}).*",
+          Pattern.DOTALL);
 
   private boolean isExemption(SmsMessage message, String messageBody) {
 
     // ignore CLASS0 ("flash") messages
-    if (message.getMessageClass() == SmsMessage.MessageClass.CLASS_0)
-      return true;
+    if (message.getMessageClass() == SmsMessage.MessageClass.CLASS_0) return true;
 
     // ignore OTP messages from Sparebank1 (Norwegian bank)
     if (messageBody.startsWith("Sparebank1://otp?")) {
       return true;
     }
 
-    return
-      message.getOriginatingAddress().length() < 7 &&
-      (messageBody.toUpperCase().startsWith("//ANDROID:") || // Sprint Visual Voicemail
-       messageBody.startsWith("//BREW:")); //BREW stands for “Binary Runtime Environment for Wireless"
+    return message.getOriginatingAddress().length() < 7
+        && (messageBody.toUpperCase().startsWith("//ANDROID:")
+            || // Sprint Visual Voicemail
+            messageBody.startsWith(
+                "//BREW:")); // BREW stands for “Binary Runtime Environment for Wireless"
   }
 
   private SmsMessage getSmsMessageFromIntent(Intent intent) {
-    Bundle bundle             = intent.getExtras();
-    Object[] pdus             = (Object[])bundle.get("pdus");
+    Bundle bundle = intent.getExtras();
+    Object[] pdus = (Object[]) bundle.get("pdus");
 
-    if (pdus == null || pdus.length == 0)
-      return null;
+    if (pdus == null || pdus.length == 0) return null;
 
-    return SmsMessage.createFromPdu((byte[])pdus[0]);
+    return SmsMessage.createFromPdu((byte[]) pdus[0]);
   }
 
   private String getSmsMessageBodyFromIntent(Intent intent) {
-    Bundle bundle             = intent.getExtras();
-    Object[] pdus             = (Object[])bundle.get("pdus");
+    Bundle bundle = intent.getExtras();
+    Object[] pdus = (Object[]) bundle.get("pdus");
     StringBuilder bodyBuilder = new StringBuilder();
 
-    if (pdus == null)
-      return null;
+    if (pdus == null) return null;
 
     for (Object pdu : pdus)
-      bodyBuilder.append(SmsMessage.createFromPdu((byte[])pdu).getDisplayMessageBody());
+      bodyBuilder.append(SmsMessage.createFromPdu((byte[]) pdu).getDisplayMessageBody());
 
     return bodyBuilder.toString();
   }
@@ -89,48 +86,42 @@ public class SmsListener extends BroadcastReceiver {
     SmsMessage message = getSmsMessageFromIntent(intent);
     String messageBody = getSmsMessageBodyFromIntent(intent);
 
-    if (message == null && messageBody == null)
-      return false;
+    if (message == null && messageBody == null) return false;
 
-    if (isExemption(message, messageBody))
-      return false;
+    if (isExemption(message, messageBody)) return false;
 
-    if (!ApplicationMigrationService.isDatabaseImported(context))
-      return false;
+    if (!ApplicationMigrationService.isDatabaseImported(context)) return false;
 
-    if (isChallenge(context, messageBody))
-      return false;
+    if (isChallenge(context, messageBody)) return false;
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT &&
-        SMS_RECEIVED_ACTION.equals(intent.getAction()) &&
-        Util.isDefaultSmsProvider(context))
-    {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
+        && SMS_RECEIVED_ACTION.equals(intent.getAction())
+        && Util.isDefaultSmsProvider(context)) {
       return false;
     }
 
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT &&
-        TextSecurePreferences.isInterceptAllSmsEnabled(context))
-    {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT
+        && TextSecurePreferences.isInterceptAllSmsEnabled(context)) {
       return true;
     }
 
     return false;
   }
 
-  @VisibleForTesting boolean isChallenge(@NonNull Context context, @Nullable String messageBody) {
-    if (messageBody == null)
-      return false;
+  @VisibleForTesting
+  boolean isChallenge(@NonNull Context context, @Nullable String messageBody) {
+    if (messageBody == null) return false;
 
-    if (CHALLENGE_PATTERN.matcher(messageBody).matches() &&
-        TextSecurePreferences.isVerifying(context))
-    {
+    if (CHALLENGE_PATTERN.matcher(messageBody).matches()
+        && TextSecurePreferences.isVerifying(context)) {
       return true;
     }
 
     return false;
   }
 
-  @VisibleForTesting String parseChallenge(String messageBody) {
+  @VisibleForTesting
+  String parseChallenge(String messageBody) {
     Matcher challengeMatcher = CHALLENGE_PATTERN.matcher(messageBody);
 
     if (!challengeMatcher.matches()) {
@@ -152,14 +143,15 @@ public class SmsListener extends BroadcastReceiver {
       context.sendBroadcast(challengeIntent);
 
       abortBroadcast();
-    } else if ((intent.getAction().equals(SMS_DELIVERED_ACTION)) ||
-               (intent.getAction().equals(SMS_RECEIVED_ACTION)) && isRelevant(context, intent))
-    {
+    } else if ((intent.getAction().equals(SMS_DELIVERED_ACTION))
+        || (intent.getAction().equals(SMS_RECEIVED_ACTION)) && isRelevant(context, intent)) {
       Log.w("SmsListener", "Constructing SmsReceiveJob...");
-      Object[] pdus           = (Object[]) intent.getExtras().get("pdus");
-      int      subscriptionId = intent.getExtras().getInt("subscription", -1);
+      Object[] pdus = (Object[]) intent.getExtras().get("pdus");
+      int subscriptionId = intent.getExtras().getInt("subscription", -1);
 
-      ApplicationContext.getInstance(context).getJobManager().add(new SmsReceiveJob(context, pdus, subscriptionId));
+      ApplicationContext.getInstance(context)
+          .getJobManager()
+          .add(new SmsReceiveJob(context, pdus, subscriptionId));
 
       abortBroadcast();
     }

@@ -1,23 +1,20 @@
 /**
  * Copyright (c) 2016 UPTech
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
+ * <p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * <p>The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+ * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package org.thoughtcrime.securesms.scribbles.widget.entity;
 
@@ -32,21 +29,18 @@ import android.support.annotation.Nullable;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
-
 import org.thoughtcrime.securesms.scribbles.viewmodel.TextLayer;
-
 
 public class TextEntity extends MotionEntity {
 
   private final TextPaint textPaint;
 
-  @Nullable
-  private Bitmap bitmap;
+  @Nullable private Bitmap bitmap;
 
-  public TextEntity(@NonNull TextLayer textLayer,
-                    @IntRange(from = 1) int canvasWidth,
-                    @IntRange(from = 1) int canvasHeight)
-  {
+  public TextEntity(
+      @NonNull TextLayer textLayer,
+      @IntRange(from = 1) int canvasWidth,
+      @IntRange(from = 1) int canvasHeight) {
     super(textLayer, canvasWidth, canvasHeight);
     this.textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 
@@ -94,11 +88,11 @@ public class TextEntity extends MotionEntity {
   }
 
   /**
-   * If reuseBmp is not null, and size of the new bitmap matches the size of the reuseBmp,
-   * new bitmap won't be created, reuseBmp it will be reused instead
+   * If reuseBmp is not null, and size of the new bitmap matches the size of the reuseBmp, new
+   * bitmap won't be created, reuseBmp it will be reused instead
    *
    * @param textLayer text to draw
-   * @param reuseBmp  the bitmap that will be reused
+   * @param reuseBmp the bitmap that will be reused
    * @return bitmap with the text
    */
   @NonNull
@@ -110,29 +104,33 @@ public class TextEntity extends MotionEntity {
     textPaint.setStyle(Paint.Style.FILL);
     textPaint.setTextSize(textLayer.getFont().getSize() * canvasWidth);
     textPaint.setColor(textLayer.getFont().getColor());
-//        textPaint.setTypeface(fontProvider.getTypeface(textLayer.getFont().getTypeface()));
+    //        textPaint.setTypeface(fontProvider.getTypeface(textLayer.getFont().getTypeface()));
 
     // drawing text guide : http://ivankocijan.xyz/android-drawing-multiline-text-on-canvas/
     // Static layout which will be drawn on canvas
-    StaticLayout sl = new StaticLayout(
-        textLayer.getText(), // - text which will be drawn
-        textPaint,
-        boundsWidth, // - width of the layout
-        Layout.Alignment.ALIGN_CENTER, // - layout alignment
-        1, // 1 - text spacing multiply
-        1, // 1 - text spacing add
-        true); // true - include padding
+    StaticLayout sl =
+        new StaticLayout(
+            textLayer.getText(), // - text which will be drawn
+            textPaint,
+            boundsWidth, // - width of the layout
+            Layout.Alignment.ALIGN_CENTER, // - layout alignment
+            1, // 1 - text spacing multiply
+            1, // 1 - text spacing add
+            true); // true - include padding
 
     // calculate height for the entity, min - Limits.MIN_BITMAP_HEIGHT
     int boundsHeight = sl.getHeight();
 
     // create bitmap not smaller than TextLayer.Limits.MIN_BITMAP_HEIGHT
-    int bmpHeight = (int) (canvasHeight * Math.max(TextLayer.Limits.MIN_BITMAP_HEIGHT,
-                                                   1.0F * boundsHeight / canvasHeight));
+    int bmpHeight =
+        (int)
+            (canvasHeight
+                * Math.max(TextLayer.Limits.MIN_BITMAP_HEIGHT, 1.0F * boundsHeight / canvasHeight));
 
     // create bitmap where text will be drawn
     Bitmap bmp;
-    if (reuseBmp != null && reuseBmp.getWidth() == boundsWidth
+    if (reuseBmp != null
+        && reuseBmp.getWidth() == boundsWidth
         && reuseBmp.getHeight() == bmpHeight) {
       // if previous bitmap exists, and it's width/height is the same - reuse it
       bmp = reuseBmp;
@@ -146,13 +144,13 @@ public class TextEntity extends MotionEntity {
 
     // move text to center if bitmap is bigger that text
     if (boundsHeight < bmpHeight) {
-      //calculate Y coordinate - In this case we want to draw the text in the
-      //center of the canvas so we move Y coordinate to center.
+      // calculate Y coordinate - In this case we want to draw the text in the
+      // center of the canvas so we move Y coordinate to center.
       float textYCoordinate = (bmpHeight - boundsHeight) / 2;
       canvas.translate(0, textYCoordinate);
     }
 
-    //draws static layout on canvas
+    // draws static layout on canvas
     sl.draw(canvas);
     canvas.restore();
 
@@ -160,7 +158,7 @@ public class TextEntity extends MotionEntity {
   }
 
   @Override
-    @NonNull
+  @NonNull
   public TextLayer getLayer() {
     return (TextLayer) layer;
   }

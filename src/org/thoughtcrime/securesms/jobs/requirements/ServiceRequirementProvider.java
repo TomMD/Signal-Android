@@ -4,23 +4,21 @@ import android.content.Context;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
-
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.whispersystems.jobqueue.requirements.RequirementListener;
 import org.whispersystems.jobqueue.requirements.RequirementProvider;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public class ServiceRequirementProvider implements RequirementProvider {
 
-  private final TelephonyManager     telephonyManager;
+  private final TelephonyManager telephonyManager;
   private final ServiceStateListener serviceStateListener;
-  private final AtomicBoolean        listeningForServiceState;
+  private final AtomicBoolean listeningForServiceState;
 
   private RequirementListener requirementListener;
 
   public ServiceRequirementProvider(Context context) {
-    this.telephonyManager         = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-    this.serviceStateListener     = new ServiceStateListener();
+    this.telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+    this.serviceStateListener = new ServiceStateListener();
     this.listeningForServiceState = new AtomicBoolean(false);
   }
 

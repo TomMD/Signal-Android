@@ -4,7 +4,6 @@ import android.content.res.Configuration;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.ChecksumException;
 import com.google.zxing.DecodeHintType;
@@ -14,22 +13,20 @@ import com.google.zxing.PlanarYUVLuminanceSource;
 import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
-
-import org.thoughtcrime.securesms.components.camera.CameraView;
-import org.thoughtcrime.securesms.components.camera.CameraView.PreviewFrame;
-import org.thoughtcrime.securesms.util.Util;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import org.thoughtcrime.securesms.components.camera.CameraView;
+import org.thoughtcrime.securesms.components.camera.CameraView.PreviewFrame;
+import org.thoughtcrime.securesms.util.Util;
 
 public class ScanningThread extends Thread implements CameraView.PreviewCallback {
 
   private static final String TAG = ScanningThread.class.getSimpleName();
 
-  private final QRCodeReader                  reader       = new QRCodeReader();
+  private final QRCodeReader reader = new QRCodeReader();
   private final AtomicReference<ScanListener> scanListener = new AtomicReference<>();
-  private final Map<DecodeHintType, String>   hints        = new HashMap<>();
+  private final Map<DecodeHintType, String> hints = new HashMap<>();
 
   private boolean scanning = true;
   private PreviewFrame previewFrame;
@@ -54,7 +51,6 @@ public class ScanningThread extends Thread implements CameraView.PreviewCallback
     }
   }
 
-
   @Override
   public void run() {
     while (true) {
@@ -66,12 +62,17 @@ public class ScanningThread extends Thread implements CameraView.PreviewCallback
         }
 
         if (!scanning) return;
-        else           ourFrame = previewFrame;
+        else ourFrame = previewFrame;
 
         previewFrame = null;
       }
 
-      String       data         = getScannedData(ourFrame.getData(), ourFrame.getWidth(), ourFrame.getHeight(), ourFrame.getOrientation());
+      String data =
+          getScannedData(
+              ourFrame.getData(),
+              ourFrame.getWidth(),
+              ourFrame.getHeight(),
+              ourFrame.getOrientation());
       ScanListener scanListener = this.scanListener.get();
 
       if (data != null && scanListener != null) {
@@ -100,17 +101,16 @@ public class ScanningThread extends Thread implements CameraView.PreviewCallback
         }
 
         int tmp = width;
-        width  = height;
+        width = height;
         height = tmp;
-        data   = rotatedData;
+        data = rotatedData;
       }
 
-      PlanarYUVLuminanceSource source = new PlanarYUVLuminanceSource(data, width, height,
-                                                                     0, 0, width, height,
-                                                                     false);
+      PlanarYUVLuminanceSource source =
+          new PlanarYUVLuminanceSource(data, width, height, 0, 0, width, height, false);
 
       BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-      Result       result = reader.decode(bitmap, hints);
+      Result result = reader.decode(bitmap, hints);
 
       if (result != null) return result.getText();
 

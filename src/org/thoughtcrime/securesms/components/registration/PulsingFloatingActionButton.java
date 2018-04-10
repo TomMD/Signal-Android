@@ -1,11 +1,9 @@
 package org.thoughtcrime.securesms.components.registration;
 
-
 import android.animation.Animator;
 import android.content.Context;
 import android.support.design.widget.FloatingActionButton;
 import android.util.AttributeSet;
-
 import org.thoughtcrime.securesms.animation.AnimationCompleteListener;
 
 public class PulsingFloatingActionButton extends FloatingActionButton {
@@ -38,18 +36,30 @@ public class PulsingFloatingActionButton extends FloatingActionButton {
   private void pulse(long periodMillis) {
     if (!pulsing) return;
 
-    this.animate().scaleX(1.2f).scaleY(1.2f).setDuration(150).setListener(new AnimationCompleteListener() {
-      @Override
-      public void onAnimationEnd(Animator animation) {
-        clearAnimation();
-        animate().scaleX(1.0f).scaleY(1.0f).setDuration(150).setListener(new AnimationCompleteListener() {
-          @Override
-          public void onAnimationEnd(Animator animation) {
-            PulsingFloatingActionButton.this.postDelayed(() -> pulse(periodMillis), periodMillis);
-          }
-        }).start();
-      }
-    }).start();
+    this.animate()
+        .scaleX(1.2f)
+        .scaleY(1.2f)
+        .setDuration(150)
+        .setListener(
+            new AnimationCompleteListener() {
+              @Override
+              public void onAnimationEnd(Animator animation) {
+                clearAnimation();
+                animate()
+                    .scaleX(1.0f)
+                    .scaleY(1.0f)
+                    .setDuration(150)
+                    .setListener(
+                        new AnimationCompleteListener() {
+                          @Override
+                          public void onAnimationEnd(Animator animation) {
+                            PulsingFloatingActionButton.this.postDelayed(
+                                () -> pulse(periodMillis), periodMillis);
+                          }
+                        })
+                    .start();
+              }
+            })
+        .start();
   }
-
 }

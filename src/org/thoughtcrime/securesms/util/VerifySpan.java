@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.text.style.ClickableSpan;
 import android.view.View;
-
 import org.thoughtcrime.securesms.VerifyIdentityActivity;
 import org.thoughtcrime.securesms.crypto.IdentityKeyParcelable;
 import org.thoughtcrime.securesms.database.Address;
@@ -14,19 +13,20 @@ import org.whispersystems.libsignal.IdentityKey;
 
 public class VerifySpan extends ClickableSpan {
 
-  private final Context     context;
-  private final Address     address;
+  private final Context context;
+  private final Address address;
   private final IdentityKey identityKey;
 
   public VerifySpan(@NonNull Context context, @NonNull IdentityKeyMismatch mismatch) {
-    this.context     = context;
-    this.address     = mismatch.getAddress();
+    this.context = context;
+    this.address = mismatch.getAddress();
     this.identityKey = mismatch.getIdentityKey();
   }
 
-  public VerifySpan(@NonNull Context context, @NonNull Address address, @NonNull IdentityKey identityKey) {
-    this.context     = context;
-    this.address     = address;
+  public VerifySpan(
+      @NonNull Context context, @NonNull Address address, @NonNull IdentityKey identityKey) {
+    this.context = context;
+    this.address = address;
     this.identityKey = identityKey;
   }
 

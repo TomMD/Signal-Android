@@ -1,43 +1,41 @@
 package org.thoughtcrime.securesms.database;
 
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
 import android.view.ViewGroup;
-
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 public class CursorRecyclerViewAdapterTest {
   private CursorRecyclerViewAdapter adapter;
-  private Context                   context;
-  private Cursor                    cursor;
+  private Context context;
+  private Cursor cursor;
 
   @Before
   public void setUp() {
     context = mock(Context.class);
-    cursor  = mock(Cursor.class);
+    cursor = mock(Cursor.class);
     when(cursor.getCount()).thenReturn(100);
     when(cursor.moveToPosition(anyInt())).thenReturn(true);
 
-    adapter = new CursorRecyclerViewAdapter(context, cursor) {
-      @Override
-      public ViewHolder onCreateItemViewHolder(ViewGroup parent, int viewType) {
-        return null;
-      }
+    adapter =
+        new CursorRecyclerViewAdapter(context, cursor) {
+          @Override
+          public ViewHolder onCreateItemViewHolder(ViewGroup parent, int viewType) {
+            return null;
+          }
 
-      @Override
-      public void onBindItemViewHolder(ViewHolder viewHolder, @NonNull Cursor cursor) {
-      }
-    };
+          @Override
+          public void onBindItemViewHolder(ViewHolder viewHolder, @NonNull Cursor cursor) {}
+        };
   }
 
   @Test
@@ -75,4 +73,3 @@ public class CursorRecyclerViewAdapterTest {
     assertNotEquals(adapter.getItemViewType(100), CursorRecyclerViewAdapter.FOOTER_TYPE);
   }
 }
-

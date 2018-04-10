@@ -1,10 +1,10 @@
-//package org.thoughtcrime.securesms.database;
+// package org.thoughtcrime.securesms.database;
 //
-//import org.thoughtcrime.securesms.TextSecureTestCase;
+// import org.thoughtcrime.securesms.TextSecureTestCase;
 //
-//import static org.assertj.core.api.Assertions.assertThat;
+// import static org.assertj.core.api.Assertions.assertThat;
 //
-//public class CanonicalAddressDatabaseTest extends TextSecureTestCase {
+// public class CanonicalAddressDatabaseTest extends TextSecureTestCase {
 //  private static final String AMBIGUOUS_NUMBER = "222-3333";
 //  private static final String SPECIFIC_NUMBER  = "+49 444 222 3333";
 //  private static final String EMAIL            = "a@b.fom";
@@ -113,7 +113,8 @@
 //    assertThat(CanonicalAddressDatabase.isNumberAddress("T-Mobile")).isFalse();
 //    assertThat(CanonicalAddressDatabase.isNumberAddress("T-Mobile1")).isFalse();
 //    assertThat(CanonicalAddressDatabase.isNumberAddress("Wherever bank")).isFalse();
-//    assertThat(CanonicalAddressDatabase.isNumberAddress("__textsecure_group__!afafafafafaf")).isFalse();
+//
+// assertThat(CanonicalAddressDatabase.isNumberAddress("__textsecure_group__!afafafafafaf")).isFalse();
 //    assertThat(CanonicalAddressDatabase.isNumberAddress("email@domain.com")).isFalse();
 //  }
-//}
+// }

@@ -8,10 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
-import android.view.View;
-
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.contacts.avatars.ContactColors;
 import org.thoughtcrime.securesms.contacts.avatars.GeneratedContactPhoto;
@@ -35,7 +32,8 @@ public class AvatarImageView extends AppCompatImageView {
     setScaleType(ScaleType.CENTER_CROP);
 
     if (attrs != null) {
-      TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.AvatarImageView, 0, 0);
+      TypedArray typedArray =
+          context.getTheme().obtainStyledAttributes(attrs, R.styleable.AvatarImageView, 0, 0);
       inverted = typedArray.getBoolean(0, false);
       typedArray.recycle();
     }
@@ -47,17 +45,26 @@ public class AvatarImageView extends AppCompatImageView {
     super.setOnClickListener(listener);
   }
 
-  public void setAvatar(@NonNull GlideRequests requestManager, @Nullable Recipient recipient, boolean quickContactEnabled) {
+  public void setAvatar(
+      @NonNull GlideRequests requestManager,
+      @Nullable Recipient recipient,
+      boolean quickContactEnabled) {
     if (recipient != null) {
-      requestManager.load(recipient.getContactPhoto())
-                    .fallback(recipient.getFallbackContactPhotoDrawable(getContext(), inverted))
-                    .error(recipient.getFallbackContactPhotoDrawable(getContext(), inverted))
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .circleCrop()
-                    .into(this);
+      requestManager
+          .load(recipient.getContactPhoto())
+          .fallback(recipient.getFallbackContactPhotoDrawable(getContext(), inverted))
+          .error(recipient.getFallbackContactPhotoDrawable(getContext(), inverted))
+          .diskCacheStrategy(DiskCacheStrategy.ALL)
+          .circleCrop()
+          .into(this);
       setAvatarClickHandler(recipient, quickContactEnabled);
     } else {
-      setImageDrawable(new GeneratedContactPhoto("#").asDrawable(getContext(), ContactColors.UNKNOWN_COLOR.toConversationColor(getContext()), inverted));
+      setImageDrawable(
+          new GeneratedContactPhoto("#")
+              .asDrawable(
+                  getContext(),
+                  ContactColors.UNKNOWN_COLOR.toConversationColor(getContext()),
+                  inverted));
       super.setOnClickListener(listener);
     }
   }
@@ -68,23 +75,30 @@ public class AvatarImageView extends AppCompatImageView {
 
   private void setAvatarClickHandler(final Recipient recipient, boolean quickContactEnabled) {
     if (!recipient.isGroupRecipient() && quickContactEnabled) {
-      super.setOnClickListener(v -> {
-        if (recipient.getContactUri() != null) {
-          ContactsContract.QuickContact.showQuickContact(getContext(), AvatarImageView.this, recipient.getContactUri(), ContactsContract.QuickContact.MODE_LARGE, null);
-        } else {
-          final Intent intent = new Intent(Intent.ACTION_INSERT_OR_EDIT);
-          if (recipient.getAddress().isEmail()) {
-            intent.putExtra(ContactsContract.Intents.Insert.EMAIL, recipient.getAddress().toEmailString());
-          } else {
-            intent.putExtra(ContactsContract.Intents.Insert.PHONE, recipient.getAddress().toPhoneString());
-          }
-          intent.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
-          getContext().startActivity(intent);
-        }
-      });
+      super.setOnClickListener(
+          v -> {
+            if (recipient.getContactUri() != null) {
+              ContactsContract.QuickContact.showQuickContact(
+                  getContext(),
+                  AvatarImageView.this,
+                  recipient.getContactUri(),
+                  ContactsContract.QuickContact.MODE_LARGE,
+                  null);
+            } else {
+              final Intent intent = new Intent(Intent.ACTION_INSERT_OR_EDIT);
+              if (recipient.getAddress().isEmail()) {
+                intent.putExtra(
+                    ContactsContract.Intents.Insert.EMAIL, recipient.getAddress().toEmailString());
+              } else {
+                intent.putExtra(
+                    ContactsContract.Intents.Insert.PHONE, recipient.getAddress().toPhoneString());
+              }
+              intent.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
+              getContext().startActivity(intent);
+            }
+          });
     } else {
       super.setOnClickListener(listener);
     }
   }
-
 }

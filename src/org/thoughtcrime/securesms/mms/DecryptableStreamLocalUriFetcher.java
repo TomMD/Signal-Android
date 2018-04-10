@@ -5,17 +5,13 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
-
 import com.bumptech.glide.load.data.StreamLocalUriFetcher;
-
-import org.thoughtcrime.securesms.crypto.MasterSecret;
-import org.thoughtcrime.securesms.util.MediaUtil;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import org.thoughtcrime.securesms.util.MediaUtil;
 
 class DecryptableStreamLocalUriFetcher extends StreamLocalUriFetcher {
 
@@ -25,11 +21,12 @@ class DecryptableStreamLocalUriFetcher extends StreamLocalUriFetcher {
 
   DecryptableStreamLocalUriFetcher(Context context, Uri uri) {
     super(context.getContentResolver(), uri);
-    this.context      = context;
+    this.context = context;
   }
 
   @Override
-  protected InputStream loadResource(Uri uri, ContentResolver contentResolver) throws FileNotFoundException {
+  protected InputStream loadResource(Uri uri, ContentResolver contentResolver)
+      throws FileNotFoundException {
     if (MediaUtil.hasVideoThumbnail(uri)) {
       Bitmap thumbnail = MediaUtil.getVideoThumbnail(context, uri);
 

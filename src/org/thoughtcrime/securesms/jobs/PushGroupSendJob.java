@@ -4,9 +4,11 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
 import com.annimon.stream.Stream;
-
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import javax.inject.Inject;
 import org.thoughtcrime.securesms.ApplicationContext;
 import org.thoughtcrime.securesms.attachments.Attachment;
 import org.thoughtcrime.securesms.database.Address;
@@ -39,12 +41,6 @@ import org.whispersystems.signalservice.api.push.exceptions.NetworkFailureExcept
 import org.whispersystems.signalservice.api.util.InvalidNumberException;
 import org.whispersystems.signalservice.internal.push.SignalServiceProtos.GroupContext;
 
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.inject.Inject;
-
 public class PushGroupSendJob extends PushSendJob implements InjectableType {
 
   private static final long serialVersionUID = 1L;
@@ -53,34 +49,37 @@ public class PushGroupSendJob extends PushSendJob implements InjectableType {
 
   @Inject transient SignalServiceMessageSender messageSender;
 
-  private final long   messageId;
-  private final long   filterRecipientId; // Deprecated
+  private final long messageId;
+  private final long filterRecipientId; // Deprecated
   private final String filterAddress;
 
-  public PushGroupSendJob(Context context, long messageId, @NonNull Address destination, @Nullable Address filterAddress) {
-    super(context, JobParameters.newBuilder()
-                                .withPersistence()
-                                .withGroupId(destination.toGroupString())
-                                .withRequirement(new MasterSecretRequirement(context))
-                                .withRequirement(new NetworkRequirement(context))
-                                .withRetryCount(5)
-                                .create());
+  public PushGroupSendJob(
+      Context context,
+      long messageId,
+      @NonNull Address destination,
+      @Nullable Address filterAddress) {
+    super(
+        context,
+        JobParameters.newBuilder()
+            .withPersistence()
+            .withGroupId(destination.toGroupString())
+            .withRequirement(new MasterSecretRequirement(context))
+            .withRequirement(new NetworkRequirement(context))
+            .withRetryCount(5)
+            .create());
 
-    this.messageId         = messageId;
-    this.filterAddress     = filterAddress == null ? null :filterAddress.toPhoneString();
+    this.messageId = messageId;
+    this.filterAddress = filterAddress == null ? null : filterAddress.toPhoneString();
     this.filterRecipientId = -1;
   }
 
   @Override
-  public void onAdded() {
-  }
+  public void onAdded() {}
 
   @Override
-  public void onPushSend()
-      throws MmsException, IOException, NoSuchMessageException
-  {
-    MmsDatabase          database = DatabaseFactory.getMmsDatabase(context);
-    OutgoingMediaMessage message  = database.getOutgoingMessage(messageId);
+  public void onPushSend() throws MmsException, IOException, NoSuchMessageException {
+    MmsDatabase database = DatabaseFactory.getMmsDatabase(context);
+    OutgoingMediaMessage message = database.getOutgoingMessage(messageId);
 
     try {
       deliver(message, filterAddress == null ? null : Address.fromSerialized(filterAddress));
@@ -91,10 +90,12 @@ public class PushGroupSendJob extends PushSendJob implements InjectableType {
       if (message.getExpiresIn() > 0 && !message.isExpirationUpdate()) {
         database.markExpireStarted(messageId);
         ApplicationContext.getInstance(context)
-                          .getExpiringMessageManager()
-                          .scheduleDeletion(messageId, true, message.getExpiresIn());
+            .getExpiringMessageManager()
+            .scheduleDeletion(messageId, true, message.getExpiresIn());
       }
-    } catch (InvalidNumberException | RecipientFormattingException | UndeliverableMessageException e) {
+    } catch (InvalidNumberException
+        | RecipientFormattingException
+        | UndeliverableMessageException e) {
       Log.w(TAG, e);
       database.markAsSentFailed(messageId);
       notifyMediaMessageDeliveryFailed(context, messageId);
@@ -107,7 +108,8 @@ public class PushGroupSendJob extends PushSendJob implements InjectableType {
       }
 
       for (UntrustedIdentityException uie : e.getUntrustedIdentityExceptions()) {
-        database.addMismatchedIdentity(messageId, Address.fromSerialized(uie.getE164Number()), uie.getIdentityKey());
+        database.addMismatchedIdentity(
+            messageId, Address.fromSerialized(uie.getE164Number()), uie.getIdentityKey());
       }
 
       database.addFailures(messageId, failures);
@@ -135,43 +137,55 @@ public class PushGroupSendJob extends PushSendJob implements InjectableType {
 
   private void deliver(OutgoingMediaMessage message, @Nullable Address filterAddress)
       throws IOException, RecipientFormattingException, InvalidNumberException,
-      EncapsulatedExceptions, UndeliverableMessageException
-  {
-    String                        groupId           = message.getRecipient().getAddress().toGroupString();
-    Optional<byte[]>              profileKey        = getProfileKey(message.getRecipient());
-    List<Address>                 recipients        = getGroupMessageRecipients(groupId, messageId);
-    MediaConstraints              mediaConstraints  = MediaConstraints.getPushMediaConstraints();
-    List<Attachment>              scaledAttachments = scaleAndStripExifFromAttachments(mediaConstraints, message.getAttachments());
+          EncapsulatedExceptions, UndeliverableMessageException {
+    String groupId = message.getRecipient().getAddress().toGroupString();
+    Optional<byte[]> profileKey = getProfileKey(message.getRecipient());
+    List<Address> recipients = getGroupMessageRecipients(groupId, messageId);
+    MediaConstraints mediaConstraints = MediaConstraints.getPushMediaConstraints();
+    List<Attachment> scaledAttachments =
+        scaleAndStripExifFromAttachments(mediaConstraints, message.getAttachments());
     List<SignalServiceAttachment> attachmentStreams = getAttachmentsFor(scaledAttachments);
 
-    List<SignalServiceAddress>    addresses;
+    List<SignalServiceAddress> addresses;
 
     if (filterAddress != null) addresses = getPushAddresses(filterAddress);
-    else                       addresses = getPushAddresses(recipients);
+    else addresses = getPushAddresses(recipients);
 
     if (message.isGroup()) {
-      OutgoingGroupMediaMessage groupMessage     = (OutgoingGroupMediaMessage) message;
-      GroupContext              groupContext     = groupMessage.getGroupContext();
-      SignalServiceAttachment   avatar           = attachmentStreams.isEmpty() ? null : attachmentStreams.get(0);
-      SignalServiceGroup.Type   type             = groupMessage.isGroupQuit() ? SignalServiceGroup.Type.QUIT : SignalServiceGroup.Type.UPDATE;
-      SignalServiceGroup        group            = new SignalServiceGroup(type, GroupUtil.getDecodedId(groupId), groupContext.getName(), groupContext.getMembersList(), avatar);
-      SignalServiceDataMessage  groupDataMessage = SignalServiceDataMessage.newBuilder()
-                                                                           .withTimestamp(message.getSentTimeMillis())
-                                                                           .asGroupMessage(group)
-                                                                           .build();
+      OutgoingGroupMediaMessage groupMessage = (OutgoingGroupMediaMessage) message;
+      GroupContext groupContext = groupMessage.getGroupContext();
+      SignalServiceAttachment avatar =
+          attachmentStreams.isEmpty() ? null : attachmentStreams.get(0);
+      SignalServiceGroup.Type type =
+          groupMessage.isGroupQuit()
+              ? SignalServiceGroup.Type.QUIT
+              : SignalServiceGroup.Type.UPDATE;
+      SignalServiceGroup group =
+          new SignalServiceGroup(
+              type,
+              GroupUtil.getDecodedId(groupId),
+              groupContext.getName(),
+              groupContext.getMembersList(),
+              avatar);
+      SignalServiceDataMessage groupDataMessage =
+          SignalServiceDataMessage.newBuilder()
+              .withTimestamp(message.getSentTimeMillis())
+              .asGroupMessage(group)
+              .build();
 
       messageSender.sendMessage(addresses, groupDataMessage);
     } else {
-      SignalServiceGroup       group        = new SignalServiceGroup(GroupUtil.getDecodedId(groupId));
-      SignalServiceDataMessage groupMessage = SignalServiceDataMessage.newBuilder()
-                                                                      .withTimestamp(message.getSentTimeMillis())
-                                                                      .asGroupMessage(group)
-                                                                      .withAttachments(attachmentStreams)
-                                                                      .withBody(message.getBody())
-                                                                      .withExpiration((int)(message.getExpiresIn() / 1000))
-                                                                      .asExpirationUpdate(message.isExpirationUpdate())
-                                                                      .withProfileKey(profileKey.orNull())
-                                                                      .build();
+      SignalServiceGroup group = new SignalServiceGroup(GroupUtil.getDecodedId(groupId));
+      SignalServiceDataMessage groupMessage =
+          SignalServiceDataMessage.newBuilder()
+              .withTimestamp(message.getSentTimeMillis())
+              .asGroupMessage(group)
+              .withAttachments(attachmentStreams)
+              .withBody(message.getBody())
+              .withExpiration((int) (message.getExpiresIn() / 1000))
+              .asExpirationUpdate(message.isExpirationUpdate())
+              .withProfileKey(profileKey.orNull())
+              .build();
 
       messageSender.sendMessage(addresses, groupMessage);
     }
@@ -188,10 +202,13 @@ public class PushGroupSendJob extends PushSendJob implements InjectableType {
   }
 
   private @NonNull List<Address> getGroupMessageRecipients(String groupId, long messageId) {
-    List<GroupReceiptInfo> destinations = DatabaseFactory.getGroupReceiptDatabase(context).getGroupReceiptInfo(messageId);
-    if (!destinations.isEmpty()) return Stream.of(destinations).map(GroupReceiptInfo::getAddress).toList();
+    List<GroupReceiptInfo> destinations =
+        DatabaseFactory.getGroupReceiptDatabase(context).getGroupReceiptInfo(messageId);
+    if (!destinations.isEmpty())
+      return Stream.of(destinations).map(GroupReceiptInfo::getAddress).toList();
 
-    List<Recipient> members = DatabaseFactory.getGroupDatabase(context).getGroupMembers(groupId, false);
+    List<Recipient> members =
+        DatabaseFactory.getGroupDatabase(context).getGroupMembers(groupId, false);
     return Stream.of(members).map(Recipient::getAddress).toList();
   }
 }

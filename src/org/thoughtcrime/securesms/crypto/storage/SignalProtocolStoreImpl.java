@@ -1,7 +1,7 @@
 package org.thoughtcrime.securesms.crypto.storage;
 
 import android.content.Context;
-
+import java.util.List;
 import org.whispersystems.libsignal.IdentityKey;
 import org.whispersystems.libsignal.IdentityKeyPair;
 import org.whispersystems.libsignal.InvalidKeyIdException;
@@ -15,20 +15,18 @@ import org.whispersystems.libsignal.state.SignalProtocolStore;
 import org.whispersystems.libsignal.state.SignedPreKeyRecord;
 import org.whispersystems.libsignal.state.SignedPreKeyStore;
 
-import java.util.List;
-
 public class SignalProtocolStoreImpl implements SignalProtocolStore {
 
-  private final PreKeyStore       preKeyStore;
+  private final PreKeyStore preKeyStore;
   private final SignedPreKeyStore signedPreKeyStore;
-  private final IdentityKeyStore  identityKeyStore;
-  private final SessionStore      sessionStore;
+  private final IdentityKeyStore identityKeyStore;
+  private final SessionStore sessionStore;
 
   public SignalProtocolStoreImpl(Context context) {
-    this.preKeyStore       = new TextSecurePreKeyStore(context);
+    this.preKeyStore = new TextSecurePreKeyStore(context);
     this.signedPreKeyStore = new TextSecurePreKeyStore(context);
-    this.identityKeyStore  = new TextSecureIdentityKeyStore(context);
-    this.sessionStore      = new TextSecureSessionStore(context);
+    this.identityKeyStore = new TextSecureIdentityKeyStore(context);
+    this.sessionStore = new TextSecureSessionStore(context);
   }
 
   @Override
@@ -47,7 +45,8 @@ public class SignalProtocolStoreImpl implements SignalProtocolStore {
   }
 
   @Override
-  public boolean isTrustedIdentity(SignalProtocolAddress address, IdentityKey identityKey, Direction direction) {
+  public boolean isTrustedIdentity(
+      SignalProtocolAddress address, IdentityKey identityKey, Direction direction) {
     return identityKeyStore.isTrustedIdentity(address, identityKey, direction);
   }
 

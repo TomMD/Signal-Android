@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms.giph.ui;
 
-
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -12,18 +11,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
-
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
-import com.bumptech.glide.load.resource.gif.GifDrawableEncoder;
-import com.bumptech.glide.load.resource.gif.GifDrawableResource;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.ByteBufferUtil;
-
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.color.MaterialColor;
 import org.thoughtcrime.securesms.giph.model.GiphyImage;
@@ -33,36 +30,27 @@ import org.thoughtcrime.securesms.mms.GlideRequests;
 import org.thoughtcrime.securesms.util.Util;
 import org.thoughtcrime.securesms.util.ViewUtil;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-
-
 class GiphyAdapter extends RecyclerView.Adapter<GiphyAdapter.GiphyViewHolder> {
 
   private static final String TAG = GiphyAdapter.class.getSimpleName();
 
-  private final Context       context;
+  private final Context context;
   private final GlideRequests glideRequests;
 
-  private List<GiphyImage>     images;
-  private OnItemClickListener  listener;
+  private List<GiphyImage> images;
+  private OnItemClickListener listener;
 
-  class GiphyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, RequestListener<Drawable> {
+  class GiphyViewHolder extends RecyclerView.ViewHolder
+      implements View.OnClickListener, RequestListener<Drawable> {
 
     public AspectRatioImageView thumbnail;
-    public GiphyImage           image;
-    public ProgressBar          gifProgress;
-    public volatile boolean     modelReady;
+    public GiphyImage image;
+    public ProgressBar gifProgress;
+    public volatile boolean modelReady;
 
     GiphyViewHolder(View view) {
       super(view);
-      thumbnail   = ViewUtil.findById(view, R.id.thumbnail);
+      thumbnail = ViewUtil.findById(view, R.id.thumbnail);
       gifProgress = ViewUtil.findById(view, R.id.gif_progress);
       thumbnail.setOnClickListener(this);
       gifProgress.setVisibility(View.GONE);
@@ -74,7 +62,11 @@ class GiphyAdapter extends RecyclerView.Adapter<GiphyAdapter.GiphyViewHolder> {
     }
 
     @Override
-    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+    public boolean onLoadFailed(
+        @Nullable GlideException e,
+        Object model,
+        Target<Drawable> target,
+        boolean isFirstResource) {
       Log.w(TAG, e);
 
       synchronized (this) {
@@ -88,7 +80,12 @@ class GiphyAdapter extends RecyclerView.Adapter<GiphyAdapter.GiphyViewHolder> {
     }
 
     @Override
-    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+    public boolean onResourceReady(
+        Drawable resource,
+        Object model,
+        Target<Drawable> target,
+        DataSource dataSource,
+        boolean isFirstResource) {
       synchronized (this) {
         if (new GiphyPaddedUrl(image.getGifUrl(), image.getGifSize()).equals(model)) {
           this.modelReady = true;
@@ -99,7 +96,6 @@ class GiphyAdapter extends RecyclerView.Adapter<GiphyAdapter.GiphyViewHolder> {
       return false;
     }
 
-
     public byte[] getData(boolean forMms) throws ExecutionException, InterruptedException {
       synchronized (this) {
         while (!modelReady) {
@@ -107,11 +103,15 @@ class GiphyAdapter extends RecyclerView.Adapter<GiphyAdapter.GiphyViewHolder> {
         }
       }
 
-      GifDrawable drawable = glideRequests.asGif()
-                                          .load(forMms ? new GiphyPaddedUrl(image.getGifMmsUrl(), image.getMmsGifSize()) :
-                                                         new GiphyPaddedUrl(image.getGifUrl(), image.getGifSize()))
-                                          .submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
-                                          .get();
+      GifDrawable drawable =
+          glideRequests
+              .asGif()
+              .load(
+                  forMms
+                      ? new GiphyPaddedUrl(image.getGifMmsUrl(), image.getMmsGifSize())
+                      : new GiphyPaddedUrl(image.getGifUrl(), image.getGifSize()))
+              .submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+              .get();
 
       return ByteBufferUtil.toBytes(drawable.getBuffer());
     }
@@ -122,10 +122,13 @@ class GiphyAdapter extends RecyclerView.Adapter<GiphyAdapter.GiphyViewHolder> {
     }
   }
 
-  GiphyAdapter(@NonNull Context context, @NonNull GlideRequests glideRequests, @NonNull List<GiphyImage> images) {
-    this.context       = context.getApplicationContext();
+  GiphyAdapter(
+      @NonNull Context context,
+      @NonNull GlideRequests glideRequests,
+      @NonNull List<GiphyImage> images) {
+    this.context = context.getApplicationContext();
     this.glideRequests = glideRequests;
-    this.images        = images;
+    this.images = images;
   }
 
   public void setImages(@NonNull List<GiphyImage> images) {
@@ -140,8 +143,8 @@ class GiphyAdapter extends RecyclerView.Adapter<GiphyAdapter.GiphyViewHolder> {
 
   @Override
   public GiphyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-    View itemView = LayoutInflater.from(parent.getContext())
-                                  .inflate(R.layout.giphy_thumbnail, parent, false);
+    View itemView =
+        LayoutInflater.from(parent.getContext()).inflate(R.layout.giphy_thumbnail, parent, false);
 
     return new GiphyViewHolder(itemView);
   }
@@ -151,29 +154,36 @@ class GiphyAdapter extends RecyclerView.Adapter<GiphyAdapter.GiphyViewHolder> {
     GiphyImage image = images.get(position);
 
     holder.modelReady = false;
-    holder.image      = image;
+    holder.image = image;
     holder.thumbnail.setAspectRatio(image.getGifAspectRatio());
     holder.gifProgress.setVisibility(View.GONE);
 
-    RequestBuilder<Drawable> thumbnailRequest = GlideApp.with(context)
-                                                        .load(new GiphyPaddedUrl(image.getStillUrl(), image.getStillSize()))
-                                                        .diskCacheStrategy(DiskCacheStrategy.ALL);
+    RequestBuilder<Drawable> thumbnailRequest =
+        GlideApp.with(context)
+            .load(new GiphyPaddedUrl(image.getStillUrl(), image.getStillSize()))
+            .diskCacheStrategy(DiskCacheStrategy.ALL);
 
     if (Util.isLowMemory(context)) {
-      glideRequests.load(new GiphyPaddedUrl(image.getStillUrl(), image.getStillSize()))
-                   .placeholder(new ColorDrawable(Util.getRandomElement(MaterialColor.values()).toConversationColor(context)))
-                   .diskCacheStrategy(DiskCacheStrategy.ALL)
-                   .listener(holder)
-                   .into(holder.thumbnail);
+      glideRequests
+          .load(new GiphyPaddedUrl(image.getStillUrl(), image.getStillSize()))
+          .placeholder(
+              new ColorDrawable(
+                  Util.getRandomElement(MaterialColor.values()).toConversationColor(context)))
+          .diskCacheStrategy(DiskCacheStrategy.ALL)
+          .listener(holder)
+          .into(holder.thumbnail);
 
       holder.setModelReady();
     } else {
-      glideRequests.load(new GiphyPaddedUrl(image.getGifUrl(), image.getGifSize()))
-                   .thumbnail(thumbnailRequest)
-                   .placeholder(new ColorDrawable(Util.getRandomElement(MaterialColor.values()).toConversationColor(context)))
-                   .diskCacheStrategy(DiskCacheStrategy.ALL)
-                   .listener(holder)
-                   .into(holder.thumbnail);
+      glideRequests
+          .load(new GiphyPaddedUrl(image.getGifUrl(), image.getGifSize()))
+          .thumbnail(thumbnailRequest)
+          .placeholder(
+              new ColorDrawable(
+                  Util.getRandomElement(MaterialColor.values()).toConversationColor(context)))
+          .diskCacheStrategy(DiskCacheStrategy.ALL)
+          .listener(holder)
+          .into(holder.thumbnail);
     }
   }
 

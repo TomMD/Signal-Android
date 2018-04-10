@@ -1,18 +1,16 @@
 /**
  * Copyright (C) 2015 Open Whisper Systems
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * <p>This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * <p>You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  */
 package org.thoughtcrime.securesms.mms;
 
@@ -25,26 +23,25 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.telephony.SmsManager;
 import android.util.Log;
-
 import com.google.android.mms.InvalidHeaderValueException;
 import com.google.android.mms.pdu_alt.NotifyRespInd;
 import com.google.android.mms.pdu_alt.PduComposer;
 import com.google.android.mms.pdu_alt.PduHeaders;
 import com.google.android.mms.pdu_alt.PduParser;
 import com.google.android.mms.pdu_alt.RetrieveConf;
-
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 import org.thoughtcrime.securesms.providers.MmsBodyProvider;
 import org.thoughtcrime.securesms.transport.UndeliverableMessageException;
 import org.thoughtcrime.securesms.util.Util;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
+public class IncomingLollipopMmsConnection extends LollipopMmsConnection
+    implements IncomingMmsConnection {
 
-public class IncomingLollipopMmsConnection extends LollipopMmsConnection implements IncomingMmsConnection {
-
-  public  static final String ACTION = IncomingLollipopMmsConnection.class.getCanonicalName() + "MMS_DOWNLOADED_ACTION";
-  private static final String TAG    = IncomingLollipopMmsConnection.class.getSimpleName();
+  public static final String ACTION =
+      IncomingLollipopMmsConnection.class.getCanonicalName() + "MMS_DOWNLOADED_ACTION";
+  private static final String TAG = IncomingLollipopMmsConnection.class.getSimpleName();
 
   public IncomingLollipopMmsConnection(Context context) {
     super(context, ACTION);
@@ -61,10 +58,9 @@ public class IncomingLollipopMmsConnection extends LollipopMmsConnection impleme
 
   @Override
   @TargetApi(VERSION_CODES.LOLLIPOP)
-  public synchronized @Nullable RetrieveConf retrieve(@NonNull String contentLocation,
-                                                      byte[] transactionId,
-                                                      int subscriptionId) throws MmsException
-  {
+  public synchronized @Nullable RetrieveConf retrieve(
+      @NonNull String contentLocation, byte[] transactionId, int subscriptionId)
+      throws MmsException {
     beginTransaction();
 
     try {
@@ -80,11 +76,8 @@ public class IncomingLollipopMmsConnection extends LollipopMmsConnection impleme
         smsManager = SmsManager.getDefault();
       }
 
-      smsManager.downloadMultimediaMessage(getContext(),
-                                           contentLocation,
-                                           pointer.getUri(),
-                                           null,
-                                           getPendingIntent());
+      smsManager.downloadMultimediaMessage(
+          getContext(), contentLocation, pointer.getUri(), null, getPendingIntent());
 
       waitForResult();
 
@@ -92,7 +85,7 @@ public class IncomingLollipopMmsConnection extends LollipopMmsConnection impleme
       Util.copy(pointer.getInputStream(), baos);
       pointer.close();
 
-      Log.w(TAG, baos.size() + "-byte response: ");// + Hex.dump(baos.toByteArray()));
+      Log.w(TAG, baos.size() + "-byte response: "); // + Hex.dump(baos.toByteArray()));
 
       RetrieveConf retrieved = (RetrieveConf) new PduParser(baos.toByteArray()).parse();
 
@@ -108,10 +101,13 @@ public class IncomingLollipopMmsConnection extends LollipopMmsConnection impleme
     }
   }
 
-  private void sendRetrievedAcknowledgement(byte[] transactionId, int mmsVersion, int subscriptionId) {
+  private void sendRetrievedAcknowledgement(
+      byte[] transactionId, int mmsVersion, int subscriptionId) {
     try {
-      NotifyRespInd retrieveResponse = new NotifyRespInd(mmsVersion, transactionId, PduHeaders.STATUS_RETRIEVED);
-      new OutgoingLollipopMmsConnection(getContext()).send(new PduComposer(getContext(), retrieveResponse).make(), subscriptionId);
+      NotifyRespInd retrieveResponse =
+          new NotifyRespInd(mmsVersion, transactionId, PduHeaders.STATUS_RETRIEVED);
+      new OutgoingLollipopMmsConnection(getContext())
+          .send(new PduComposer(getContext(), retrieveResponse).make(), subscriptionId);
     } catch (UndeliverableMessageException e) {
       Log.w(TAG, e);
     } catch (InvalidHeaderValueException e) {

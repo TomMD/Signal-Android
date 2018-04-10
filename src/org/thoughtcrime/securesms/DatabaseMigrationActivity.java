@@ -16,23 +16,22 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import org.thoughtcrime.securesms.database.SmsMigrator.ProgressDescription;
 import org.thoughtcrime.securesms.service.ApplicationMigrationService;
 import org.thoughtcrime.securesms.service.ApplicationMigrationService.ImportState;
 
 public class DatabaseMigrationActivity extends PassphraseRequiredActionBarActivity {
 
-  private final ImportServiceConnection serviceConnection  = new ImportServiceConnection();
-  private final ImportStateHandler      importStateHandler = new ImportStateHandler();
-  private final BroadcastReceiver       completedReceiver  = new NullReceiver();
+  private final ImportServiceConnection serviceConnection = new ImportServiceConnection();
+  private final ImportStateHandler importStateHandler = new ImportStateHandler();
+  private final BroadcastReceiver completedReceiver = new NullReceiver();
 
   private LinearLayout promptLayout;
   private LinearLayout progressLayout;
-  private Button       skipButton;
-  private Button       importButton;
-  private ProgressBar  progress;
-  private TextView     progressLabel;
+  private Button skipButton;
+  private Button importButton;
+  private ProgressBar progress;
+  private TextView progressLabel;
 
   private ApplicationMigrationService importService;
   private boolean isVisible = false;
@@ -66,9 +65,7 @@ public class DatabaseMigrationActivity extends PassphraseRequiredActionBarActivi
   }
 
   @Override
-  public void onBackPressed() {
-
-  }
+  public void onBackPressed() {}
 
   private void initializeServiceBinding() {
     Intent intent = new Intent(this, ApplicationMigrationService.class);
@@ -76,36 +73,40 @@ public class DatabaseMigrationActivity extends PassphraseRequiredActionBarActivi
   }
 
   private void initializeResources() {
-    this.promptLayout   = (LinearLayout)findViewById(R.id.prompt_layout);
-    this.progressLayout = (LinearLayout)findViewById(R.id.progress_layout);
-    this.skipButton     = (Button)      findViewById(R.id.skip_button);
-    this.importButton   = (Button)      findViewById(R.id.import_button);
-    this.progress       = (ProgressBar) findViewById(R.id.import_progress);
-    this.progressLabel  = (TextView)    findViewById(R.id.import_status);
+    this.promptLayout = (LinearLayout) findViewById(R.id.prompt_layout);
+    this.progressLayout = (LinearLayout) findViewById(R.id.progress_layout);
+    this.skipButton = (Button) findViewById(R.id.skip_button);
+    this.importButton = (Button) findViewById(R.id.import_button);
+    this.progress = (ProgressBar) findViewById(R.id.import_progress);
+    this.progressLabel = (TextView) findViewById(R.id.import_status);
 
     this.progressLayout.setVisibility(View.GONE);
     this.promptLayout.setVisibility(View.GONE);
 
-    this.importButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        Intent intent = new Intent(DatabaseMigrationActivity.this, ApplicationMigrationService.class);
-        intent.setAction(ApplicationMigrationService.MIGRATE_DATABASE);
-        intent.putExtra("master_secret", (Parcelable)getIntent().getParcelableExtra("master_secret"));
-        startService(intent);
+    this.importButton.setOnClickListener(
+        new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            Intent intent =
+                new Intent(DatabaseMigrationActivity.this, ApplicationMigrationService.class);
+            intent.setAction(ApplicationMigrationService.MIGRATE_DATABASE);
+            intent.putExtra(
+                "master_secret", (Parcelable) getIntent().getParcelableExtra("master_secret"));
+            startService(intent);
 
-        promptLayout.setVisibility(View.GONE);
-        progressLayout.setVisibility(View.VISIBLE);
-      }
-    });
+            promptLayout.setVisibility(View.GONE);
+            progressLayout.setVisibility(View.VISIBLE);
+          }
+        });
 
-    this.skipButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        ApplicationMigrationService.setDatabaseImported(DatabaseMigrationActivity.this);
-        handleImportComplete();
-      }
-    });
+    this.skipButton.setOnClickListener(
+        new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            ApplicationMigrationService.setDatabaseImported(DatabaseMigrationActivity.this);
+            handleImportComplete();
+          }
+        });
   }
 
   private void registerForCompletedNotification() {
@@ -134,20 +135,21 @@ public class DatabaseMigrationActivity extends PassphraseRequiredActionBarActivi
     this.progressLayout.setVisibility(View.VISIBLE);
     this.progressLabel.setText(update.primaryComplete + "/" + update.primaryTotal);
 
-    double max               = this.progress.getMax();
-    double primaryTotal      = update.primaryTotal;
-    double primaryComplete   = update.primaryComplete;
-    double secondaryTotal    = update.secondaryTotal;
+    double max = this.progress.getMax();
+    double primaryTotal = update.primaryTotal;
+    double primaryComplete = update.primaryComplete;
+    double secondaryTotal = update.secondaryTotal;
     double secondaryComplete = update.secondaryComplete;
 
-    this.progress.setProgress((int)Math.round((primaryComplete / primaryTotal) * max));
-    this.progress.setSecondaryProgress((int)Math.round((secondaryComplete / secondaryTotal) * max));
+    this.progress.setProgress((int) Math.round((primaryComplete / primaryTotal) * max));
+    this.progress.setSecondaryProgress(
+        (int) Math.round((secondaryComplete / secondaryTotal) * max));
   }
 
   private void handleImportComplete() {
     if (isVisible) {
       if (getIntent().hasExtra("next_intent")) {
-        startActivity((Intent)getIntent().getParcelableExtra("next_intent"));
+        startActivity((Intent) getIntent().getParcelableExtra("next_intent"));
       } else {
         startActivity(new Intent(this, ConversationListActivity.class));
       }
@@ -160,9 +162,15 @@ public class DatabaseMigrationActivity extends PassphraseRequiredActionBarActivi
     @Override
     public void handleMessage(Message message) {
       switch (message.what) {
-      case ImportState.STATE_IDLE:                   handleStateIdle();                                     break;
-      case ImportState.STATE_MIGRATING_IN_PROGRESS:  handleStateProgress((ProgressDescription)message.obj); break;
-      case ImportState.STATE_MIGRATING_COMPLETE:     handleImportComplete();                                break;
+        case ImportState.STATE_IDLE:
+          handleStateIdle();
+          break;
+        case ImportState.STATE_MIGRATING_IN_PROGRESS:
+          handleStateProgress((ProgressDescription) message.obj);
+          break;
+        case ImportState.STATE_MIGRATING_COMPLETE:
+          handleImportComplete();
+          break;
       }
     }
   }
@@ -170,7 +178,8 @@ public class DatabaseMigrationActivity extends PassphraseRequiredActionBarActivi
   private class ImportServiceConnection implements ServiceConnection {
     @Override
     public void onServiceConnected(ComponentName className, IBinder service) {
-      importService  = ((ApplicationMigrationService.ApplicationMigrationBinder)service).getService();
+      importService =
+          ((ApplicationMigrationService.ApplicationMigrationBinder) service).getService();
       importService.setImportStateHandler(importStateHandler);
 
       ImportState state = importService.getState();
@@ -189,6 +198,4 @@ public class DatabaseMigrationActivity extends PassphraseRequiredActionBarActivi
       abortBroadcast();
     }
   }
-
-
 }

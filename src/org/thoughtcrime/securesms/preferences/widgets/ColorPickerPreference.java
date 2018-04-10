@@ -12,11 +12,9 @@ import android.support.v7.preference.PreferenceViewHolder;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.ImageView;
-
 import com.takisoft.colorpicker.ColorPickerDialog;
 import com.takisoft.colorpicker.ColorPickerDialog.Size;
 import com.takisoft.colorpicker.ColorStateDrawable;
-
 import org.thoughtcrime.securesms.R;
 
 public class ColorPickerPreference extends DialogPreference {
@@ -33,12 +31,16 @@ public class ColorPickerPreference extends DialogPreference {
   private ImageView colorWidget;
   private OnPreferenceChangeListener listener;
 
-  public ColorPickerPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+  public ColorPickerPreference(
+      Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
     super(context, attrs, defStyleAttr, defStyleRes);
 
-    TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ColorPickerPreference, defStyleAttr, 0);
+    TypedArray a =
+        context.obtainStyledAttributes(attrs, R.styleable.ColorPickerPreference, defStyleAttr, 0);
 
-    int colorsId = a.getResourceId(R.styleable.ColorPickerPreference_colors, R.array.color_picker_default_colors);
+    int colorsId =
+        a.getResourceId(
+            R.styleable.ColorPickerPreference_colors, R.array.color_picker_default_colors);
 
     if (colorsId != 0) {
       colors = context.getResources().getIntArray(colorsId);
@@ -61,8 +63,11 @@ public class ColorPickerPreference extends DialogPreference {
 
   @SuppressLint("RestrictedApi")
   public ColorPickerPreference(Context context, AttributeSet attrs) {
-    this(context, attrs, TypedArrayUtils.getAttr(context, R.attr.dialogPreferenceStyle,
-                                                 android.R.attr.dialogPreferenceStyle));
+    this(
+        context,
+        attrs,
+        TypedArrayUtils.getAttr(
+            context, R.attr.dialogPreferenceStyle, android.R.attr.dialogPreferenceStyle));
   }
 
   public ColorPickerPreference(Context context) {
@@ -88,8 +93,10 @@ public class ColorPickerPreference extends DialogPreference {
       return;
     }
 
-    Drawable[] colorDrawable = new Drawable[]
-        {ContextCompat.getDrawable(getContext(), R.drawable.colorpickerpreference_pref_swatch)};
+    Drawable[] colorDrawable =
+        new Drawable[] {
+          ContextCompat.getDrawable(getContext(), R.drawable.colorpickerpreference_pref_swatch)
+        };
     colorWidget.setImageDrawable(new ColorStateDrawable(colorDrawable, color));
   }
 
@@ -130,23 +137,21 @@ public class ColorPickerPreference extends DialogPreference {
   }
 
   /**
-   * Returns whether the available colors should be sorted automatically based on their HSV
-   * values.
+   * Returns whether the available colors should be sorted automatically based on their HSV values.
    *
-   * @return Whether the available colors should be sorted automatically based on their HSV
-   * values.
+   * @return Whether the available colors should be sorted automatically based on their HSV values.
    */
   public boolean isSortColors() {
     return sortColors;
   }
 
   /**
-   * Sets whether the available colors should be sorted automatically based on their HSV
-   * values. The sorting does not modify the order of the original colors supplied via
-   * {@link #setColors(int[])} or the XML attribute {@code app:colors}.
+   * Sets whether the available colors should be sorted automatically based on their HSV values. The
+   * sorting does not modify the order of the original colors supplied via {@link #setColors(int[])}
+   * or the XML attribute {@code app:colors}.
    *
    * @param sortColors Whether the available colors should be sorted automatically based on their
-   *                   HSV values.
+   *     HSV values.
    */
   public void setSortColors(boolean sortColors) {
     this.sortColors = sortColors;
@@ -183,12 +188,12 @@ public class ColorPickerPreference extends DialogPreference {
   }
 
   /**
-   * Sets the number of columns to be used in the picker dialog for displaying the available
-   * colors. If the value is less than or equals to 0, the number of columns will be determined
+   * Sets the number of columns to be used in the picker dialog for displaying the available colors.
+   * If the value is less than or equals to 0, the number of columns will be determined
    * automatically by the system using FlexboxLayoutManager.
    *
-   * @param columns The number of columns to be used in the picker dialog. Use 0 to set it to
-   *                'auto' mode.
+   * @param columns The number of columns to be used in the picker dialog. Use 0 to set it to 'auto'
+   *     mode.
    * @see com.google.android.flexbox.FlexboxLayoutManager
    */
   public void setColumns(int columns) {
@@ -196,8 +201,8 @@ public class ColorPickerPreference extends DialogPreference {
   }
 
   /**
-   * Returns the size of the color swatches in the dialog. It can be either
-   * {@link ColorPickerDialog#SIZE_SMALL} or {@link ColorPickerDialog#SIZE_LARGE}.
+   * Returns the size of the color swatches in the dialog. It can be either {@link
+   * ColorPickerDialog#SIZE_SMALL} or {@link ColorPickerDialog#SIZE_LARGE}.
    *
    * @return The size of the color swatches in the dialog.
    * @see ColorPickerDialog#SIZE_SMALL
@@ -209,11 +214,11 @@ public class ColorPickerPreference extends DialogPreference {
   }
 
   /**
-   * Sets the size of the color swatches in the dialog. It can be either
-   * {@link ColorPickerDialog#SIZE_SMALL} or {@link ColorPickerDialog#SIZE_LARGE}.
+   * Sets the size of the color swatches in the dialog. It can be either {@link
+   * ColorPickerDialog#SIZE_SMALL} or {@link ColorPickerDialog#SIZE_LARGE}.
    *
-   * @param size The size of the color swatches in the dialog. It can be either
-   *             {@link ColorPickerDialog#SIZE_SMALL} or {@link ColorPickerDialog#SIZE_LARGE}.
+   * @param size The size of the color swatches in the dialog. It can be either {@link
+   *     ColorPickerDialog#SIZE_SMALL} or {@link ColorPickerDialog#SIZE_LARGE}.
    * @see ColorPickerDialog#SIZE_SMALL
    * @see ColorPickerDialog#SIZE_LARGE
    */
@@ -246,6 +251,10 @@ public class ColorPickerPreference extends DialogPreference {
   @Override
   protected void onSetInitialValue(boolean restoreValue, Object defaultValueObj) {
     final String defaultValue = (String) defaultValueObj;
-    setInternalColor(restoreValue ? getPersistedInt(0) : (!TextUtils.isEmpty(defaultValue) ? Color.parseColor(defaultValue) : 0), true);
+    setInternalColor(
+        restoreValue
+            ? getPersistedInt(0)
+            : (!TextUtils.isEmpty(defaultValue) ? Color.parseColor(defaultValue) : 0),
+        true);
   }
 }

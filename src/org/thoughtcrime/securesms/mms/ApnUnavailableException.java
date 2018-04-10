@@ -2,8 +2,7 @@ package org.thoughtcrime.securesms.mms;
 
 public class ApnUnavailableException extends Exception {
 
-  public ApnUnavailableException() {
-  }
+  public ApnUnavailableException() {}
 
   public ApnUnavailableException(String detailMessage) {
     super(detailMessage);

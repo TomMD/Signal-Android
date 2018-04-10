@@ -20,9 +20,7 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-
 import com.nineoldandroids.animation.ObjectAnimator;
-
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.components.InputAwareLayout.InputView;
 import org.thoughtcrime.securesms.components.KeyboardAwareLinearLayout;
@@ -36,25 +34,25 @@ public class QuickAttachmentDrawer extends ViewGroup implements InputView, Camer
 
   private final ViewDragHelper dragHelper;
 
-  private CameraView                cameraView;
-  private int                       coverViewPosition;
+  private CameraView cameraView;
+  private int coverViewPosition;
   private KeyboardAwareLinearLayout container;
-  private View                      coverView;
-  private View                      controls;
-  private ImageButton               fullScreenButton;
-  private ImageButton               swapCameraButton;
-  private ImageButton               shutterButton;
-  private int                       slideOffset;
-  private float                     initialMotionX;
-  private float                     initialMotionY;
-  private int                       rotation;
-  private AttachmentDrawerListener  listener;
-  private int                       halfExpandedHeight;
-  private ObjectAnimator            animator;
+  private View coverView;
+  private View controls;
+  private ImageButton fullScreenButton;
+  private ImageButton swapCameraButton;
+  private ImageButton shutterButton;
+  private int slideOffset;
+  private float initialMotionX;
+  private float initialMotionY;
+  private int rotation;
+  private AttachmentDrawerListener listener;
+  private int halfExpandedHeight;
+  private ObjectAnimator animator;
 
-  private DrawerState drawerState      = DrawerState.COLLAPSED;
-  private Rect        drawChildrenRect = new Rect();
-  private boolean     paused           = false;
+  private DrawerState drawerState = DrawerState.COLLAPSED;
+  private Rect drawChildrenRect = new Rect();
+  private boolean paused = false;
 
   public QuickAttachmentDrawer(Context context) {
     this(context, null);
@@ -84,8 +82,8 @@ public class QuickAttachmentDrawer extends ViewGroup implements InputView, Camer
   }
 
   public static boolean isDeviceSupported(Context context) {
-    return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA) &&
-           Camera.getNumberOfCameras() > 0;
+    return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)
+        && Camera.getNumberOfCameras() > 0;
   }
 
   @Override
@@ -118,16 +116,21 @@ public class QuickAttachmentDrawer extends ViewGroup implements InputView, Camer
 
   private void updateControlsView() {
     Log.w(TAG, "updateControlsView()");
-    View controls = LayoutInflater.from(getContext()).inflate(isLandscape() ? R.layout.quick_camera_controls_land
-                                                                            : R.layout.quick_camera_controls,
-                                                              this, false);
-    shutterButton    = (ImageButton) controls.findViewById(R.id.shutter_button);
+    View controls =
+        LayoutInflater.from(getContext())
+            .inflate(
+                isLandscape()
+                    ? R.layout.quick_camera_controls_land
+                    : R.layout.quick_camera_controls,
+                this,
+                false);
+    shutterButton = (ImageButton) controls.findViewById(R.id.shutter_button);
     swapCameraButton = (ImageButton) controls.findViewById(R.id.swap_camera_button);
     fullScreenButton = (ImageButton) controls.findViewById(R.id.fullscreen_button);
     if (cameraView.isMultiCamera()) {
       swapCameraButton.setVisibility(View.VISIBLE);
-      swapCameraButton.setImageResource(cameraView.isRearCamera() ? R.drawable.quick_camera_front
-                                                                  : R.drawable.quick_camera_rear);
+      swapCameraButton.setImageResource(
+          cameraView.isRearCamera() ? R.drawable.quick_camera_front : R.drawable.quick_camera_rear);
       swapCameraButton.setOnClickListener(new CameraFlipClickListener());
     }
     shutterButton.setOnClickListener(new ShutterClickListener());
@@ -146,7 +149,7 @@ public class QuickAttachmentDrawer extends ViewGroup implements InputView, Camer
   }
 
   private KeyboardAwareLinearLayout getContainer() {
-    if (container == null) container = (KeyboardAwareLinearLayout)getParent();
+    if (container == null) container = (KeyboardAwareLinearLayout) getParent();
     return container;
   }
 
@@ -163,25 +166,25 @@ public class QuickAttachmentDrawer extends ViewGroup implements InputView, Camer
     }
 
     final int paddingLeft = getPaddingLeft();
-    final int paddingTop  = getPaddingTop();
+    final int paddingTop = getPaddingTop();
 
     for (int i = 0; i < getChildCount(); i++) {
-      final View child       = getChildAt(i);
-      final int  childHeight = child.getMeasuredHeight();
+      final View child = getChildAt(i);
+      final int childHeight = child.getMeasuredHeight();
 
-      int childTop  = paddingTop;
+      int childTop = paddingTop;
       int childLeft = paddingLeft;
       int childBottom;
 
       if (child == cameraView) {
-        childTop    = computeCameraTopPosition(slideOffset);
+        childTop = computeCameraTopPosition(slideOffset);
         childBottom = childTop + childHeight;
         if (cameraView.getMeasuredWidth() < getMeasuredWidth())
           childLeft = (getMeasuredWidth() - cameraView.getMeasuredWidth()) / 2 + paddingLeft;
       } else if (child == controls) {
         childBottom = getMeasuredHeight();
       } else {
-        childTop    = computeCoverTopPosition(slideOffset);
+        childTop = computeCoverTopPosition(slideOffset);
         childBottom = childTop + childHeight;
       }
       final int childRight = childLeft + child.getMeasuredWidth();
@@ -192,8 +195,8 @@ public class QuickAttachmentDrawer extends ViewGroup implements InputView, Camer
 
   @Override
   protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    final int widthMode  = MeasureSpec.getMode(widthMeasureSpec);
-    final int widthSize  = MeasureSpec.getSize(widthMeasureSpec);
+    final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+    final int widthSize = MeasureSpec.getSize(widthMeasureSpec);
     final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
     final int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
@@ -287,20 +290,20 @@ public class QuickAttachmentDrawer extends ViewGroup implements InputView, Camer
 
   private void setDrawerState(DrawerState drawerState) {
     switch (drawerState) {
-    case COLLAPSED:
-      fullScreenButton.setImageResource(R.drawable.quick_camera_fullscreen);
-      break;
-    case HALF_EXPANDED:
-      if (isLandscape()) {
-        setDrawerState(DrawerState.FULL_EXPANDED);
-        return;
-      }
-      fullScreenButton.setImageResource(R.drawable.quick_camera_fullscreen);
-      break;
-    case FULL_EXPANDED:
-      fullScreenButton.setImageResource(isLandscape() ? R.drawable.quick_camera_hide
-                                                      : R.drawable.quick_camera_exit_fullscreen);
-      break;
+      case COLLAPSED:
+        fullScreenButton.setImageResource(R.drawable.quick_camera_fullscreen);
+        break;
+      case HALF_EXPANDED:
+        if (isLandscape()) {
+          setDrawerState(DrawerState.FULL_EXPANDED);
+          return;
+        }
+        fullScreenButton.setImageResource(R.drawable.quick_camera_fullscreen);
+        break;
+      case FULL_EXPANDED:
+        fullScreenButton.setImageResource(
+            isLandscape() ? R.drawable.quick_camera_hide : R.drawable.quick_camera_exit_fullscreen);
+        break;
     }
 
     if (listener != null && drawerState != this.drawerState) {
@@ -317,9 +320,12 @@ public class QuickAttachmentDrawer extends ViewGroup implements InputView, Camer
 
   public int getTargetSlideOffset() {
     switch (drawerState) {
-    case FULL_EXPANDED: return getMeasuredHeight();
-    case HALF_EXPANDED: return halfExpandedHeight;
-    default:            return 0;
+      case FULL_EXPANDED:
+        return getMeasuredHeight();
+      case HALF_EXPANDED:
+        return halfExpandedHeight;
+      default:
+        return 0;
     }
   }
 
@@ -383,8 +389,7 @@ public class QuickAttachmentDrawer extends ViewGroup implements InputView, Camer
     }
 
     @Override
-    public void onViewCaptured(View capturedChild, int activePointerId) {
-    }
+    public void onViewCaptured(View capturedChild, int activePointerId) {}
 
     @Override
     public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
@@ -416,7 +421,8 @@ public class QuickAttachmentDrawer extends ViewGroup implements InputView, Camer
         dragHelper.captureChildView(coverView, 0);
         dragHelper.settleCapturedViewAt(coverView.getLeft(), computeCoverTopPosition(slideOffset));
         dragHelper.captureChildView(cameraView, 0);
-        dragHelper.settleCapturedViewAt(cameraView.getLeft(), computeCameraTopPosition(slideOffset));
+        dragHelper.settleCapturedViewAt(
+            cameraView.getLeft(), computeCameraTopPosition(slideOffset));
         ViewCompat.postInvalidateOnAnimation(QuickAttachmentDrawer.this);
       }
     }
@@ -445,25 +451,26 @@ public class QuickAttachmentDrawer extends ViewGroup implements InputView, Camer
     final float y = event.getY();
 
     switch (action) {
-    case MotionEvent.ACTION_DOWN:
-      initialMotionX = x;
-      initialMotionY = y;
-      break;
+      case MotionEvent.ACTION_DOWN:
+        initialMotionX = x;
+        initialMotionY = y;
+        break;
 
-    case MotionEvent.ACTION_MOVE:
-      final float adx = Math.abs(x - initialMotionX);
-      final float ady = Math.abs(y - initialMotionY);
-      final int dragSlop = dragHelper.getTouchSlop();
+      case MotionEvent.ACTION_MOVE:
+        final float adx = Math.abs(x - initialMotionX);
+        final float ady = Math.abs(y - initialMotionY);
+        final int dragSlop = dragHelper.getTouchSlop();
 
-      if (adx > dragSlop && ady < dragSlop) {
-        return super.onInterceptTouchEvent(event);
-      }
+        if (adx > dragSlop && ady < dragSlop) {
+          return super.onInterceptTouchEvent(event);
+        }
 
-      if ((ady > dragSlop && adx > ady) || !isDragViewUnder((int) initialMotionX, (int) initialMotionY)) {
-        dragHelper.cancel();
-        return false;
-      }
-      break;
+        if ((ady > dragSlop && adx > ady)
+            || !isDragViewUnder((int) initialMotionX, (int) initialMotionY)) {
+          dragHelper.cancel();
+          return false;
+        }
+        break;
     }
     return dragHelper.shouldInterceptTouchEvent(event);
   }
@@ -484,8 +491,10 @@ public class QuickAttachmentDrawer extends ViewGroup implements InputView, Camer
     this.getLocationOnScreen(parentLocation);
     int screenX = parentLocation[0] + x;
     int screenY = parentLocation[1] + y;
-    return screenX >= viewLocation[0] && screenX < viewLocation[0] + cameraView.getWidth() &&
-           screenY >= viewLocation[1] && screenY < viewLocation[1] + cameraView.getHeight();
+    return screenX >= viewLocation[0]
+        && screenX < viewLocation[0] + cameraView.getWidth()
+        && screenY >= viewLocation[1]
+        && screenY < viewLocation[1] + cameraView.getHeight();
   }
 
   private int computeCameraTopPosition(int slideOffset) {
@@ -493,16 +502,21 @@ public class QuickAttachmentDrawer extends ViewGroup implements InputView, Camer
       return getPaddingTop();
     }
 
-    final int   baseCameraTop = (cameraView.getMeasuredHeight() - halfExpandedHeight) / 2;
-    final int   baseOffset    = getMeasuredHeight() - slideOffset - baseCameraTop;
-    final float slop          = Util.clamp((float)(slideOffset - halfExpandedHeight) / (getMeasuredHeight() - halfExpandedHeight),
-                                           0f,
-                                           1f);
-    return baseOffset + (int)(slop * baseCameraTop);
+    final int baseCameraTop = (cameraView.getMeasuredHeight() - halfExpandedHeight) / 2;
+    final int baseOffset = getMeasuredHeight() - slideOffset - baseCameraTop;
+    final float slop =
+        Util.clamp(
+            (float) (slideOffset - halfExpandedHeight) / (getMeasuredHeight() - halfExpandedHeight),
+            0f,
+            1f);
+    return baseOffset + (int) (slop * baseCameraTop);
   }
 
   private int computeCoverTopPosition(int slideOffset) {
-    return getMeasuredHeight() - getPaddingBottom() - slideOffset - getCoverView().getMeasuredHeight();
+    return getMeasuredHeight()
+        - getPaddingBottom()
+        - slideOffset
+        - getCoverView().getMeasuredHeight();
   }
 
   private void slideTo(int slideOffset, boolean forceInstant) {
@@ -535,7 +549,9 @@ public class QuickAttachmentDrawer extends ViewGroup implements InputView, Camer
   }
 
   public enum DrawerState {
-    COLLAPSED, HALF_EXPANDED, FULL_EXPANDED;
+    COLLAPSED,
+    HALF_EXPANDED,
+    FULL_EXPANDED;
 
     public boolean isVisible() {
       return this != COLLAPSED;
@@ -545,9 +561,9 @@ public class QuickAttachmentDrawer extends ViewGroup implements InputView, Camer
   private class ShutterClickListener implements OnClickListener {
     @Override
     public void onClick(View v) {
-      boolean crop        = drawerState != DrawerState.FULL_EXPANDED;
-      int     imageHeight = crop ? getContainer().getKeyboardHeight() : cameraView.getMeasuredHeight();
-      Rect    previewRect = new Rect(0, 0, cameraView.getMeasuredWidth(), imageHeight);
+      boolean crop = drawerState != DrawerState.FULL_EXPANDED;
+      int imageHeight = crop ? getContainer().getKeyboardHeight() : cameraView.getMeasuredHeight();
+      Rect previewRect = new Rect(0, 0, cameraView.getMeasuredWidth(), imageHeight);
       cameraView.takePicture(previewRect);
     }
   }
@@ -556,8 +572,8 @@ public class QuickAttachmentDrawer extends ViewGroup implements InputView, Camer
     @Override
     public void onClick(View v) {
       cameraView.flipCamera();
-      swapCameraButton.setImageResource(cameraView.isRearCamera() ? R.drawable.quick_camera_front
-                                                                  : R.drawable.quick_camera_rear);
+      swapCameraButton.setImageResource(
+          cameraView.isRearCamera() ? R.drawable.quick_camera_front : R.drawable.quick_camera_rear);
     }
   }
 

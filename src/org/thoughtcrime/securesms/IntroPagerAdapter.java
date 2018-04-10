@@ -3,18 +3,17 @@ package org.thoughtcrime.securesms;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-
 import java.util.List;
 
 public class IntroPagerAdapter extends FragmentStatePagerAdapter {
 
   public static class IntroPage {
-    final int      backgroundColor;
+    final int backgroundColor;
     final Fragment fragment;
 
     public IntroPage(int backgroundColor, Fragment fragment) {
       this.backgroundColor = backgroundColor;
-      this.fragment        = fragment;
+      this.fragment = fragment;
     }
   }
 

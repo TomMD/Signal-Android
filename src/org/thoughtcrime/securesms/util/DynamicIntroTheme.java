@@ -1,7 +1,6 @@
 package org.thoughtcrime.securesms.util;
 
 import android.app.Activity;
-
 import org.thoughtcrime.securesms.R;
 
 public class DynamicIntroTheme extends DynamicTheme {

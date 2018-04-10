@@ -2,7 +2,8 @@ package org.thoughtcrime.securesms.jobs;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-
+import java.io.IOException;
+import javax.inject.Inject;
 import org.thoughtcrime.securesms.dependencies.InjectableType;
 import org.whispersystems.jobqueue.JobParameters;
 import org.whispersystems.jobqueue.requirements.NetworkRequirement;
@@ -13,10 +14,6 @@ import org.whispersystems.signalservice.api.messages.SignalServiceGroup;
 import org.whispersystems.signalservice.api.messages.SignalServiceGroup.Type;
 import org.whispersystems.signalservice.api.push.SignalServiceAddress;
 import org.whispersystems.signalservice.api.push.exceptions.PushNetworkException;
-
-import java.io.IOException;
-
-import javax.inject.Inject;
 
 public class RequestGroupInfoJob extends ContextJob implements InjectableType {
 
@@ -29,14 +26,17 @@ public class RequestGroupInfoJob extends ContextJob implements InjectableType {
   private final String source;
   private final byte[] groupId;
 
-  public RequestGroupInfoJob(@NonNull Context context, @NonNull String source, @NonNull byte[] groupId) {
-    super(context, JobParameters.newBuilder()
-                                .withRequirement(new NetworkRequirement(context))
-                                .withPersistence()
-                                .withRetryCount(50)
-                                .create());
+  public RequestGroupInfoJob(
+      @NonNull Context context, @NonNull String source, @NonNull byte[] groupId) {
+    super(
+        context,
+        JobParameters.newBuilder()
+            .withRequirement(new NetworkRequirement(context))
+            .withPersistence()
+            .withRetryCount(50)
+            .create());
 
-    this.source  = source;
+    this.source = source;
     this.groupId = groupId;
   }
 
@@ -45,14 +45,14 @@ public class RequestGroupInfoJob extends ContextJob implements InjectableType {
 
   @Override
   public void onRun() throws IOException, UntrustedIdentityException {
-    SignalServiceGroup       group   = SignalServiceGroup.newBuilder(Type.REQUEST_INFO)
-                                                         .withId(groupId)
-                                                         .build();
+    SignalServiceGroup group =
+        SignalServiceGroup.newBuilder(Type.REQUEST_INFO).withId(groupId).build();
 
-    SignalServiceDataMessage message = SignalServiceDataMessage.newBuilder()
-                                                               .asGroupMessage(group)
-                                                               .withTimestamp(System.currentTimeMillis())
-                                                               .build();
+    SignalServiceDataMessage message =
+        SignalServiceDataMessage.newBuilder()
+            .asGroupMessage(group)
+            .withTimestamp(System.currentTimeMillis())
+            .build();
 
     messageSender.sendMessage(new SignalServiceAddress(source), message);
   }
@@ -63,7 +63,5 @@ public class RequestGroupInfoJob extends ContextJob implements InjectableType {
   }
 
   @Override
-  public void onCanceled() {
-
-  }
+  public void onCanceled() {}
 }

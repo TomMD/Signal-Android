@@ -1,24 +1,19 @@
 package org.thoughtcrime.securesms.database;
 
-
 import android.content.Context;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 public abstract class FastCursorRecyclerViewAdapter<VH extends RecyclerView.ViewHolder, T>
-    extends CursorRecyclerViewAdapter<VH>
-{
+    extends CursorRecyclerViewAdapter<VH> {
   private static final String TAG = FastCursorRecyclerViewAdapter.class.getSimpleName();
 
-  private final LinkedList<T> fastRecords       = new LinkedList<>();
-  private final List<Long>    releasedRecordIds = new LinkedList<>();
+  private final LinkedList<T> fastRecords = new LinkedList<>();
+  private final List<Long> releasedRecordIds = new LinkedList<>();
 
   protected FastCursorRecyclerViewAdapter(Context context, Cursor cursor) {
     super(context, cursor);
@@ -40,7 +35,7 @@ public abstract class FastCursorRecyclerViewAdapter<VH extends RecyclerView.View
       Iterator<Long> releaseIdIterator = releasedRecordIds.iterator();
 
       while (releaseIdIterator.hasNext()) {
-        long        releasedId         = releaseIdIterator.next();
+        long releasedId = releaseIdIterator.next();
         Iterator<T> fastRecordIterator = fastRecords.iterator();
 
         while (fastRecordIterator.hasNext()) {
@@ -55,9 +50,13 @@ public abstract class FastCursorRecyclerViewAdapter<VH extends RecyclerView.View
   }
 
   protected abstract T getRecordFromCursor(@NonNull Cursor cursor);
+
   protected abstract void onBindItemViewHolder(VH viewHolder, @NonNull T record);
+
   protected abstract long getItemId(@NonNull T record);
+
   protected abstract int getItemViewType(@NonNull T record);
+
   protected abstract boolean isRecordForId(@NonNull T record, long id);
 
   @Override
@@ -107,5 +106,4 @@ public abstract class FastCursorRecyclerViewAdapter<VH extends RecyclerView.View
   private int getCalculatedPosition(int position) {
     return hasHeaderView() ? position - 1 : position;
   }
-
 }

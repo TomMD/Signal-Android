@@ -1,8 +1,7 @@
 package org.thoughtcrime.securesms.service;
 
 public class AccountVerificationTimeoutException extends Exception {
-  public AccountVerificationTimeoutException() {
-  }
+  public AccountVerificationTimeoutException() {}
 
   public AccountVerificationTimeoutException(String detailMessage) {
     super(detailMessage);

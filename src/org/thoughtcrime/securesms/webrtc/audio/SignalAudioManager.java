@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms.webrtc.audio;
 
-
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.SoundPool;
@@ -8,7 +7,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.util.ServiceUtil;
 
@@ -17,21 +15,21 @@ public class SignalAudioManager {
   @SuppressWarnings("unused")
   private static final String TAG = SignalAudioManager.class.getSimpleName();
 
-  private final Context        context;
+  private final Context context;
   private final IncomingRinger incomingRinger;
   private final OutgoingRinger outgoingRinger;
 
   private final SoundPool soundPool;
-  private final int       connectedSoundId;
-  private final int       disconnectedSoundId;
+  private final int connectedSoundId;
+  private final int disconnectedSoundId;
 
   public SignalAudioManager(@NonNull Context context) {
-    this.context             = context.getApplicationContext();
-    this.incomingRinger      = new IncomingRinger(context);
-    this.outgoingRinger      = new OutgoingRinger(context);
-    this.soundPool           = new SoundPool(1, AudioManager.STREAM_VOICE_CALL, 0);
+    this.context = context.getApplicationContext();
+    this.incomingRinger = new IncomingRinger(context);
+    this.outgoingRinger = new OutgoingRinger(context);
+    this.soundPool = new SoundPool(1, AudioManager.STREAM_VOICE_CALL, 0);
 
-    this.connectedSoundId    = this.soundPool.load(context, R.raw.webrtc_completed, 1);
+    this.connectedSoundId = this.soundPool.load(context, R.raw.webrtc_completed, 1);
     this.disconnectedSoundId = this.soundPool.load(context, R.raw.webrtc_disconnected, 1);
   }
 
@@ -39,15 +37,17 @@ public class SignalAudioManager {
     AudioManager audioManager = ServiceUtil.getAudioManager(context);
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      audioManager.requestAudioFocus(null, AudioManager.STREAM_VOICE_CALL, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE);
+      audioManager.requestAudioFocus(
+          null, AudioManager.STREAM_VOICE_CALL, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE);
     } else {
-      audioManager.requestAudioFocus(null, AudioManager.STREAM_VOICE_CALL, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
+      audioManager.requestAudioFocus(
+          null, AudioManager.STREAM_VOICE_CALL, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
     }
   }
 
   public void startIncomingRinger(@Nullable Uri ringtoneUri, boolean vibrate) {
     AudioManager audioManager = ServiceUtil.getAudioManager(context);
-    boolean      speaker      = !audioManager.isWiredHeadsetOn() && !audioManager.isBluetoothScoOn();
+    boolean speaker = !audioManager.isWiredHeadsetOn() && !audioManager.isBluetoothScoOn();
 
     audioManager.setMode(AudioManager.MODE_RINGTONE);
     audioManager.setMicrophoneMute(false);

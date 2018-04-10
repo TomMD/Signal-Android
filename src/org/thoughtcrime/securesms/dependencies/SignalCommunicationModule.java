@@ -2,7 +2,8 @@ package org.thoughtcrime.securesms.dependencies;
 
 import android.content.Context;
 import android.util.Log;
-
+import dagger.Module;
+import dagger.Provides;
 import org.greenrobot.eventbus.EventBus;
 import org.thoughtcrime.securesms.BuildConfig;
 import org.thoughtcrime.securesms.CreateProfileActivity;
@@ -34,7 +35,6 @@ import org.thoughtcrime.securesms.jobs.RetrieveProfileJob;
 import org.thoughtcrime.securesms.jobs.RotateSignedPreKeyJob;
 import org.thoughtcrime.securesms.jobs.SendReadReceiptJob;
 import org.thoughtcrime.securesms.preferences.AppProtectionPreferenceFragment;
-import org.thoughtcrime.securesms.preferences.SmsMmsPreferenceFragment;
 import org.thoughtcrime.securesms.push.SecurityEventListener;
 import org.thoughtcrime.securesms.push.SignalServiceNetworkAccess;
 import org.thoughtcrime.securesms.service.MessageRetrievalService;
@@ -47,60 +47,64 @@ import org.whispersystems.signalservice.api.SignalServiceMessageSender;
 import org.whispersystems.signalservice.api.util.CredentialsProvider;
 import org.whispersystems.signalservice.api.websocket.ConnectivityListener;
 
-import dagger.Module;
-import dagger.Provides;
-
-@Module(complete = false, injects = {CleanPreKeysJob.class,
-                                     CreateSignedPreKeyJob.class,
-                                     PushGroupSendJob.class,
-                                     PushTextSendJob.class,
-                                     PushMediaSendJob.class,
-                                     AttachmentDownloadJob.class,
-                                     RefreshPreKeysJob.class,
-                                     MessageRetrievalService.class,
-                                     PushNotificationReceiveJob.class,
-                                     MultiDeviceContactUpdateJob.class,
-                                     MultiDeviceGroupUpdateJob.class,
-                                     MultiDeviceReadUpdateJob.class,
-                                     MultiDeviceBlockedUpdateJob.class,
-                                     DeviceListFragment.class,
-                                     RefreshAttributesJob.class,
-                                     GcmRefreshJob.class,
-                                     RequestGroupInfoJob.class,
-                                     PushGroupUpdateJob.class,
-                                     AvatarDownloadJob.class,
-                                     RotateSignedPreKeyJob.class,
-                                     WebRtcCallService.class,
-                                     RetrieveProfileJob.class,
-                                     MultiDeviceVerifiedUpdateJob.class,
-                                     CreateProfileActivity.class,
-                                     RetrieveProfileAvatarJob.class,
-                                     MultiDeviceProfileKeyUpdateJob.class,
-                                     SendReadReceiptJob.class,
-                                     MultiDeviceReadReceiptUpdateJob.class,
-                                     AppProtectionPreferenceFragment.class})
+@Module(
+  complete = false,
+  injects = {
+    CleanPreKeysJob.class,
+    CreateSignedPreKeyJob.class,
+    PushGroupSendJob.class,
+    PushTextSendJob.class,
+    PushMediaSendJob.class,
+    AttachmentDownloadJob.class,
+    RefreshPreKeysJob.class,
+    MessageRetrievalService.class,
+    PushNotificationReceiveJob.class,
+    MultiDeviceContactUpdateJob.class,
+    MultiDeviceGroupUpdateJob.class,
+    MultiDeviceReadUpdateJob.class,
+    MultiDeviceBlockedUpdateJob.class,
+    DeviceListFragment.class,
+    RefreshAttributesJob.class,
+    GcmRefreshJob.class,
+    RequestGroupInfoJob.class,
+    PushGroupUpdateJob.class,
+    AvatarDownloadJob.class,
+    RotateSignedPreKeyJob.class,
+    WebRtcCallService.class,
+    RetrieveProfileJob.class,
+    MultiDeviceVerifiedUpdateJob.class,
+    CreateProfileActivity.class,
+    RetrieveProfileAvatarJob.class,
+    MultiDeviceProfileKeyUpdateJob.class,
+    SendReadReceiptJob.class,
+    MultiDeviceReadReceiptUpdateJob.class,
+    AppProtectionPreferenceFragment.class
+  }
+)
 public class SignalCommunicationModule {
 
   private static final String TAG = SignalCommunicationModule.class.getSimpleName();
 
-  private final Context                      context;
-  private final SignalServiceNetworkAccess   networkAccess;
+  private final Context context;
+  private final SignalServiceNetworkAccess networkAccess;
 
-  private SignalServiceAccountManager  accountManager;
-  private SignalServiceMessageSender   messageSender;
+  private SignalServiceAccountManager accountManager;
+  private SignalServiceMessageSender messageSender;
   private SignalServiceMessageReceiver messageReceiver;
 
   public SignalCommunicationModule(Context context, SignalServiceNetworkAccess networkAccess) {
-    this.context       = context;
+    this.context = context;
     this.networkAccess = networkAccess;
   }
 
   @Provides
   synchronized SignalServiceAccountManager provideSignalAccountManager() {
     if (this.accountManager == null) {
-      this.accountManager = new SignalServiceAccountManager(networkAccess.getConfiguration(context),
-                                                            new DynamicCredentialsProvider(context),
-                                                            BuildConfig.USER_AGENT);
+      this.accountManager =
+          new SignalServiceAccountManager(
+              networkAccess.getConfiguration(context),
+              new DynamicCredentialsProvider(context),
+              BuildConfig.USER_AGENT);
     }
 
     return this.accountManager;
@@ -109,12 +113,14 @@ public class SignalCommunicationModule {
   @Provides
   synchronized SignalServiceMessageSender provideSignalMessageSender() {
     if (this.messageSender == null) {
-      this.messageSender = new SignalServiceMessageSender(networkAccess.getConfiguration(context),
-                                                          new DynamicCredentialsProvider(context),
-                                                          new SignalProtocolStoreImpl(context),
-                                                          BuildConfig.USER_AGENT,
-                                                          Optional.fromNullable(MessageRetrievalService.getPipe()),
-                                                          Optional.of(new SecurityEventListener(context)));
+      this.messageSender =
+          new SignalServiceMessageSender(
+              networkAccess.getConfiguration(context),
+              new DynamicCredentialsProvider(context),
+              new SignalProtocolStoreImpl(context),
+              BuildConfig.USER_AGENT,
+              Optional.fromNullable(MessageRetrievalService.getPipe()),
+              Optional.of(new SecurityEventListener(context)));
     } else {
       this.messageSender.setMessagePipe(MessageRetrievalService.getPipe());
     }
@@ -125,10 +131,12 @@ public class SignalCommunicationModule {
   @Provides
   synchronized SignalServiceMessageReceiver provideSignalMessageReceiver() {
     if (this.messageReceiver == null) {
-      this.messageReceiver = new SignalServiceMessageReceiver(networkAccess.getConfiguration(context),
-                                                              new DynamicCredentialsProvider(context),
-                                                              BuildConfig.USER_AGENT,
-                                                              new PipeConnectivityListener());
+      this.messageReceiver =
+          new SignalServiceMessageReceiver(
+              networkAccess.getConfiguration(context),
+              new DynamicCredentialsProvider(context),
+              BuildConfig.USER_AGENT,
+              new PipeConnectivityListener());
     }
 
     return this.messageReceiver;
@@ -181,7 +189,5 @@ public class SignalCommunicationModule {
       TextSecurePreferences.setUnauthorizedReceived(context, true);
       EventBus.getDefault().post(new ReminderUpdateEvent());
     }
-
   }
-
 }

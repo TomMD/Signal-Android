@@ -19,47 +19,51 @@ package org.thoughtcrime.securesms.database.model;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.text.SpannableString;
-
 import org.thoughtcrime.securesms.database.MmsSmsColumns;
 import org.thoughtcrime.securesms.database.SmsDatabase;
 import org.thoughtcrime.securesms.recipients.Recipient;
 
 /**
- * The base class for all message record models.  Encapsulates basic data
- * shared between ThreadRecord and MessageRecord.
+ * The base class for all message record models. Encapsulates basic data shared between ThreadRecord
+ * and MessageRecord.
  *
  * @author Moxie Marlinspike
- *
  */
-
 public abstract class DisplayRecord {
 
   protected final Context context;
   protected final long type;
 
-  private final Recipient  recipient;
-  private final long       dateSent;
-  private final long       dateReceived;
-  private final long       threadId;
-  private final String     body;
-  private final int        deliveryStatus;
-  private final int        deliveryReceiptCount;
-  private final int        readReceiptCount;
+  private final Recipient recipient;
+  private final long dateSent;
+  private final long dateReceived;
+  private final long threadId;
+  private final String body;
+  private final int deliveryStatus;
+  private final int deliveryReceiptCount;
+  private final int readReceiptCount;
 
-  DisplayRecord(Context context, String body, Recipient recipient, long dateSent,
-                long dateReceived, long threadId, int deliveryStatus, int deliveryReceiptCount,
-                long type, int readReceiptCount)
-  {
-    this.context              = context.getApplicationContext();
-    this.threadId             = threadId;
-    this.recipient            = recipient;
-    this.dateSent             = dateSent;
-    this.dateReceived         = dateReceived;
-    this.type                 = type;
-    this.body                 = body;
+  DisplayRecord(
+      Context context,
+      String body,
+      Recipient recipient,
+      long dateSent,
+      long dateReceived,
+      long threadId,
+      int deliveryStatus,
+      int deliveryReceiptCount,
+      long type,
+      int readReceiptCount) {
+    this.context = context.getApplicationContext();
+    this.threadId = threadId;
+    this.recipient = recipient;
+    this.dateSent = dateSent;
+    this.dateReceived = dateReceived;
+    this.type = type;
+    this.body = body;
     this.deliveryReceiptCount = deliveryReceiptCount;
-    this.readReceiptCount     = readReceiptCount;
-    this.deliveryStatus       = deliveryStatus;
+    this.readReceiptCount = readReceiptCount;
+    this.deliveryStatus = deliveryStatus;
   }
 
   public @NonNull String getBody() {
@@ -67,16 +71,15 @@ public abstract class DisplayRecord {
   }
 
   public boolean isFailed() {
-    return
-        MmsSmsColumns.Types.isFailedMessageType(type)            ||
-        MmsSmsColumns.Types.isPendingSecureSmsFallbackType(type) ||
-        deliveryStatus >= SmsDatabase.Status.STATUS_FAILED;
+    return MmsSmsColumns.Types.isFailedMessageType(type)
+        || MmsSmsColumns.Types.isPendingSecureSmsFallbackType(type)
+        || deliveryStatus >= SmsDatabase.Status.STATUS_FAILED;
   }
 
   public boolean isPending() {
-    return MmsSmsColumns.Types.isPendingMessageType(type) &&
-           !MmsSmsColumns.Types.isIdentityVerified(type)  &&
-           !MmsSmsColumns.Types.isIdentityDefault(type);
+    return MmsSmsColumns.Types.isPendingMessageType(type)
+        && !MmsSmsColumns.Types.isIdentityVerified(type)
+        && !MmsSmsColumns.Types.isIdentityDefault(type);
   }
 
   public boolean isOutgoing() {
@@ -162,8 +165,9 @@ public abstract class DisplayRecord {
   }
 
   public boolean isDelivered() {
-    return (deliveryStatus >= SmsDatabase.Status.STATUS_COMPLETE &&
-            deliveryStatus < SmsDatabase.Status.STATUS_PENDING) || deliveryReceiptCount > 0;
+    return (deliveryStatus >= SmsDatabase.Status.STATUS_COMPLETE
+            && deliveryStatus < SmsDatabase.Status.STATUS_PENDING)
+        || deliveryReceiptCount > 0;
   }
 
   public boolean isRemoteRead() {

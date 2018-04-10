@@ -1,18 +1,16 @@
 /**
  * Copyright (C) 2015 Open Whisper Systems
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * <p>This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * <p>You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  */
 package org.thoughtcrime.securesms.mms;
 
@@ -26,22 +24,21 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.telephony.SmsManager;
 import android.util.Log;
-
 import com.android.mms.service_alt.MmsConfig;
 import com.google.android.mms.pdu_alt.PduParser;
 import com.google.android.mms.pdu_alt.SendConf;
-
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 import org.thoughtcrime.securesms.providers.MmsBodyProvider;
 import org.thoughtcrime.securesms.transport.UndeliverableMessageException;
 import org.thoughtcrime.securesms.util.Util;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
-
-public class OutgoingLollipopMmsConnection extends LollipopMmsConnection implements OutgoingMmsConnection {
-  private static final String TAG    = OutgoingLollipopMmsConnection.class.getSimpleName();
-  private static final String ACTION = OutgoingLollipopMmsConnection.class.getCanonicalName() + "MMS_SENT_ACTION";
+public class OutgoingLollipopMmsConnection extends LollipopMmsConnection
+    implements OutgoingMmsConnection {
+  private static final String TAG = OutgoingLollipopMmsConnection.class.getSimpleName();
+  private static final String ACTION =
+      OutgoingLollipopMmsConnection.class.getCanonicalName() + "MMS_SENT_ACTION";
 
   private byte[] response;
 
@@ -62,8 +59,7 @@ public class OutgoingLollipopMmsConnection extends LollipopMmsConnection impleme
   @Override
   @TargetApi(VERSION_CODES.LOLLIPOP)
   public @Nullable synchronized SendConf send(@NonNull byte[] pduBytes, int subscriptionId)
-      throws UndeliverableMessageException
-  {
+      throws UndeliverableMessageException {
     beginTransaction();
     try {
       MmsBodyProvider.Pointer pointer = MmsBodyProvider.makeTemporaryPointer(getContext());
@@ -85,14 +81,12 @@ public class OutgoingLollipopMmsConnection extends LollipopMmsConnection impleme
       if (mmsConfig != null) {
         MmsConfig.Overridden overridden = new MmsConfig.Overridden(mmsConfig, new Bundle());
         configOverrides.putString(SmsManager.MMS_CONFIG_HTTP_PARAMS, overridden.getHttpParams());
-        configOverrides.putInt(SmsManager.MMS_CONFIG_MAX_MESSAGE_SIZE, overridden.getMaxMessageSize());
+        configOverrides.putInt(
+            SmsManager.MMS_CONFIG_MAX_MESSAGE_SIZE, overridden.getMaxMessageSize());
       }
 
-      smsManager.sendMultimediaMessage(getContext(),
-                                       pointer.getUri(),
-                                       null,
-                                       configOverrides,
-                                       getPendingIntent());
+      smsManager.sendMultimediaMessage(
+          getContext(), pointer.getUri(), null, configOverrides, getPendingIntent());
 
       waitForResult();
 
@@ -111,4 +105,3 @@ public class OutgoingLollipopMmsConnection extends LollipopMmsConnection impleme
     }
   }
 }
-

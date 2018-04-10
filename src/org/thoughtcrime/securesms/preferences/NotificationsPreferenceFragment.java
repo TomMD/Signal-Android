@@ -1,5 +1,7 @@
 package org.thoughtcrime.securesms.preferences;
 
+import static android.app.Activity.RESULT_OK;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -13,16 +15,11 @@ import android.support.annotation.Nullable;
 import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.Preference;
 import android.text.TextUtils;
-
 import org.thoughtcrime.securesms.ApplicationPreferencesActivity;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.components.SwitchPreferenceCompat;
 import org.thoughtcrime.securesms.notifications.MessageNotifier;
-import org.thoughtcrime.securesms.preferences.widgets.SignalPreference;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
-import org.w3c.dom.Text;
-
-import static android.app.Activity.RESULT_OK;
 
 public class NotificationsPreferenceFragment extends ListSummaryPreferenceFragment {
 
@@ -49,46 +46,56 @@ public class NotificationsPreferenceFragment extends ListSummaryPreferenceFragme
         .setOnPreferenceChangeListener(new RingtoneSummaryListener());
 
     this.findPreference(TextSecurePreferences.RINGTONE_PREF)
-        .setOnPreferenceClickListener(preference -> {
-          Uri current = TextSecurePreferences.getNotificationRingtone(getContext());
+        .setOnPreferenceClickListener(
+            preference -> {
+              Uri current = TextSecurePreferences.getNotificationRingtone(getContext());
 
-          Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
-          intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
-          intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, true);
-          intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION);
-          intent.putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, Settings.System.DEFAULT_NOTIFICATION_URI);
-          intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, current);
+              Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+              intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
+              intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, true);
+              intent.putExtra(
+                  RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION);
+              intent.putExtra(
+                  RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI,
+                  Settings.System.DEFAULT_NOTIFICATION_URI);
+              intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, current);
 
-          startActivityForResult(intent, 1);
+              startActivityForResult(intent, 1);
 
-          return true;
-        });
+              return true;
+            });
 
     this.findPreference(TextSecurePreferences.CALL_RINGTONE_PREF)
-        .setOnPreferenceClickListener(preference -> {
-          Uri current = TextSecurePreferences.getCallNotificationRingtone(getContext());
+        .setOnPreferenceClickListener(
+            preference -> {
+              Uri current = TextSecurePreferences.getCallNotificationRingtone(getContext());
 
-          Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
-          intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
-          intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, true);
-          intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_RINGTONE);
-          intent.putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, Settings.System.DEFAULT_RINGTONE_URI);
-          intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, current);
+              Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+              intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
+              intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, true);
+              intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_RINGTONE);
+              intent.putExtra(
+                  RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, Settings.System.DEFAULT_RINGTONE_URI);
+              intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, current);
 
-          startActivityForResult(intent, 2);
+              startActivityForResult(intent, 2);
 
-          return true;
-        });
+              return true;
+            });
 
     initializeListSummary((ListPreference) findPreference(TextSecurePreferences.LED_COLOR_PREF));
     initializeListSummary((ListPreference) findPreference(TextSecurePreferences.LED_BLINK_PREF));
-    initializeListSummary((ListPreference) findPreference(TextSecurePreferences.REPEAT_ALERTS_PREF));
-    initializeListSummary((ListPreference) findPreference(TextSecurePreferences.NOTIFICATION_PRIVACY_PREF));
-    initializeListSummary((ListPreference) findPreference(TextSecurePreferences.NOTIFICATION_PRIORITY_PREF));
+    initializeListSummary(
+        (ListPreference) findPreference(TextSecurePreferences.REPEAT_ALERTS_PREF));
+    initializeListSummary(
+        (ListPreference) findPreference(TextSecurePreferences.NOTIFICATION_PRIVACY_PREF));
+    initializeListSummary(
+        (ListPreference) findPreference(TextSecurePreferences.NOTIFICATION_PRIORITY_PREF));
 
     initializeRingtoneSummary(findPreference(TextSecurePreferences.RINGTONE_PREF));
     initializeCallRingtoneSummary(findPreference(TextSecurePreferences.CALL_RINGTONE_PREF));
-    initializeCallVibrateSummary((SwitchPreferenceCompat)findPreference(TextSecurePreferences.CALL_VIBRATE_PREF));
+    initializeCallVibrateSummary(
+        (SwitchPreferenceCompat) findPreference(TextSecurePreferences.CALL_VIBRATE_PREF));
   }
 
   @Override
@@ -99,7 +106,9 @@ public class NotificationsPreferenceFragment extends ListSummaryPreferenceFragme
   @Override
   public void onResume() {
     super.onResume();
-    ((ApplicationPreferencesActivity) getActivity()).getSupportActionBar().setTitle(R.string.preferences__notifications);
+    ((ApplicationPreferencesActivity) getActivity())
+        .getSupportActionBar()
+        .setTitle(R.string.preferences__notifications);
   }
 
   @Override
@@ -110,7 +119,8 @@ public class NotificationsPreferenceFragment extends ListSummaryPreferenceFragme
       if (Settings.System.DEFAULT_NOTIFICATION_URI.equals(uri)) {
         TextSecurePreferences.removeNotificationRingtone(getContext());
       } else {
-        TextSecurePreferences.setNotificationRingtone(getContext(), uri != null ? uri.toString() : Uri.EMPTY.toString());
+        TextSecurePreferences.setNotificationRingtone(
+            getContext(), uri != null ? uri.toString() : Uri.EMPTY.toString());
       }
 
       initializeRingtoneSummary(findPreference(TextSecurePreferences.RINGTONE_PREF));
@@ -120,7 +130,8 @@ public class NotificationsPreferenceFragment extends ListSummaryPreferenceFragme
       if (Settings.System.DEFAULT_RINGTONE_URI.equals(uri)) {
         TextSecurePreferences.removeCallNotificationRingtone(getContext());
       } else {
-        TextSecurePreferences.setCallNotificationRingtone(getContext(), uri != null ? uri.toString() : Uri.EMPTY.toString());
+        TextSecurePreferences.setCallNotificationRingtone(
+            getContext(), uri != null ? uri.toString() : Uri.EMPTY.toString());
       }
 
       initializeCallRingtoneSummary(findPreference(TextSecurePreferences.CALL_RINGTONE_PREF));
@@ -147,15 +158,17 @@ public class NotificationsPreferenceFragment extends ListSummaryPreferenceFragme
   }
 
   private void initializeRingtoneSummary(Preference pref) {
-    RingtoneSummaryListener listener = (RingtoneSummaryListener) pref.getOnPreferenceChangeListener();
-    Uri                     uri      = TextSecurePreferences.getNotificationRingtone(getContext());
+    RingtoneSummaryListener listener =
+        (RingtoneSummaryListener) pref.getOnPreferenceChangeListener();
+    Uri uri = TextSecurePreferences.getNotificationRingtone(getContext());
 
     listener.onPreferenceChange(pref, uri);
   }
 
   private void initializeCallRingtoneSummary(Preference pref) {
-    RingtoneSummaryListener listener = (RingtoneSummaryListener) pref.getOnPreferenceChangeListener();
-    Uri                     uri      = TextSecurePreferences.getCallNotificationRingtone(getContext());
+    RingtoneSummaryListener listener =
+        (RingtoneSummaryListener) pref.getOnPreferenceChangeListener();
+    Uri uri = TextSecurePreferences.getCallNotificationRingtone(getContext());
 
     listener.onPreferenceChange(pref, uri);
   }
@@ -165,10 +178,11 @@ public class NotificationsPreferenceFragment extends ListSummaryPreferenceFragme
   }
 
   public static CharSequence getSummary(Context context) {
-    final int onCapsResId   = R.string.ApplicationPreferencesActivity_On;
-    final int offCapsResId  = R.string.ApplicationPreferencesActivity_Off;
+    final int onCapsResId = R.string.ApplicationPreferencesActivity_On;
+    final int offCapsResId = R.string.ApplicationPreferencesActivity_Off;
 
-    return context.getString(TextSecurePreferences.isNotificationsEnabled(context) ? onCapsResId : offCapsResId);
+    return context.getString(
+        TextSecurePreferences.isNotificationsEnabled(context) ? onCapsResId : offCapsResId);
   }
 
   private class NotificationPrivacyListener extends ListSummaryListener {
@@ -185,6 +199,5 @@ public class NotificationsPreferenceFragment extends ListSummaryPreferenceFragme
 
       return super.onPreferenceChange(preference, value);
     }
-
   }
 }

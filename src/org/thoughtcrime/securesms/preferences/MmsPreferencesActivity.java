@@ -21,14 +21,13 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
-
 import org.thoughtcrime.securesms.PassphraseRequiredActionBarActivity;
 import org.thoughtcrime.securesms.util.DynamicLanguage;
 import org.thoughtcrime.securesms.util.DynamicTheme;
 
 public class MmsPreferencesActivity extends PassphraseRequiredActionBarActivity {
 
-  private final DynamicTheme dynamicTheme       = new DynamicTheme();
+  private final DynamicTheme dynamicTheme = new DynamicTheme();
   private final DynamicLanguage dynamicLanguage = new DynamicLanguage();
 
   @Override
@@ -47,7 +46,6 @@ public class MmsPreferencesActivity extends PassphraseRequiredActionBarActivity 
     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
     fragmentTransaction.replace(android.R.id.content, fragment);
     fragmentTransaction.commit();
-
   }
 
   @Override
@@ -72,5 +70,4 @@ public class MmsPreferencesActivity extends PassphraseRequiredActionBarActivity 
   public void onBackPressed() {
     super.onBackPressed();
   }
-
 }

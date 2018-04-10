@@ -1,22 +1,18 @@
 package org.thoughtcrime.securesms.mms;
 
 import android.util.Log;
-
 import com.google.android.mms.ContentType;
 import com.google.android.mms.pdu_alt.CharacterSets;
 import com.google.android.mms.pdu_alt.PduBody;
 import com.google.android.mms.pdu_alt.PduPart;
-
-import org.thoughtcrime.securesms.util.Util;
-
 import java.io.UnsupportedEncodingException;
-
+import org.thoughtcrime.securesms.util.Util;
 
 public class PartParser {
   public static String getMessageText(PduBody body) {
     String bodyText = null;
 
-    for (int i=0;i<body.getPartsNum();i++) {
+    for (int i = 0; i < body.getPartsNum(); i++) {
       if (ContentType.isTextType(Util.toIsoString(body.getPart(i).getContentType()))) {
         String partText;
 
@@ -46,7 +42,7 @@ public class PartParser {
   public static PduBody getSupportedMediaParts(PduBody body) {
     PduBody stripped = new PduBody();
 
-    for (int i=0;i<body.getPartsNum();i++) {
+    for (int i = 0; i < body.getPartsNum(); i++) {
       if (isDisplayableMedia(body.getPart(i))) {
         stripped.addPart(body.getPart(i));
       }
@@ -58,7 +54,7 @@ public class PartParser {
   public static int getSupportedMediaPartCount(PduBody body) {
     int partCount = 0;
 
-    for (int i=0;i<body.getPartsNum();i++) {
+    for (int i = 0; i < body.getPartsNum(); i++) {
       if (isDisplayableMedia(body.getPart(i))) {
         partCount++;
       }

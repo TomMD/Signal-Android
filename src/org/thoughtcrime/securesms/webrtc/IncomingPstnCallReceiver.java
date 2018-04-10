@@ -8,17 +8,14 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-
-import org.thoughtcrime.securesms.service.WebRtcCallService;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import org.thoughtcrime.securesms.service.WebRtcCallService;
 
 /**
  * Listens for incoming PSTN calls and rejects them if a RedPhone call is already in progress.
  *
- * Unstable use of reflection employed to gain access to ITelephony.
- *
+ * <p>Unstable use of reflection employed to gain access to ITelephony.
  */
 public class IncomingPstnCallReceiver extends BroadcastReceiver {
 
@@ -33,7 +30,9 @@ public class IncomingPstnCallReceiver extends BroadcastReceiver {
       return;
     }
 
-    if (!intent.getStringExtra(TelephonyManager.EXTRA_STATE).equals(TelephonyManager.EXTRA_STATE_RINGING)) {
+    if (!intent
+        .getStringExtra(TelephonyManager.EXTRA_STATE)
+        .equals(TelephonyManager.EXTRA_STATE_RINGING)) {
       Log.w(TAG, "Telephony event is not state rining...");
       return;
     }
@@ -56,7 +55,8 @@ public class IncomingPstnCallReceiver extends BroadcastReceiver {
       if (resultCode == 1) {
         Log.w(TAG, "Attempting to deny incoming PSTN call.");
 
-        TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+        TelephonyManager tm =
+            (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 
         try {
           Method getTelephony = tm.getClass().getDeclaredMethod("getITelephony");

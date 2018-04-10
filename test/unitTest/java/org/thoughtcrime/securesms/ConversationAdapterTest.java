@@ -1,15 +1,14 @@
 package org.thoughtcrime.securesms;
 
-import android.database.Cursor;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
+
+import android.database.Cursor;
+import org.junit.Before;
+import org.junit.Test;
 
 public class ConversationAdapterTest extends BaseUnitTest {
   private Cursor cursor = mock(Cursor.class);

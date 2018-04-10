@@ -1,21 +1,17 @@
 package org.thoughtcrime.securesms.components.webrtc;
 
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.media.AudioManager;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
-
 import com.tomergoldst.tooltips.ToolTip;
 import com.tomergoldst.tooltips.ToolTipsManager;
-
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.components.AccessibleToggleButton;
 import org.thoughtcrime.securesms.util.ServiceUtil;
@@ -31,7 +27,8 @@ public class WebRtcCallControls extends LinearLayout {
   private AccessibleToggleButton bluetoothButton;
 
   @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-  public WebRtcCallControls(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+  public WebRtcCallControls(
+      Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
     super(context, attrs, defStyleAttr, defStyleRes);
     initialize();
   }
@@ -53,51 +50,56 @@ public class WebRtcCallControls extends LinearLayout {
   }
 
   private void initialize() {
-    LayoutInflater inflater = (LayoutInflater)getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    LayoutInflater inflater =
+        (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     inflater.inflate(R.layout.webrtc_call_controls, this, true);
 
-    this.speakerButton   = ViewUtil.findById(this, R.id.speakerButton);
+    this.speakerButton = ViewUtil.findById(this, R.id.speakerButton);
     this.bluetoothButton = ViewUtil.findById(this, R.id.bluetoothButton);
     this.audioMuteButton = ViewUtil.findById(this, R.id.muteButton);
     this.videoMuteButton = ViewUtil.findById(this, R.id.video_mute_button);
   }
 
   public void setAudioMuteButtonListener(final MuteButtonListener listener) {
-    audioMuteButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-      @Override
-      public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-        listener.onToggle(b);
-      }
-    });
+    audioMuteButton.setOnCheckedChangeListener(
+        new CompoundButton.OnCheckedChangeListener() {
+          @Override
+          public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+            listener.onToggle(b);
+          }
+        });
   }
 
   public void setVideoMuteButtonListener(final MuteButtonListener listener) {
-    videoMuteButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-      @Override
-      public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        listener.onToggle(!isChecked);
-      }
-    });
+    videoMuteButton.setOnCheckedChangeListener(
+        new CompoundButton.OnCheckedChangeListener() {
+          @Override
+          public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            listener.onToggle(!isChecked);
+          }
+        });
   }
 
   public void setSpeakerButtonListener(final SpeakerButtonListener listener) {
-    speakerButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-      @Override
-      public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        listener.onSpeakerChange(isChecked);
-        updateAudioState(bluetoothButton.getVisibility() == View.VISIBLE);
-      }
-    });
+    speakerButton.setOnCheckedChangeListener(
+        new CompoundButton.OnCheckedChangeListener() {
+          @Override
+          public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            listener.onSpeakerChange(isChecked);
+            updateAudioState(bluetoothButton.getVisibility() == View.VISIBLE);
+          }
+        });
   }
 
   public void setBluetoothButtonListener(final BluetoothButtonListener listener) {
-    bluetoothButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-      @Override
-      public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        listener.onBluetoothChange(isChecked);
-        updateAudioState(true);
-      }
-    });
+    bluetoothButton.setOnCheckedChangeListener(
+        new CompoundButton.OnCheckedChangeListener() {
+          @Override
+          public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            listener.onBluetoothChange(isChecked);
+            updateAudioState(true);
+          }
+        });
   }
 
   public void updateAudioState(boolean isBluetoothAvailable) {
@@ -149,7 +151,7 @@ public class WebRtcCallControls extends LinearLayout {
       bluetoothButton.setAlpha(0.3f);
       videoMuteButton.setAlpha(0.3f);
       audioMuteButton.setAlpha(0.3f);
-      
+
       speakerButton.setEnabled(false);
       bluetoothButton.setEnabled(false);
       videoMuteButton.setEnabled(false);
@@ -161,17 +163,24 @@ public class WebRtcCallControls extends LinearLayout {
     if (Build.VERSION.SDK_INT > 15) {
       final ToolTipsManager toolTipsManager = new ToolTipsManager();
 
-      ToolTip toolTip = new ToolTip.Builder(getContext(), videoMuteButton, viewGroup,
-                                            getContext().getString(R.string.WebRtcCallControls_tap_to_enable_your_video),
-                                            ToolTip.POSITION_BELOW).build();
+      ToolTip toolTip =
+          new ToolTip.Builder(
+                  getContext(),
+                  videoMuteButton,
+                  viewGroup,
+                  getContext().getString(R.string.WebRtcCallControls_tap_to_enable_your_video),
+                  ToolTip.POSITION_BELOW)
+              .build();
       toolTipsManager.show(toolTip);
 
-      videoMuteButton.postDelayed(new Runnable() {
-        @Override
-        public void run() {
-          toolTipsManager.findAndDismiss(videoMuteButton);
-        }
-      }, 4000);
+      videoMuteButton.postDelayed(
+          new Runnable() {
+            @Override
+            public void run() {
+              toolTipsManager.findAndDismiss(videoMuteButton);
+            }
+          },
+          4000);
     }
   }
 
@@ -186,9 +195,4 @@ public class WebRtcCallControls extends LinearLayout {
   public static interface BluetoothButtonListener {
     public void onBluetoothChange(boolean isBluetooth);
   }
-
-
-
-
-
 }

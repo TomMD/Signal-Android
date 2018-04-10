@@ -19,7 +19,7 @@ package org.thoughtcrime.securesms.sms;
 import android.content.Context;
 import android.util.Log;
 import android.util.Pair;
-
+import java.io.IOException;
 import org.thoughtcrime.securesms.ApplicationContext;
 import org.thoughtcrime.securesms.database.Address;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
@@ -45,21 +45,19 @@ import org.whispersystems.libsignal.util.guava.Optional;
 import org.whispersystems.signalservice.api.SignalServiceAccountManager;
 import org.whispersystems.signalservice.api.push.ContactTokenDetails;
 
-import java.io.IOException;
-
 public class MessageSender {
 
   private static final String TAG = MessageSender.class.getSimpleName();
 
-  public static long send(final Context context,
-                          final OutgoingTextMessage message,
-                          final long threadId,
-                          final boolean forceSms,
-                          final SmsDatabase.InsertListener insertListener)
-  {
-    SmsDatabase database    = DatabaseFactory.getSmsDatabase(context);
-    Recipient   recipient   = message.getRecipient();
-    boolean     keyExchange = message.isKeyExchange();
+  public static long send(
+      final Context context,
+      final OutgoingTextMessage message,
+      final long threadId,
+      final boolean forceSms,
+      final SmsDatabase.InsertListener insertListener) {
+    SmsDatabase database = DatabaseFactory.getSmsDatabase(context);
+    Recipient recipient = message.getRecipient();
+    boolean keyExchange = message.isKeyExchange();
 
     long allocatedThreadId;
 
@@ -69,33 +67,37 @@ public class MessageSender {
       allocatedThreadId = threadId;
     }
 
-    long messageId = database.insertMessageOutbox(allocatedThreadId, message, forceSms, System.currentTimeMillis(), insertListener);
+    long messageId =
+        database.insertMessageOutbox(
+            allocatedThreadId, message, forceSms, System.currentTimeMillis(), insertListener);
 
     sendTextMessage(context, recipient, forceSms, keyExchange, messageId, message.getExpiresIn());
 
     return allocatedThreadId;
   }
 
-  public static long send(final Context context,
-                          final OutgoingMediaMessage message,
-                          final long threadId,
-                          final boolean forceSms,
-                          final SmsDatabase.InsertListener insertListener)
-  {
+  public static long send(
+      final Context context,
+      final OutgoingMediaMessage message,
+      final long threadId,
+      final boolean forceSms,
+      final SmsDatabase.InsertListener insertListener) {
     try {
       ThreadDatabase threadDatabase = DatabaseFactory.getThreadDatabase(context);
-      MmsDatabase    database       = DatabaseFactory.getMmsDatabase(context);
+      MmsDatabase database = DatabaseFactory.getMmsDatabase(context);
 
       long allocatedThreadId;
 
       if (threadId == -1) {
-        allocatedThreadId = threadDatabase.getThreadIdFor(message.getRecipient(), message.getDistributionType());
+        allocatedThreadId =
+            threadDatabase.getThreadIdFor(message.getRecipient(), message.getDistributionType());
       } else {
         allocatedThreadId = threadId;
       }
 
       Recipient recipient = message.getRecipient();
-      long      messageId = database.insertMessageOutbox(message, allocatedThreadId, forceSms, insertListener);
+      long messageId =
+          database.insertMessageOutbox(message, allocatedThreadId, forceSms, insertListener);
 
       sendMediaMessage(context, recipient, forceSms, messageId, message.getExpiresIn());
 
@@ -106,18 +108,19 @@ public class MessageSender {
     }
   }
 
-  public static void resendGroupMessage(Context context, MessageRecord messageRecord, Address filterAddress) {
+  public static void resendGroupMessage(
+      Context context, MessageRecord messageRecord, Address filterAddress) {
     if (!messageRecord.isMms()) throw new AssertionError("Not Group");
     sendGroupPush(context, messageRecord.getRecipient(), messageRecord.getId(), filterAddress);
   }
 
   public static void resend(Context context, MessageRecord messageRecord) {
     try {
-      long       messageId   = messageRecord.getId();
-      boolean    forceSms    = messageRecord.isForcedSms();
-      boolean    keyExchange = messageRecord.isKeyExchange();
-      long       expiresIn   = messageRecord.getExpiresIn();
-      Recipient  recipient   = messageRecord.getRecipient();
+      long messageId = messageRecord.getId();
+      boolean forceSms = messageRecord.isForcedSms();
+      boolean keyExchange = messageRecord.isKeyExchange();
+      long expiresIn = messageRecord.getExpiresIn();
+      Recipient recipient = messageRecord.getRecipient();
 
       if (messageRecord.isMms()) {
         sendMediaMessage(context, recipient, forceSms, messageId, expiresIn);
@@ -129,9 +132,9 @@ public class MessageSender {
     }
   }
 
-  private static void sendMediaMessage(Context context, Recipient recipient, boolean forceSms, long messageId, long expiresIn)
-      throws MmsException
-  {
+  private static void sendMediaMessage(
+      Context context, Recipient recipient, boolean forceSms, long messageId, long expiresIn)
+      throws MmsException {
     if (!forceSms && isSelfSend(context, recipient)) {
       sendMediaSelf(context, messageId, expiresIn);
     } else if (isGroupPushSend(recipient)) {
@@ -143,10 +146,13 @@ public class MessageSender {
     }
   }
 
-  private static void sendTextMessage(Context context, Recipient recipient,
-                                      boolean forceSms, boolean keyExchange,
-                                      long messageId, long expiresIn)
-  {
+  private static void sendTextMessage(
+      Context context,
+      Recipient recipient,
+      boolean forceSms,
+      boolean keyExchange,
+      long messageId,
+      long expiresIn) {
     if (!forceSms && isSelfSend(context, recipient)) {
       sendTextSelf(context, messageId, expiresIn);
     } else if (!forceSms && isPushTextSend(context, recipient, keyExchange)) {
@@ -165,7 +171,8 @@ public class MessageSender {
     database.markAsPush(messageAndThreadId.first);
 
     if (expiresIn > 0) {
-      ExpiringMessageManager expiringMessageManager = ApplicationContext.getInstance(context).getExpiringMessageManager();
+      ExpiringMessageManager expiringMessageManager =
+          ApplicationContext.getInstance(context).getExpiringMessageManager();
 
       database.markExpireStarted(messageId);
       expiringMessageManager.scheduleDeletion(messageId, false, expiresIn);
@@ -173,10 +180,10 @@ public class MessageSender {
   }
 
   private static void sendMediaSelf(Context context, long messageId, long expiresIn)
-      throws MmsException
-  {
-    ExpiringMessageManager expiringMessageManager = ApplicationContext.getInstance(context).getExpiringMessageManager();
-    MmsDatabase            database               = DatabaseFactory.getMmsDatabase(context);
+      throws MmsException {
+    ExpiringMessageManager expiringMessageManager =
+        ApplicationContext.getInstance(context).getExpiringMessageManager();
+    MmsDatabase database = DatabaseFactory.getMmsDatabase(context);
 
     database.markAsSent(messageId, true);
     database.copyMessageInbox(messageId);
@@ -197,7 +204,8 @@ public class MessageSender {
     jobManager.add(new PushMediaSendJob(context, messageId, recipient.getAddress()));
   }
 
-  private static void sendGroupPush(Context context, Recipient recipient, long messageId, Address filterAddress) {
+  private static void sendGroupPush(
+      Context context, Recipient recipient, long messageId, Address filterAddress) {
     JobManager jobManager = ApplicationContext.getInstance(context).getJobManager();
     jobManager.add(new PushGroupSendJob(context, messageId, recipient.getAddress(), filterAddress));
   }
@@ -237,8 +245,7 @@ public class MessageSender {
   }
 
   private static boolean isGroupPushSend(Recipient recipient) {
-    return recipient.getAddress().isGroup() &&
-           !recipient.getAddress().isMmsGroup();
+    return recipient.getAddress().isGroup() && !recipient.getAddress().isMmsGroup();
   }
 
   private static boolean isSelfSend(Context context, Recipient recipient) {
@@ -256,18 +263,22 @@ public class MessageSender {
   private static boolean isPushDestination(Context context, Recipient destination) {
     if (destination.resolve().getRegistered() == RecipientDatabase.RegisteredState.REGISTERED) {
       return true;
-    } else if (destination.resolve().getRegistered() == RecipientDatabase.RegisteredState.NOT_REGISTERED) {
+    } else if (destination.resolve().getRegistered()
+        == RecipientDatabase.RegisteredState.NOT_REGISTERED) {
       return false;
     } else {
       try {
-        SignalServiceAccountManager   accountManager = AccountManagerFactory.createManager(context);
-        Optional<ContactTokenDetails> registeredUser = accountManager.getContact(destination.getAddress().serialize());
+        SignalServiceAccountManager accountManager = AccountManagerFactory.createManager(context);
+        Optional<ContactTokenDetails> registeredUser =
+            accountManager.getContact(destination.getAddress().serialize());
 
         if (!registeredUser.isPresent()) {
-          DatabaseFactory.getRecipientDatabase(context).setRegistered(destination, RecipientDatabase.RegisteredState.NOT_REGISTERED);
+          DatabaseFactory.getRecipientDatabase(context)
+              .setRegistered(destination, RecipientDatabase.RegisteredState.NOT_REGISTERED);
           return false;
         } else {
-          DatabaseFactory.getRecipientDatabase(context).setRegistered(destination, RecipientDatabase.RegisteredState.REGISTERED);
+          DatabaseFactory.getRecipientDatabase(context)
+              .setRegistered(destination, RecipientDatabase.RegisteredState.REGISTERED);
           return true;
         }
       } catch (IOException e1) {
@@ -276,5 +287,4 @@ public class MessageSender {
       }
     }
   }
-
 }

@@ -1,12 +1,7 @@
 package org.thoughtcrime.securesms.giph.net;
 
-
 import android.os.AsyncTask;
 import android.util.Log;
-
-import org.thoughtcrime.securesms.BuildConfig;
-import org.thoughtcrime.securesms.util.Util;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -15,12 +10,14 @@ import java.net.SocketAddress;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import org.thoughtcrime.securesms.BuildConfig;
+import org.thoughtcrime.securesms.util.Util;
 
 public class GiphyProxySelector extends ProxySelector {
 
   private static final String TAG = GiphyProxySelector.class.getSimpleName();
 
-  private final    List<Proxy> EMPTY = new ArrayList<>(1);
+  private final List<Proxy> EMPTY = new ArrayList<>(1);
   private volatile List<Proxy> GIPHY = null;
 
   public GiphyProxySelector() {
@@ -45,7 +42,7 @@ public class GiphyProxySelector extends ProxySelector {
   @Override
   public List<Proxy> select(URI uri) {
     if (uri.getHost().endsWith("giphy.com")) return getOrCreateGiphyProxy();
-    else                                     return EMPTY;
+    else return EMPTY;
   }
 
   @Override
@@ -54,10 +51,16 @@ public class GiphyProxySelector extends ProxySelector {
   }
 
   private void initializeGiphyProxy() {
-    GIPHY = new ArrayList<Proxy>(1) {{
-      add(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(BuildConfig.GIPHY_PROXY_HOST,
-                                                           BuildConfig.GIPHY_PROXY_PORT)));
-    }};
+    GIPHY =
+        new ArrayList<Proxy>(1) {
+          {
+            add(
+                new Proxy(
+                    Proxy.Type.HTTP,
+                    new InetSocketAddress(
+                        BuildConfig.GIPHY_PROXY_HOST, BuildConfig.GIPHY_PROXY_PORT)));
+          }
+        };
   }
 
   private List<Proxy> getOrCreateGiphyProxy() {
@@ -69,5 +72,4 @@ public class GiphyProxySelector extends ProxySelector {
 
     return GIPHY;
   }
-
 }

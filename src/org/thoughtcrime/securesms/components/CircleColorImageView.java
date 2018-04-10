@@ -3,17 +3,15 @@ package org.thoughtcrime.securesms.components;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
-
 import org.thoughtcrime.securesms.R;
 
 public class CircleColorImageView extends ImageView {
 
- public CircleColorImageView(Context context) {
+  public CircleColorImageView(Context context) {
     this(context, null);
   }
 
@@ -27,7 +25,8 @@ public class CircleColorImageView extends ImageView {
     int circleColor = Color.WHITE;
 
     if (attrs != null) {
-      TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.CircleColorImageView, 0, 0);
+      TypedArray typedArray =
+          context.getTheme().obtainStyledAttributes(attrs, R.styleable.CircleColorImageView, 0, 0);
       circleColor = typedArray.getColor(R.styleable.CircleColorImageView_circleColor, Color.WHITE);
       typedArray.recycle();
     }

@@ -2,7 +2,10 @@ package org.thoughtcrime.securesms.jobs;
 
 import android.content.Context;
 import android.util.Log;
-
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.List;
+import javax.inject.Inject;
 import org.thoughtcrime.securesms.ApplicationContext;
 import org.thoughtcrime.securesms.attachments.Attachment;
 import org.thoughtcrime.securesms.database.Address;
@@ -25,12 +28,6 @@ import org.whispersystems.signalservice.api.messages.SignalServiceDataMessage;
 import org.whispersystems.signalservice.api.push.SignalServiceAddress;
 import org.whispersystems.signalservice.api.push.exceptions.UnregisteredUserException;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.List;
-
-import javax.inject.Inject;
-
 public class PushMediaSendJob extends PushSendJob implements InjectableType {
 
   private static final long serialVersionUID = 1L;
@@ -47,18 +44,16 @@ public class PushMediaSendJob extends PushSendJob implements InjectableType {
   }
 
   @Override
-  public void onAdded() {
-
-  }
+  public void onAdded() {}
 
   @Override
   public void onPushSend()
       throws RetryLaterException, MmsException, NoSuchMessageException,
-             UndeliverableMessageException
-  {
-    ExpiringMessageManager expirationManager = ApplicationContext.getInstance(context).getExpiringMessageManager();
-    MmsDatabase            database          = DatabaseFactory.getMmsDatabase(context);
-    OutgoingMediaMessage   message           = database.getOutgoingMessage(messageId);
+          UndeliverableMessageException {
+    ExpiringMessageManager expirationManager =
+        ApplicationContext.getInstance(context).getExpiringMessageManager();
+    MmsDatabase database = DatabaseFactory.getMmsDatabase(context);
+    OutgoingMediaMessage message = database.getOutgoingMessage(messageId);
 
     try {
       deliver(message);
@@ -74,10 +69,13 @@ public class PushMediaSendJob extends PushSendJob implements InjectableType {
       Log.w(TAG, ifae);
       database.markAsPendingInsecureSmsFallback(messageId);
       notifyMediaMessageDeliveryFailed(context, messageId);
-      ApplicationContext.getInstance(context).getJobManager().add(new DirectoryRefreshJob(context, false));
+      ApplicationContext.getInstance(context)
+          .getJobManager()
+          .add(new DirectoryRefreshJob(context, false));
     } catch (UntrustedIdentityException uie) {
       Log.w(TAG, uie);
-      database.addMismatchedIdentity(messageId, Address.fromSerialized(uie.getE164Number()), uie.getIdentityKey());
+      database.addMismatchedIdentity(
+          messageId, Address.fromSerialized(uie.getE164Number()), uie.getIdentityKey());
       database.markAsSentFailed(messageId);
     }
   }
@@ -85,7 +83,7 @@ public class PushMediaSendJob extends PushSendJob implements InjectableType {
   @Override
   public boolean onShouldRetryThrowable(Exception exception) {
     if (exception instanceof RequirementNotMetException) return true;
-    if (exception instanceof RetryLaterException)        return true;
+    if (exception instanceof RetryLaterException) return true;
 
     return false;
   }
@@ -98,26 +96,27 @@ public class PushMediaSendJob extends PushSendJob implements InjectableType {
 
   private void deliver(OutgoingMediaMessage message)
       throws RetryLaterException, InsecureFallbackApprovalException, UntrustedIdentityException,
-             UndeliverableMessageException
-  {
+          UndeliverableMessageException {
     if (message.getRecipient() == null) {
       throw new UndeliverableMessageException("No destination address.");
     }
 
     try {
-      SignalServiceAddress          address           = getPushAddress(message.getRecipient().getAddress());
-      MediaConstraints              mediaConstraints  = MediaConstraints.getPushMediaConstraints();
-      List<Attachment>              scaledAttachments = scaleAndStripExifFromAttachments(mediaConstraints, message.getAttachments());
+      SignalServiceAddress address = getPushAddress(message.getRecipient().getAddress());
+      MediaConstraints mediaConstraints = MediaConstraints.getPushMediaConstraints();
+      List<Attachment> scaledAttachments =
+          scaleAndStripExifFromAttachments(mediaConstraints, message.getAttachments());
       List<SignalServiceAttachment> attachmentStreams = getAttachmentsFor(scaledAttachments);
-      Optional<byte[]>              profileKey        = getProfileKey(message.getRecipient());
-      SignalServiceDataMessage      mediaMessage      = SignalServiceDataMessage.newBuilder()
-                                                                                .withBody(message.getBody())
-                                                                                .withAttachments(attachmentStreams)
-                                                                                .withTimestamp(message.getSentTimeMillis())
-                                                                                .withExpiration((int)(message.getExpiresIn() / 1000))
-                                                                                .withProfileKey(profileKey.orNull())
-                                                                                .asExpirationUpdate(message.isExpirationUpdate())
-                                                                                .build();
+      Optional<byte[]> profileKey = getProfileKey(message.getRecipient());
+      SignalServiceDataMessage mediaMessage =
+          SignalServiceDataMessage.newBuilder()
+              .withBody(message.getBody())
+              .withAttachments(attachmentStreams)
+              .withTimestamp(message.getSentTimeMillis())
+              .withExpiration((int) (message.getExpiresIn() / 1000))
+              .withProfileKey(profileKey.orNull())
+              .asExpirationUpdate(message.isExpirationUpdate())
+              .build();
 
       messageSender.sendMessage(address, mediaMessage);
     } catch (UnregisteredUserException e) {

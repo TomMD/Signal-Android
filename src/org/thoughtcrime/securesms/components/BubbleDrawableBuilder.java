@@ -4,16 +4,15 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
-
 import org.thoughtcrime.securesms.R;
 
 public class BubbleDrawableBuilder {
   private int color;
   private int shadowColor;
   private boolean hasShadow = true;
-  private boolean[] corners = new boolean[]{true,true,true,true};
+  private boolean[] corners = new boolean[] {true, true, true, true};
 
-  protected BubbleDrawableBuilder() { }
+  protected BubbleDrawableBuilder() {}
 
   public BubbleDrawableBuilder setColor(int color) {
     this.color = color;
@@ -37,8 +36,9 @@ public class BubbleDrawableBuilder {
 
   public Drawable create(Context context) {
     final GradientDrawable bubble = new GradientDrawable();
-    final int              radius = context.getResources().getDimensionPixelSize(R.dimen.message_bubble_corner_radius);
-    final float[]          radii  = cornerBooleansToRadii(corners, radius);
+    final int radius =
+        context.getResources().getDimensionPixelSize(R.dimen.message_bubble_corner_radius);
+    final float[] radii = cornerBooleansToRadii(corners, radius);
 
     bubble.setColor(color);
     bubble.setCornerRadii(radii);
@@ -46,13 +46,14 @@ public class BubbleDrawableBuilder {
     if (!hasShadow) {
       return bubble;
     } else {
-      final GradientDrawable shadow   = new GradientDrawable();
-      final int              distance = context.getResources().getDimensionPixelSize(R.dimen.message_bubble_shadow_distance);
+      final GradientDrawable shadow = new GradientDrawable();
+      final int distance =
+          context.getResources().getDimensionPixelSize(R.dimen.message_bubble_shadow_distance);
 
       shadow.setColor(shadowColor);
       shadow.setCornerRadii(radii);
 
-      final LayerDrawable layers = new LayerDrawable(new Drawable[]{shadow, bubble});
+      final LayerDrawable layers = new LayerDrawable(new Drawable[] {shadow, bubble});
       layers.setLayerInset(1, 0, 0, 0, distance);
       return layers;
     }
@@ -64,13 +65,12 @@ public class BubbleDrawableBuilder {
     }
 
     float[] radii = new float[8];
-    int     i     = 0;
+    int i = 0;
     for (boolean corner : corners) {
-      radii[i] = radii[i+1] = corner ? radius : 0;
+      radii[i] = radii[i + 1] = corner ? radius : 0;
       i += 2;
     }
 
     return radii;
   }
-
 }

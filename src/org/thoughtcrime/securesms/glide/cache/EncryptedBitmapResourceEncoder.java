@@ -1,21 +1,19 @@
 package org.thoughtcrime.securesms.glide.cache;
 
-
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.util.Log;
-
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class EncryptedBitmapResourceEncoder extends EncryptedCoder implements ResourceEncoder<Bitmap> {
+public class EncryptedBitmapResourceEncoder extends EncryptedCoder
+    implements ResourceEncoder<Bitmap> {
 
   private static final String TAG = EncryptedBitmapResourceEncoder.class.getSimpleName();
 
@@ -32,12 +30,13 @@ public class EncryptedBitmapResourceEncoder extends EncryptedCoder implements Re
 
   @SuppressWarnings("EmptyCatchBlock")
   @Override
-  public boolean encode(@NonNull Resource<Bitmap> data, @NonNull File file, @NonNull Options options) {
+  public boolean encode(
+      @NonNull Resource<Bitmap> data, @NonNull File file, @NonNull Options options) {
     Log.w(TAG, "Encrypted resource encoder running: " + file.toString());
 
-    Bitmap                bitmap  = data.get();
-    Bitmap.CompressFormat format  = getFormat(bitmap, options);
-    int                   quality = options.get(BitmapEncoder.COMPRESSION_QUALITY);
+    Bitmap bitmap = data.get();
+    Bitmap.CompressFormat format = getFormat(bitmap, options);
+    int quality = options.get(BitmapEncoder.COMPRESSION_QUALITY);
 
     try (OutputStream os = createEncryptedOutputStream(secret, file)) {
       bitmap.compress(format, quality, os);
@@ -60,6 +59,4 @@ public class EncryptedBitmapResourceEncoder extends EncryptedCoder implements Re
       return Bitmap.CompressFormat.JPEG;
     }
   }
-
-
 }

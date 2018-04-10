@@ -1,10 +1,9 @@
 package org.thoughtcrime.securesms.database;
 
+import static junit.framework.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import static junit.framework.Assert.assertEquals;
 
 public class AddressTest {
 
@@ -13,25 +12,29 @@ public class AddressTest {
 
   @Test
   public void testAddressString() throws Exception {
-    Address.ExternalAddressFormatter formatter = new Address.ExternalAddressFormatter("+14152222222");
+    Address.ExternalAddressFormatter formatter =
+        new Address.ExternalAddressFormatter("+14152222222");
     assertEquals(formatter.format("bonbon"), "bonbon");
   }
 
   @Test
   public void testAddressShortCode() throws Exception {
-    Address.ExternalAddressFormatter formatter = new Address.ExternalAddressFormatter("+14152222222");
+    Address.ExternalAddressFormatter formatter =
+        new Address.ExternalAddressFormatter("+14152222222");
     assertEquals(formatter.format("40404"), "40404");
   }
 
   @Test
   public void testEmailAddress() throws Exception {
-    Address.ExternalAddressFormatter formatter = new Address.ExternalAddressFormatter("+14152222222");
+    Address.ExternalAddressFormatter formatter =
+        new Address.ExternalAddressFormatter("+14152222222");
     assertEquals(formatter.format("junk@junk.net"), "junk@junk.net");
   }
 
   @Test
   public void testNumberArbitrary() throws Exception {
-    Address.ExternalAddressFormatter formatter = new Address.ExternalAddressFormatter("+14152222222");
+    Address.ExternalAddressFormatter formatter =
+        new Address.ExternalAddressFormatter("+14152222222");
     assertEquals(formatter.format("(415) 111-1122"), "+14151111122");
     assertEquals(formatter.format("(415) 111 1123"), "+14151111123");
     assertEquals(formatter.format("415-111-1124"), "+14151111124");
@@ -46,7 +49,8 @@ public class AddressTest {
 
   @Test
   public void testGroup() throws Exception {
-    Address.ExternalAddressFormatter formatter = new Address.ExternalAddressFormatter("+14152222222");
+    Address.ExternalAddressFormatter formatter =
+        new Address.ExternalAddressFormatter("+14152222222");
     assertEquals(formatter.format("__textsecure_group__!foobar"), "__textsecure_group__!foobar");
   }
 
@@ -55,5 +59,4 @@ public class AddressTest {
     Address.ExternalAddressFormatter formatter = new Address.ExternalAddressFormatter("US", true);
     assertEquals(formatter.format("(415) 111-1122"), "+14151111122");
   }
-
 }

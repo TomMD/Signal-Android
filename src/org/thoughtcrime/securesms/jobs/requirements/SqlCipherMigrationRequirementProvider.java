@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms.jobs.requirements;
 
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -25,7 +24,5 @@ public class SqlCipherMigrationRequirementProvider implements RequirementProvide
     if (listener != null) listener.onRequirementStatusChanged();
   }
 
-  public static class SqlCipherNeedsMigrationEvent {
-
-  }
+  public static class SqlCipherNeedsMigrationEvent {}
 }

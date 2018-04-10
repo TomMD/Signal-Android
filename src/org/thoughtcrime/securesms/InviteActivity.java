@@ -23,7 +23,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
-
+import java.util.concurrent.ExecutionException;
 import org.thoughtcrime.securesms.components.ContactFilterToolbar;
 import org.thoughtcrime.securesms.components.ContactFilterToolbar.OnFilterChangedListener;
 import org.thoughtcrime.securesms.contacts.ContactsCursorLoader.DisplayMode;
@@ -36,17 +36,16 @@ import org.thoughtcrime.securesms.util.ViewUtil;
 import org.thoughtcrime.securesms.util.concurrent.ListenableFuture.Listener;
 import org.thoughtcrime.securesms.util.task.ProgressDialogAsyncTask;
 
-import java.util.concurrent.ExecutionException;
-
-public class InviteActivity extends PassphraseRequiredActionBarActivity implements ContactSelectionListFragment.OnContactSelectedListener {
+public class InviteActivity extends PassphraseRequiredActionBarActivity
+    implements ContactSelectionListFragment.OnContactSelectedListener {
 
   private ContactSelectionListFragment contactsFragment;
-  private EditText                     inviteText;
-  private ViewGroup                    smsSendFrame;
-  private Button                       smsSendButton;
-  private Animation                    slideInAnimation;
-  private Animation                    slideOutAnimation;
-  private ImageView                    heart;
+  private EditText inviteText;
+  private ViewGroup smsSendFrame;
+  private Button smsSendButton;
+  private Animation slideInAnimation;
+  private Animation slideOutAnimation;
+  private ImageView heart;
 
   @Override
   protected void onCreate(Bundle savedInstanceState, boolean ready) {
@@ -62,21 +61,24 @@ public class InviteActivity extends PassphraseRequiredActionBarActivity implemen
   }
 
   private void initializeResources() {
-    slideInAnimation  = loadAnimation(R.anim.slide_from_bottom);
+    slideInAnimation = loadAnimation(R.anim.slide_from_bottom);
     slideOutAnimation = loadAnimation(R.anim.slide_to_bottom);
 
-    View                 shareButton     = ViewUtil.findById(this, R.id.share_button);
-    View                 smsButton       = ViewUtil.findById(this, R.id.sms_button);
-    Button               smsCancelButton = ViewUtil.findById(this, R.id.cancel_sms_button);
-    ContactFilterToolbar contactFilter   = ViewUtil.findById(this, R.id.contact_filter);
+    View shareButton = ViewUtil.findById(this, R.id.share_button);
+    View smsButton = ViewUtil.findById(this, R.id.sms_button);
+    Button smsCancelButton = ViewUtil.findById(this, R.id.cancel_sms_button);
+    ContactFilterToolbar contactFilter = ViewUtil.findById(this, R.id.contact_filter);
 
-    inviteText        = ViewUtil.findById(this, R.id.invite_text);
-    smsSendFrame      = ViewUtil.findById(this, R.id.sms_send_frame);
-    smsSendButton     = ViewUtil.findById(this, R.id.send_sms_button);
-    heart             = ViewUtil.findById(this, R.id.heart);
-    contactsFragment  = (ContactSelectionListFragment)getSupportFragmentManager().findFragmentById(R.id.contact_selection_list_fragment);
+    inviteText = ViewUtil.findById(this, R.id.invite_text);
+    smsSendFrame = ViewUtil.findById(this, R.id.sms_send_frame);
+    smsSendButton = ViewUtil.findById(this, R.id.send_sms_button);
+    heart = ViewUtil.findById(this, R.id.heart);
+    contactsFragment =
+        (ContactSelectionListFragment)
+            getSupportFragmentManager().findFragmentById(R.id.contact_selection_list_fragment);
 
-    inviteText.setText(getString(R.string.InviteActivity_lets_switch_to_signal, "https://sgnl.link/1KpeYmF"));
+    inviteText.setText(
+        getString(R.string.InviteActivity_lets_switch_to_signal, "https://sgnl.link/1KpeYmF"));
     updateSmsButtonText();
 
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
@@ -109,19 +111,25 @@ public class InviteActivity extends PassphraseRequiredActionBarActivity implemen
 
   private void sendSmsInvites() {
     new SendSmsInvitesAsyncTask(this, inviteText.getText().toString())
-        .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                           contactsFragment.getSelectedContacts()
-                                           .toArray(new String[contactsFragment.getSelectedContacts().size()]));
+        .executeOnExecutor(
+            AsyncTask.THREAD_POOL_EXECUTOR,
+            contactsFragment
+                .getSelectedContacts()
+                .toArray(new String[contactsFragment.getSelectedContacts().size()]));
   }
 
   private void updateSmsButtonText() {
-    smsSendButton.setText(getResources().getQuantityString(R.plurals.InviteActivity_send_sms_to_friends,
-                                                           contactsFragment.getSelectedContacts().size(),
-                                                           contactsFragment.getSelectedContacts().size()));
+    smsSendButton.setText(
+        getResources()
+            .getQuantityString(
+                R.plurals.InviteActivity_send_sms_to_friends,
+                contactsFragment.getSelectedContacts().size(),
+                contactsFragment.getSelectedContacts().size()));
     smsSendButton.setEnabled(!contactsFragment.getSelectedContacts().isEmpty());
   }
 
-  @Override public void onBackPressed() {
+  @Override
+  public void onBackPressed() {
     if (smsSendFrame.getVisibility() == View.VISIBLE) {
       cancelSmsSelection();
     } else {
@@ -143,9 +151,12 @@ public class InviteActivity extends PassphraseRequiredActionBarActivity implemen
       sendIntent.putExtra(Intent.EXTRA_TEXT, inviteText.getText().toString());
       sendIntent.setType("text/plain");
       if (sendIntent.resolveActivity(getPackageManager()) != null) {
-        startActivity(Intent.createChooser(sendIntent, getString(R.string.InviteActivity_invite_to_signal)));
+        startActivity(
+            Intent.createChooser(sendIntent, getString(R.string.InviteActivity_invite_to_signal)));
       } else {
-        Toast.makeText(InviteActivity.this, R.string.InviteActivity_no_app_to_share_to, Toast.LENGTH_LONG).show();
+        Toast.makeText(
+                InviteActivity.this, R.string.InviteActivity_no_app_to_share_to, Toast.LENGTH_LONG)
+            .show();
       }
     }
   }
@@ -168,9 +179,12 @@ public class InviteActivity extends PassphraseRequiredActionBarActivity implemen
     @Override
     public void onClick(View v) {
       new AlertDialog.Builder(InviteActivity.this)
-          .setTitle(getResources().getQuantityString(R.plurals.InviteActivity_send_sms_invites,
-                                                     contactsFragment.getSelectedContacts().size(),
-                                                     contactsFragment.getSelectedContacts().size()))
+          .setTitle(
+              getResources()
+                  .getQuantityString(
+                      R.plurals.InviteActivity_send_sms_invites,
+                      contactsFragment.getSelectedContacts().size(),
+                      contactsFragment.getSelectedContacts().size()))
           .setMessage(inviteText.getText().toString())
           .setPositiveButton(R.string.yes, (dialog, which) -> sendSmsInvites())
           .setNegativeButton(R.string.no, (dialog, which) -> dialog.dismiss())
@@ -192,9 +206,9 @@ public class InviteActivity extends PassphraseRequiredActionBarActivity implemen
       heart.getViewTreeObserver().removeOnPreDrawListener(this);
       final int w = heart.getWidth();
       final int h = heart.getHeight();
-      Animator reveal = ViewAnimationUtils.createCircularReveal(heart,
-                                                                w / 2, h,
-                                                                0, (float)Math.sqrt(h*h + (w*w/4)));
+      Animator reveal =
+          ViewAnimationUtils.createCircularReveal(
+              heart, w / 2, h, 0, (float) Math.sqrt(h * h + (w * w / 4)));
       reveal.setInterpolator(new FastOutSlowInInterpolator());
       reveal.setDuration(800);
       reveal.start();
@@ -203,7 +217,7 @@ public class InviteActivity extends PassphraseRequiredActionBarActivity implemen
   }
 
   @SuppressLint("StaticFieldLeak")
-  private class SendSmsInvitesAsyncTask extends ProgressDialogAsyncTask<String,Void,Void> {
+  private class SendSmsInvitesAsyncTask extends ProgressDialogAsyncTask<String, Void, Void> {
     private final String message;
 
     SendSmsInvitesAsyncTask(Context context, String message) {
@@ -217,10 +231,11 @@ public class InviteActivity extends PassphraseRequiredActionBarActivity implemen
       if (context == null) return null;
 
       for (String number : numbers) {
-        Recipient recipient      = Recipient.from(context, Address.fromExternal(context, number), false);
-        int       subscriptionId = recipient.getDefaultSubscriptionId().or(-1);
+        Recipient recipient = Recipient.from(context, Address.fromExternal(context, number), false);
+        int subscriptionId = recipient.getDefaultSubscriptionId().or(-1);
 
-        MessageSender.send(context, new OutgoingTextMessage(recipient, message, subscriptionId), -1L, true, null);
+        MessageSender.send(
+            context, new OutgoingTextMessage(recipient, message, subscriptionId), -1L, true, null);
 
         if (recipient.getContactUri() != null) {
           DatabaseFactory.getRecipientDatabase(context).setSeenInviteReminder(recipient, true);
@@ -236,15 +251,17 @@ public class InviteActivity extends PassphraseRequiredActionBarActivity implemen
       final Context context = getContext();
       if (context == null) return;
 
-      ViewUtil.animateOut(smsSendFrame, slideOutAnimation, View.GONE).addListener(new Listener<Boolean>() {
-        @Override
-        public void onSuccess(Boolean result) {
-          contactsFragment.reset();
-        }
+      ViewUtil.animateOut(smsSendFrame, slideOutAnimation, View.GONE)
+          .addListener(
+              new Listener<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                  contactsFragment.reset();
+                }
 
-        @Override
-        public void onFailure(ExecutionException e) {}
-      });
+                @Override
+                public void onFailure(ExecutionException e) {}
+              });
       Toast.makeText(context, R.string.InviteActivity_invitations_sent, Toast.LENGTH_LONG).show();
     }
   }

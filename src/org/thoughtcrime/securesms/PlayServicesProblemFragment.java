@@ -1,20 +1,17 @@
 /**
  * Copyright (C) 2014 Open Whisper Systems
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * <p>This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * <p>You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.thoughtcrime.securesms;
 
 import android.app.Activity;
@@ -24,21 +21,22 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
 public class PlayServicesProblemFragment extends DialogFragment {
 
   @Override
   public @NonNull Dialog onCreateDialog(@NonNull Bundle bundle) {
-    int    code   = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getActivity());
+    int code = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getActivity());
     Dialog dialog = GooglePlayServicesUtil.getErrorDialog(code, getActivity(), 9111);
 
     if (dialog == null) {
       return new AlertDialog.Builder(getActivity())
-              .setNegativeButton(android.R.string.ok, null)
-              .setMessage(R.string.PlayServicesProblemFragment_the_version_of_google_play_services_you_have_installed_is_not_functioning)
-              .create();
+          .setNegativeButton(android.R.string.ok, null)
+          .setMessage(
+              R.string
+                  .PlayServicesProblemFragment_the_version_of_google_play_services_you_have_installed_is_not_functioning)
+          .create();
     } else {
       return dialog;
     }
@@ -60,5 +58,4 @@ public class PlayServicesProblemFragment extends DialogFragment {
     Activity activity = getActivity();
     if (activity != null) activity.finish();
   }
-  
 }

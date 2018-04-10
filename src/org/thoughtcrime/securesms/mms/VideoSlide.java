@@ -1,18 +1,16 @@
-/** 
+/**
  * Copyright (C) 2011 Whisper Systems
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * <p>This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * <p>You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  */
 package org.thoughtcrime.securesms.mms;
 
@@ -21,7 +19,6 @@ import android.content.res.Resources.Theme;
 import android.net.Uri;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
-
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.attachments.Attachment;
 import org.thoughtcrime.securesms.util.MediaUtil;
@@ -30,7 +27,18 @@ import org.thoughtcrime.securesms.util.ResUtil;
 public class VideoSlide extends Slide {
 
   public VideoSlide(Context context, Uri uri, long dataSize) {
-    super(context, constructAttachmentFromUri(context, uri, MediaUtil.VIDEO_UNSPECIFIED, dataSize, 0, 0, MediaUtil.hasVideoThumbnail(uri), null, false));
+    super(
+        context,
+        constructAttachmentFromUri(
+            context,
+            uri,
+            MediaUtil.VIDEO_UNSPECIFIED,
+            dataSize,
+            0,
+            0,
+            MediaUtil.hasVideoThumbnail(uri),
+            null,
+            false));
   }
 
   public VideoSlide(Context context, Attachment attachment) {
@@ -62,7 +70,8 @@ public class VideoSlide extends Slide {
     return true;
   }
 
-  @NonNull @Override
+  @NonNull
+  @Override
   public String getContentDescription() {
     return context.getString(R.string.Slide_video);
   }

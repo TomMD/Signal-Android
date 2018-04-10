@@ -1,11 +1,9 @@
 package org.thoughtcrime.securesms.util;
 
-
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
@@ -37,7 +35,8 @@ public class PlayServicesUtil {
         return PlayServicesStatus.SUCCESS;
       case ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED:
         try {
-          ApplicationInfo applicationInfo = context.getPackageManager().getApplicationInfo("com.google.android.gms", 0);
+          ApplicationInfo applicationInfo =
+              context.getPackageManager().getApplicationInfo("com.google.android.gms", 0);
 
           if (applicationInfo != null && !applicationInfo.enabled) {
             return PlayServicesStatus.MISSING;
@@ -57,5 +56,4 @@ public class PlayServicesUtil {
         return PlayServicesStatus.TRANSIENT_ERROR;
     }
   }
-
 }

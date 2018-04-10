@@ -4,11 +4,9 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-
-import org.thoughtcrime.securesms.util.Util;
-
 import java.lang.ref.WeakReference;
 import java.util.concurrent.TimeUnit;
+import org.thoughtcrime.securesms.util.Util;
 
 public class ExpirationTimerView extends HourglassView {
 
@@ -41,10 +39,11 @@ public class ExpirationTimerView extends HourglassView {
     synchronized (this) {
       visible = true;
       if (!stopped) return;
-      else          stopped = false;
+      else stopped = false;
     }
 
-    Util.runOnMainDelayed(new AnimationUpdateRunnable(this), calculateAnimationDelay(this.startedAt, this.expiresIn));
+    Util.runOnMainDelayed(
+        new AnimationUpdateRunnable(this), calculateAnimationDelay(this.startedAt, this.expiresIn));
   }
 
   public void stopAnimation() {
@@ -54,15 +53,15 @@ public class ExpirationTimerView extends HourglassView {
   }
 
   private float calculateProgress(long startedAt, long expiresIn) {
-    long  progressed      = System.currentTimeMillis() - startedAt;
-    float percentComplete = (float)progressed / (float)expiresIn;
+    long progressed = System.currentTimeMillis() - startedAt;
+    float percentComplete = (float) progressed / (float) expiresIn;
 
     return percentComplete * 100;
   }
 
   private long calculateAnimationDelay(long startedAt, long expiresIn) {
     long progressed = System.currentTimeMillis() - startedAt;
-    long remaining  = expiresIn - progressed;
+    long remaining = expiresIn - progressed;
 
     if (remaining < TimeUnit.SECONDS.toMillis(30)) {
       return 50;
@@ -93,8 +92,8 @@ public class ExpirationTimerView extends HourglassView {
         }
       }
 
-      Util.runOnMainDelayed(this, timerView.calculateAnimationDelay(timerView.startedAt, timerView.expiresIn));
+      Util.runOnMainDelayed(
+          this, timerView.calculateAnimationDelay(timerView.startedAt, timerView.expiresIn));
     }
   }
-
 }

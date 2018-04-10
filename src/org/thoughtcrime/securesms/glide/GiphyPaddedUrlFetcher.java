@@ -1,27 +1,22 @@
 package org.thoughtcrime.securesms.glide;
 
-
 import android.support.annotation.NonNull;
 import android.util.Log;
-
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.util.ContentLengthInputStream;
-
-import org.thoughtcrime.securesms.giph.model.GiphyPaddedUrl;
-import org.thoughtcrime.securesms.util.Util;
-
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
-
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import org.thoughtcrime.securesms.giph.model.GiphyPaddedUrl;
+import org.thoughtcrime.securesms.util.Util;
 
 class GiphyPaddedUrlFetcher implements DataFetcher<InputStream> {
 
@@ -30,36 +25,36 @@ class GiphyPaddedUrlFetcher implements DataFetcher<InputStream> {
   private static final long MB = 1024 * 1024;
   private static final long KB = 1024;
 
-  private final OkHttpClient   client;
+  private final OkHttpClient client;
   private final GiphyPaddedUrl url;
 
   private List<ResponseBody> bodies;
-  private List<InputStream>  rangeStreams;
-  private InputStream        stream;
+  private List<InputStream> rangeStreams;
+  private InputStream stream;
 
-  GiphyPaddedUrlFetcher(@NonNull OkHttpClient client,
-                        @NonNull GiphyPaddedUrl url)
-  {
-    this.client  = client;
-    this.url     = url;
+  GiphyPaddedUrlFetcher(@NonNull OkHttpClient client, @NonNull GiphyPaddedUrl url) {
+    this.client = client;
+    this.url = url;
   }
 
   @Override
-  public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super InputStream> callback) {
-    bodies       = new LinkedList<>();
+  public void loadData(
+      @NonNull Priority priority, @NonNull DataCallback<? super InputStream> callback) {
+    bodies = new LinkedList<>();
     rangeStreams = new LinkedList<>();
-    stream       = null;
+    stream = null;
 
     try {
       List<ByteRange> requestPattern = getRequestPattern(url.getSize());
 
       for (ByteRange range : requestPattern) {
-        Request request = new Request.Builder()
-                                     .addHeader("Range", "bytes=" + range.start + "-" + range.end)
-                                     .addHeader("Accept-Encoding", "identity")
-                                     .url(url.getTarget())
-                                     .get()
-                                     .build();
+        Request request =
+            new Request.Builder()
+                .addHeader("Range", "bytes=" + range.start + "-" + range.end)
+                .addHeader("Accept-Encoding", "identity")
+                .url(url.getTarget())
+                .get()
+                .build();
 
         Response response = client.newCall(request).execute();
 
@@ -70,9 +65,13 @@ class GiphyPaddedUrlFetcher implements DataFetcher<InputStream> {
         ResponseBody responseBody = response.body();
 
         if (responseBody == null) throw new IOException("Response body was null");
-        else                      bodies.add(responseBody);
+        else bodies.add(responseBody);
 
-        rangeStreams.add(new SkippingInputStream(ContentLengthInputStream.obtain(responseBody.byteStream(), responseBody.contentLength()), range.ignoreFirst));
+        rangeStreams.add(
+            new SkippingInputStream(
+                ContentLengthInputStream.obtain(
+                    responseBody.byteStream(), responseBody.contentLength()),
+                range.ignoreFirst));
       }
 
       stream = new InputStreamList(rangeStreams);
@@ -89,7 +88,8 @@ class GiphyPaddedUrlFetcher implements DataFetcher<InputStream> {
       for (InputStream rangeStream : rangeStreams) {
         try {
           if (rangeStream != null) rangeStream.close();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
       }
     }
 
@@ -102,14 +102,13 @@ class GiphyPaddedUrlFetcher implements DataFetcher<InputStream> {
     if (stream != null) {
       try {
         stream.close();
-      } catch (IOException ignored) {}
+      } catch (IOException ignored) {
+      }
     }
   }
 
   @Override
-  public void cancel() {
-
-  }
+  public void cancel() {}
 
   @NonNull
   @Override
@@ -124,11 +123,11 @@ class GiphyPaddedUrlFetcher implements DataFetcher<InputStream> {
   }
 
   private List<ByteRange> getRequestPattern(long size) throws IOException {
-    if      (size > MB)       return getRequestPattern(size, MB);
+    if (size > MB) return getRequestPattern(size, MB);
     else if (size > 500 * KB) return getRequestPattern(size, 500 * KB);
     else if (size > 100 * KB) return getRequestPattern(size, 100 * KB);
-    else if (size > 50 * KB)  return getRequestPattern(size, 50 * KB);
-    else if (size > KB)       return getRequestPattern(size, KB);
+    else if (size > 50 * KB) return getRequestPattern(size, 50 * KB);
+    else if (size > KB) return getRequestPattern(size, KB);
 
     throw new IOException("Unsupported size: " + size);
   }
@@ -144,7 +143,7 @@ class GiphyPaddedUrlFetcher implements DataFetcher<InputStream> {
     }
 
     if (size - offset > 0) {
-      results.add(new ByteRange(size - increment, size-1, increment - (size - offset)));
+      results.add(new ByteRange(size - increment, size - 1, increment - (size - offset)));
     }
 
     return results;
@@ -156,8 +155,8 @@ class GiphyPaddedUrlFetcher implements DataFetcher<InputStream> {
     private final long ignoreFirst;
 
     private ByteRange(long start, long end, long ignoreFirst) {
-      this.start       = start;
-      this.end         = end;
+      this.start = start;
+      this.end = end;
       this.ignoreFirst = ignoreFirst;
     }
   }
@@ -213,7 +212,7 @@ class GiphyPaddedUrlFetcher implements DataFetcher<InputStream> {
         int read = super.read(buffer, 0, Math.min(buffer.length, Util.toIntExact(amount)));
 
         if (read != -1) amount -= read;
-        else            return;
+        else return;
       }
     }
   }
@@ -234,7 +233,7 @@ class GiphyPaddedUrlFetcher implements DataFetcher<InputStream> {
         int result = inputStreams.get(currentStreamIndex).read();
 
         if (result == -1) currentStreamIndex++;
-        else              return result;
+        else return result;
       }
 
       return -1;
@@ -246,7 +245,7 @@ class GiphyPaddedUrlFetcher implements DataFetcher<InputStream> {
         int result = inputStreams.get(currentStreamIndex).read(buffer, offset, length);
 
         if (result == -1) currentStreamIndex++;
-        else              return result;
+        else return result;
       }
 
       return -1;
@@ -262,7 +261,8 @@ class GiphyPaddedUrlFetcher implements DataFetcher<InputStream> {
       for (InputStream stream : inputStreams) {
         try {
           stream.close();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
       }
     }
 
@@ -270,16 +270,16 @@ class GiphyPaddedUrlFetcher implements DataFetcher<InputStream> {
     public int available() {
       int total = 0;
 
-      for (int i=currentStreamIndex;i<inputStreams.size();i++) {
+      for (int i = currentStreamIndex; i < inputStreams.size(); i++) {
         try {
           int available = inputStreams.get(i).available();
 
           if (available != -1) total += available;
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
       }
 
       return total;
     }
   }
-
 }

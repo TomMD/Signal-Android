@@ -14,7 +14,7 @@ import android.view.inputmethod.InputMethodManager;
 
 public class ServiceUtil {
   public static InputMethodManager getInputMethodManager(Context context) {
-    return (InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE);
+    return (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
   }
 
   public static WindowManager getWindowManager(Context context) {
@@ -30,22 +30,22 @@ public class ServiceUtil {
   }
 
   public static TelephonyManager getTelephonyManager(Context context) {
-    return (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+    return (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
   }
 
   public static AudioManager getAudioManager(Context context) {
-    return (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
+    return (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
   }
 
   public static PowerManager getPowerManager(Context context) {
-    return (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+    return (PowerManager) context.getSystemService(Context.POWER_SERVICE);
   }
 
   public static AlarmManager getAlarmManager(Context context) {
-    return (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+    return (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
   }
 
   public static Vibrator getVibrator(Context context) {
-    return  (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
+    return (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
   }
 }

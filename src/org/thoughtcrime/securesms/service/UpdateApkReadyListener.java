@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms.service;
 
-
 import android.app.DownloadManager;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -12,17 +11,15 @@ import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.MessageDigest;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.util.FileUtils;
 import org.thoughtcrime.securesms.util.Hex;
 import org.thoughtcrime.securesms.util.ServiceUtil;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.MessageDigest;
 
 public class UpdateApkReadyListener extends BroadcastReceiver {
 
@@ -36,7 +33,7 @@ public class UpdateApkReadyListener extends BroadcastReceiver {
       long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -2);
 
       if (downloadId == TextSecurePreferences.getUpdateApkDownloadId(context)) {
-        Uri    uri           = getLocalUriForDownloadId(context, downloadId);
+        Uri uri = getLocalUriForDownloadId(context, downloadId);
         String encodedDigest = TextSecurePreferences.getUpdateApkDigest(context);
 
         if (uri == null) {
@@ -60,33 +57,39 @@ public class UpdateApkReadyListener extends BroadcastReceiver {
 
     PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
 
-    Notification notification = new NotificationCompat.Builder(context)
-        .setOngoing(true)
-        .setContentTitle(context.getString(R.string.UpdateApkReadyListener_Signal_update))
-        .setContentText(context.getString(R.string.UpdateApkReadyListener_a_new_version_of_signal_is_available_tap_to_update))
-        .setSmallIcon(R.drawable.icon_notification)
-        .setColor(context.getResources().getColor(R.color.textsecure_primary))
-        .setPriority(NotificationCompat.PRIORITY_HIGH)
-        .setCategory(NotificationCompat.CATEGORY_REMINDER)
-        .setContentIntent(pendingIntent)
-        .build();
+    Notification notification =
+        new NotificationCompat.Builder(context)
+            .setOngoing(true)
+            .setContentTitle(context.getString(R.string.UpdateApkReadyListener_Signal_update))
+            .setContentText(
+                context.getString(
+                    R.string
+                        .UpdateApkReadyListener_a_new_version_of_signal_is_available_tap_to_update))
+            .setSmallIcon(R.drawable.icon_notification)
+            .setColor(context.getResources().getColor(R.color.textsecure_primary))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setContentIntent(pendingIntent)
+            .build();
 
     ServiceUtil.getNotificationManager(context).notify(666, notification);
   }
 
   private @Nullable Uri getLocalUriForDownloadId(Context context, long downloadId) {
-    DownloadManager       downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-    DownloadManager.Query query           = new DownloadManager.Query();
+    DownloadManager downloadManager =
+        (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+    DownloadManager.Query query = new DownloadManager.Query();
     query.setFilterById(downloadId);
 
     Cursor cursor = downloadManager.query(query);
 
     try {
       if (cursor != null && cursor.moveToFirst()) {
-        String localUri  = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI));
+        String localUri =
+            cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI));
 
         if (localUri != null) {
-          File   localFile = new File(Uri.parse(localUri).getPath());
+          File localFile = new File(Uri.parse(localUri).getPath());
           return Uri.fromFile(localFile);
         }
       }
@@ -101,10 +104,12 @@ public class UpdateApkReadyListener extends BroadcastReceiver {
     try {
       if (theirEncodedDigest == null) return false;
 
-      byte[]          theirDigest     = Hex.fromStringCondensed(theirEncodedDigest);
-      DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-      FileInputStream fin             = new FileInputStream(downloadManager.openDownloadedFile(downloadId).getFileDescriptor());
-      byte[]          ourDigest       = FileUtils.getFileDigest(fin);
+      byte[] theirDigest = Hex.fromStringCondensed(theirEncodedDigest);
+      DownloadManager downloadManager =
+          (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+      FileInputStream fin =
+          new FileInputStream(downloadManager.openDownloadedFile(downloadId).getFileDescriptor());
+      byte[] ourDigest = FileUtils.getFileDigest(fin);
 
       fin.close();
 

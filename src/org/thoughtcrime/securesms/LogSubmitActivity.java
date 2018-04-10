@@ -7,14 +7,12 @@ import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
-
 import org.thoughtcrime.securesms.util.DynamicTheme;
 import org.whispersystems.libpastelog.SubmitLogFragment;
 
-/**
- * Activity for submitting logcat logs to a pastebin service.
- */
-public class LogSubmitActivity extends BaseActionBarActivity implements SubmitLogFragment.OnLogSubmittedListener {
+/** Activity for submitting logcat logs to a pastebin service. */
+public class LogSubmitActivity extends BaseActionBarActivity
+    implements SubmitLogFragment.OnLogSubmittedListener {
 
   private static final String TAG = LogSubmitActivity.class.getSimpleName();
   private DynamicTheme dynamicTheme = new DynamicTheme();
@@ -41,9 +39,9 @@ public class LogSubmitActivity extends BaseActionBarActivity implements SubmitLo
   public boolean onOptionsItemSelected(MenuItem item) {
     super.onOptionsItemSelected(item);
     switch (item.getItemId()) {
-    case android.R.id.home:
-      finish();
-      return true;
+      case android.R.id.home:
+        finish();
+        return true;
     }
 
     return false;
@@ -51,13 +49,18 @@ public class LogSubmitActivity extends BaseActionBarActivity implements SubmitLo
 
   @Override
   public void onSuccess() {
-    Toast.makeText(getApplicationContext(), R.string.log_submit_activity__thanks, Toast.LENGTH_LONG).show();
+    Toast.makeText(getApplicationContext(), R.string.log_submit_activity__thanks, Toast.LENGTH_LONG)
+        .show();
     finish();
   }
 
   @Override
   public void onFailure() {
-    Toast.makeText(getApplicationContext(), R.string.log_submit_activity__log_fetch_failed, Toast.LENGTH_LONG).show();
+    Toast.makeText(
+            getApplicationContext(),
+            R.string.log_submit_activity__log_fetch_failed,
+            Toast.LENGTH_LONG)
+        .show();
     finish();
   }
 
@@ -72,7 +75,8 @@ public class LogSubmitActivity extends BaseActionBarActivity implements SubmitLo
       super.startActivity(intent);
     } catch (ActivityNotFoundException e) {
       Log.w(TAG, e);
-      Toast.makeText(this, R.string.log_submit_activity__no_browser_installed, Toast.LENGTH_LONG).show();
+      Toast.makeText(this, R.string.log_submit_activity__no_browser_installed, Toast.LENGTH_LONG)
+          .show();
     }
   }
 }

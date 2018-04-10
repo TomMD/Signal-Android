@@ -3,7 +3,6 @@ package org.thoughtcrime.securesms;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
-
 import org.thoughtcrime.securesms.preferences.MmsPreferencesActivity;
 
 public class PromptMmsActivity extends PassphraseRequiredActionBarActivity {
@@ -18,14 +17,14 @@ public class PromptMmsActivity extends PassphraseRequiredActionBarActivity {
     Button okButton = findViewById(R.id.ok_button);
     Button cancelButton = findViewById(R.id.cancel_button);
 
-    okButton.setOnClickListener(v -> {
-      Intent intent = new Intent(PromptMmsActivity.this, MmsPreferencesActivity.class);
-      intent.putExtras(PromptMmsActivity.this.getIntent().getExtras());
-      startActivity(intent);
-      finish();
-    });
+    okButton.setOnClickListener(
+        v -> {
+          Intent intent = new Intent(PromptMmsActivity.this, MmsPreferencesActivity.class);
+          intent.putExtras(PromptMmsActivity.this.getIntent().getExtras());
+          startActivity(intent);
+          finish();
+        });
 
     cancelButton.setOnClickListener(v -> finish());
   }
-
 }

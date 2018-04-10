@@ -11,20 +11,9 @@
 package org.thoughtcrime.securesms.components.webrtc;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Xfermode;
-import android.graphics.drawable.Drawable;
-import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Simple container that confines the children to a subrectangle specified as percentage values of
@@ -81,23 +70,24 @@ public class PercentFrameLayout extends ViewGroup {
     final int width = getDefaultSize(Integer.MAX_VALUE, widthMeasureSpec);
     final int height = getDefaultSize(Integer.MAX_VALUE, heightMeasureSpec);
 
-    setMeasuredDimension(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
-                         MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+    setMeasuredDimension(
+        MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+        MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
 
-    int childWidth  = width * widthPercent / 100;
+    int childWidth = width * widthPercent / 100;
     int childHeight = height * heightPercent / 100;
 
     if (square) {
-      if (width > height) childWidth  = childHeight;
-      else                childHeight = childWidth;
+      if (width > height) childWidth = childHeight;
+      else childHeight = childWidth;
     }
 
     if (hidden) {
-      childWidth  = 1;
+      childWidth = 1;
       childHeight = 1;
     }
 
-    int childWidthMeasureSpec  = MeasureSpec.makeMeasureSpec(childWidth, MeasureSpec.AT_MOST);
+    int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(childWidth, MeasureSpec.AT_MOST);
     int childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(childHeight, MeasureSpec.AT_MOST);
 
     for (int i = 0; i < getChildCount(); ++i) {
@@ -118,7 +108,6 @@ public class PercentFrameLayout extends ViewGroup {
     final int subLeft = left + width * xPercent / 100;
     final int subTop = top + height * yPercent / 100;
 
-
     for (int i = 0; i < getChildCount(); ++i) {
       final View child = getChildAt(i);
       if (child.getVisibility() != GONE) {
@@ -130,7 +119,7 @@ public class PercentFrameLayout extends ViewGroup {
 
         if (hidden) {
           childLeft = 0;
-          childTop  = 0;
+          childTop = 0;
         }
 
         child.layout(childLeft, childTop, childLeft + childWidth, childTop + childHeight);

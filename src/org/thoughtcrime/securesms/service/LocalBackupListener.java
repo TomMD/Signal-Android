@@ -1,14 +1,11 @@
 package org.thoughtcrime.securesms.service;
 
-
 import android.content.Context;
 import android.content.Intent;
-
+import java.util.concurrent.TimeUnit;
 import org.thoughtcrime.securesms.ApplicationContext;
 import org.thoughtcrime.securesms.jobs.LocalBackupJob;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
-
-import java.util.concurrent.TimeUnit;
 
 public class LocalBackupListener extends PersistentAlarmManagerListener {
 

@@ -5,7 +5,6 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-
 import org.thoughtcrime.securesms.ApplicationContext;
 
 public class ExpirationListener extends BroadcastReceiver {
@@ -16,11 +15,12 @@ public class ExpirationListener extends BroadcastReceiver {
   }
 
   public static void setAlarm(Context context, long waitTimeMillis) {
-    Intent        intent        = new Intent(context, ExpirationListener.class);
+    Intent intent = new Intent(context, ExpirationListener.class);
     PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-    AlarmManager  alarmManager  = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+    AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
     alarmManager.cancel(pendingIntent);
-    alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + waitTimeMillis, pendingIntent);
+    alarmManager.set(
+        AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + waitTimeMillis, pendingIntent);
   }
 }

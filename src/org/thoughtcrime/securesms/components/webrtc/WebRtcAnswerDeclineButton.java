@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms.components.webrtc;
 
-
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ArgbEvaluator;
@@ -19,7 +18,6 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.util.ViewUtil;
 
@@ -31,18 +29,18 @@ public class WebRtcAnswerDeclineButton extends LinearLayout implements View.OnTo
   private static final int TOTAL_TIME = 1000;
   private static final int SHAKE_TIME = 200;
 
-  private static final int UP_TIME       = (TOTAL_TIME - SHAKE_TIME) / 2;
-  private static final int DOWN_TIME     = (TOTAL_TIME - SHAKE_TIME) / 2;
+  private static final int UP_TIME = (TOTAL_TIME - SHAKE_TIME) / 2;
+  private static final int DOWN_TIME = (TOTAL_TIME - SHAKE_TIME) / 2;
   private static final int FADE_OUT_TIME = 300;
-  private static final int FADE_IN_TIME  = 100;
+  private static final int FADE_IN_TIME = 100;
   private static final int SHIMMER_TOTAL = UP_TIME + SHAKE_TIME;
 
-  private static final int ANSWER_THRESHOLD  = 112;
+  private static final int ANSWER_THRESHOLD = 112;
   private static final int DECLINE_THRESHOLD = 56;
 
-  private TextView  swipeUpText;
+  private TextView swipeUpText;
   private ImageView fab;
-  private TextView  swipeDownText;
+  private TextView swipeDownText;
 
   private ImageView arrowOne;
   private ImageView arrowTwo;
@@ -52,7 +50,7 @@ public class WebRtcAnswerDeclineButton extends LinearLayout implements View.OnTo
   private float lastY;
 
   private boolean animating = false;
-  private boolean complete  = false;
+  private boolean complete = false;
 
   private AnimatorSet animatorSet;
   private AnswerDeclineListener listener;
@@ -67,31 +65,35 @@ public class WebRtcAnswerDeclineButton extends LinearLayout implements View.OnTo
     initialize();
   }
 
-  public WebRtcAnswerDeclineButton(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+  public WebRtcAnswerDeclineButton(
+      Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     initialize();
   }
 
   @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-  public WebRtcAnswerDeclineButton(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+  public WebRtcAnswerDeclineButton(
+      Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
     super(context, attrs, defStyleAttr, defStyleRes);
     initialize();
   }
 
   private void initialize() {
     setOrientation(LinearLayout.VERTICAL);
-    setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+    setLayoutParams(
+        new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
     inflate(getContext(), R.layout.webrtc_answer_decline_button, this);
 
-    this.swipeUpText   = findViewById(R.id.swipe_up_text);
-    this.fab           = findViewById(R.id.answer);
+    this.swipeUpText = findViewById(R.id.swipe_up_text);
+    this.fab = findViewById(R.id.answer);
     this.swipeDownText = findViewById(R.id.swipe_down_text);
 
-    this.arrowOne   = findViewById(R.id.arrow_one);
-    this.arrowTwo   = findViewById(R.id.arrow_two);
+    this.arrowOne = findViewById(R.id.arrow_one);
+    this.arrowTwo = findViewById(R.id.arrow_two);
     this.arrowThree = findViewById(R.id.arrow_three);
-    this.arrowFour  = findViewById(R.id.arrow_four);
+    this.arrowFour = findViewById(R.id.arrow_four);
 
     this.fab.setOnTouchListener(this);
   }
@@ -145,13 +147,19 @@ public class WebRtcAnswerDeclineButton extends LinearLayout implements View.OnTo
 
         float differenceThreshold;
         float percentageToThreshold;
-        int   backgroundColor;
-        int   foregroundColor;
+        int backgroundColor;
+        int foregroundColor;
 
         if (difference <= 0) {
-          differenceThreshold   = ViewUtil.dpToPx(getContext(), ANSWER_THRESHOLD);
+          differenceThreshold = ViewUtil.dpToPx(getContext(), ANSWER_THRESHOLD);
           percentageToThreshold = Math.min(1, (difference * -1) / differenceThreshold);
-          backgroundColor       = (int) new ArgbEvaluator().evaluate(percentageToThreshold, getResources().getColor(R.color.green_100), getResources().getColor(R.color.green_600));
+          backgroundColor =
+              (int)
+                  new ArgbEvaluator()
+                      .evaluate(
+                          percentageToThreshold,
+                          getResources().getColor(R.color.green_100),
+                          getResources().getColor(R.color.green_600));
 
           if (percentageToThreshold > 0.5) {
             foregroundColor = Color.WHITE;
@@ -172,7 +180,13 @@ public class WebRtcAnswerDeclineButton extends LinearLayout implements View.OnTo
         } else {
           differenceThreshold = ViewUtil.dpToPx(getContext(), DECLINE_THRESHOLD);
           percentageToThreshold = Math.min(1, difference / differenceThreshold);
-          backgroundColor = (int) new ArgbEvaluator().evaluate(percentageToThreshold, getResources().getColor(R.color.red_100), getResources().getColor(R.color.red_600));
+          backgroundColor =
+              (int)
+                  new ArgbEvaluator()
+                      .evaluate(
+                          percentageToThreshold,
+                          getResources().getColor(R.color.red_100),
+                          getResources().getColor(R.color.red_600));
 
           if (percentageToThreshold > 0.5) {
             foregroundColor = Color.WHITE;
@@ -205,8 +219,8 @@ public class WebRtcAnswerDeclineButton extends LinearLayout implements View.OnTo
   }
 
   private void animateElements(int delay) {
-    ObjectAnimator fabUp    = getUpAnimation(fab);
-    ObjectAnimator fabDown  = getDownAnimation(fab);
+    ObjectAnimator fabUp = getUpAnimation(fab);
+    ObjectAnimator fabDown = getDownAnimation(fab);
     ObjectAnimator fabShake = getShakeAnimation(fab);
 
     animatorSet = new AnimatorSet();
@@ -219,34 +233,36 @@ public class WebRtcAnswerDeclineButton extends LinearLayout implements View.OnTo
 
     animatorSet.play(getShimmer(arrowFour, arrowThree, arrowTwo, arrowOne));
 
-    animatorSet.addListener(new Animator.AnimatorListener() {
-      @Override
-      public void onAnimationStart(Animator animation) {
-      }
+    animatorSet.addListener(
+        new Animator.AnimatorListener() {
+          @Override
+          public void onAnimationStart(Animator animation) {}
 
-      @Override
-      public void onAnimationEnd(Animator animation) {
-        if (animating) animateElements(1000);
-      }
+          @Override
+          public void onAnimationEnd(Animator animation) {
+            if (animating) animateElements(1000);
+          }
 
-      @Override
-      public void onAnimationCancel(Animator animation) {}
-      @Override
-      public void onAnimationRepeat(Animator animation) {}
-    });
+          @Override
+          public void onAnimationCancel(Animator animation) {}
+
+          @Override
+          public void onAnimationRepeat(Animator animation) {}
+        });
 
     animatorSet.setStartDelay(delay);
     animatorSet.start();
   }
 
   private Animator getShimmer(View... targets) {
-    AnimatorSet animatorSet  = new AnimatorSet();
-    int         evenDuration = SHIMMER_TOTAL / targets.length;
-    int         interval     = 75;
+    AnimatorSet animatorSet = new AnimatorSet();
+    int evenDuration = SHIMMER_TOTAL / targets.length;
+    int interval = 75;
 
-    for (int i=0;i<targets.length;i++) {
-      animatorSet.play(getShimmer(targets[i], evenDuration + (evenDuration - interval)))
-                 .after(interval * i);
+    for (int i = 0; i < targets.length; i++) {
+      animatorSet
+          .play(getShimmer(targets[i], evenDuration + (evenDuration - interval)))
+          .after(interval * i);
     }
 
     return animatorSet;
@@ -260,14 +276,16 @@ public class WebRtcAnswerDeclineButton extends LinearLayout implements View.OnTo
   }
 
   private ObjectAnimator getShakeAnimation(View target) {
-    ObjectAnimator animator = ObjectAnimator.ofFloat(target, "translationX", 0, 25, -25, 25, -25,15, -15, 6, -6, 0);
+    ObjectAnimator animator =
+        ObjectAnimator.ofFloat(target, "translationX", 0, 25, -25, 25, -25, 15, -15, 6, -6, 0);
     animator.setDuration(SHAKE_TIME);
 
     return animator;
   }
 
   private ObjectAnimator getUpAnimation(View target) {
-    ObjectAnimator animator = ObjectAnimator.ofFloat(target, "translationY", 0, -1 * ViewUtil.dpToPx(getContext(), 32));
+    ObjectAnimator animator =
+        ObjectAnimator.ofFloat(target, "translationY", 0, -1 * ViewUtil.dpToPx(getContext(), 32));
     animator.setInterpolator(new AccelerateInterpolator());
     animator.setDuration(UP_TIME);
 
@@ -296,8 +314,8 @@ public class WebRtcAnswerDeclineButton extends LinearLayout implements View.OnTo
 
   private void resetElements() {
     animating = false;
-    complete  = false;
-    
+    complete = false;
+
     if (animatorSet != null) animatorSet.cancel();
 
     swipeUpText.setTranslationY(0);
@@ -307,6 +325,7 @@ public class WebRtcAnswerDeclineButton extends LinearLayout implements View.OnTo
 
   public interface AnswerDeclineListener {
     void onAnswered();
+
     void onDeclined();
   }
 }

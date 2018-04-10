@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms.giph.ui;
 
-
 import android.content.Context;
 import android.graphics.Rect;
 import android.support.annotation.Nullable;
@@ -18,7 +17,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.components.AnimatingToggle;
 import org.thoughtcrime.securesms.util.ViewUtil;
@@ -28,13 +26,13 @@ public class GiphyActivityToolbar extends Toolbar {
   @Nullable private OnFilterChangedListener filterListener;
   @Nullable private OnLayoutChangedListener layoutListener;
 
-  private EditText        searchText;
+  private EditText searchText;
   private AnimatingToggle toggle;
-  private ImageView       action;
-  private ImageView       listToggle;
-  private ImageView       gridToggle;
-  private ImageView       clearToggle;
-  private LinearLayout    toggleContainer;
+  private ImageView action;
+  private ImageView listToggle;
+  private ImageView gridToggle;
+  private ImageView clearToggle;
+  private LinearLayout toggleContainer;
 
   public GiphyActivityToolbar(Context context) {
     this(context, null);
@@ -48,69 +46,73 @@ public class GiphyActivityToolbar extends Toolbar {
     super(context, attrs, defStyleAttr);
     inflate(context, R.layout.giphy_activity_toolbar, this);
 
-    this.action          = ViewUtil.findById(this, R.id.action_icon);
-    this.searchText      = ViewUtil.findById(this, R.id.search_view);
-    this.toggle          = ViewUtil.findById(this, R.id.button_toggle);
-    this.listToggle      = ViewUtil.findById(this, R.id.view_stream);
-    this.gridToggle      = ViewUtil.findById(this, R.id.view_grid);
-    this.clearToggle     = ViewUtil.findById(this, R.id.search_clear);
+    this.action = ViewUtil.findById(this, R.id.action_icon);
+    this.searchText = ViewUtil.findById(this, R.id.search_view);
+    this.toggle = ViewUtil.findById(this, R.id.button_toggle);
+    this.listToggle = ViewUtil.findById(this, R.id.view_stream);
+    this.gridToggle = ViewUtil.findById(this, R.id.view_grid);
+    this.clearToggle = ViewUtil.findById(this, R.id.search_clear);
     this.toggleContainer = ViewUtil.findById(this, R.id.toggle_container);
 
-    this.listToggle.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        displayTogglingView(gridToggle);
-        if (layoutListener != null) layoutListener.onLayoutChanged(OnLayoutChangedListener.LAYOUT_LIST);
-      }
-    });
+    this.listToggle.setOnClickListener(
+        new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            displayTogglingView(gridToggle);
+            if (layoutListener != null)
+              layoutListener.onLayoutChanged(OnLayoutChangedListener.LAYOUT_LIST);
+          }
+        });
 
-    this.gridToggle.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        displayTogglingView(listToggle);
-        if (layoutListener != null) layoutListener.onLayoutChanged(OnLayoutChangedListener.LAYOUT_GRID);
-      }
-    });
+    this.gridToggle.setOnClickListener(
+        new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            displayTogglingView(listToggle);
+            if (layoutListener != null)
+              layoutListener.onLayoutChanged(OnLayoutChangedListener.LAYOUT_GRID);
+          }
+        });
 
-    this.clearToggle.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        searchText.setText("");
-        clearToggle.setVisibility(View.INVISIBLE);
-      }
-    });
+    this.clearToggle.setOnClickListener(
+        new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            searchText.setText("");
+            clearToggle.setVisibility(View.INVISIBLE);
+          }
+        });
 
-    this.searchText.addTextChangedListener(new TextWatcher() {
-      @Override
-      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+    this.searchText.addTextChangedListener(
+        new TextWatcher() {
+          @Override
+          public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
-      }
+          @Override
+          public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
-      @Override
-      public void onTextChanged(CharSequence s, int start, int before, int count) {
+          @Override
+          public void afterTextChanged(Editable s) {
+            if (SearchUtil.isEmpty(searchText)) clearToggle.setVisibility(View.INVISIBLE);
+            else clearToggle.setVisibility(View.VISIBLE);
 
-      }
+            notifyListener();
+          }
+        });
 
-      @Override
-      public void afterTextChanged(Editable s) {
-        if (SearchUtil.isEmpty(searchText)) clearToggle.setVisibility(View.INVISIBLE);
-        else                                clearToggle.setVisibility(View.VISIBLE);
+    this.searchText.setOnEditorActionListener(
+        new TextView.OnEditorActionListener() {
+          @Override
+          public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+              InputMethodManager inputMethodManager =
+                  (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+              inputMethodManager.hideSoftInputFromWindow(searchText.getWindowToken(), 0);
+            }
 
-        notifyListener();
-      }
-    });
-
-    this.searchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-      @Override
-      public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-        if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-          InputMethodManager inputMethodManager = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-          inputMethodManager.hideSoftInputFromWindow(searchText.getWindowToken(), 0);
-        }
-
-        return false;
-      }
-    });
+            return false;
+          }
+        });
 
     setLogo(null);
     setNavigationIcon(null);
@@ -133,7 +135,7 @@ public class GiphyActivityToolbar extends Toolbar {
     this.layoutListener = layoutListener;
   }
 
-  public void setOnFilterChangedListener(@Nullable  OnFilterChangedListener filterListener) {
+  public void setOnFilterChangedListener(@Nullable OnFilterChangedListener filterListener) {
     this.filterListener = filterListener;
   }
 
@@ -147,22 +149,24 @@ public class GiphyActivityToolbar extends Toolbar {
   }
 
   private void expandTapArea(final View container, final View child) {
-    final int padding = getResources().getDimensionPixelSize(R.dimen.contact_selection_actions_tap_area);
+    final int padding =
+        getResources().getDimensionPixelSize(R.dimen.contact_selection_actions_tap_area);
 
-    container.post(new Runnable() {
-      @Override
-      public void run() {
-        Rect rect = new Rect();
-        child.getHitRect(rect);
+    container.post(
+        new Runnable() {
+          @Override
+          public void run() {
+            Rect rect = new Rect();
+            child.getHitRect(rect);
 
-        rect.top -= padding;
-        rect.left -= padding;
-        rect.right += padding;
-        rect.bottom += padding;
+            rect.top -= padding;
+            rect.left -= padding;
+            rect.right += padding;
+            rect.bottom += padding;
 
-        container.setTouchDelegate(new TouchDelegate(rect, child));
-      }
-    });
+            container.setTouchDelegate(new TouchDelegate(rect, child));
+          }
+        });
   }
 
   private static class SearchUtil {
@@ -186,8 +190,7 @@ public class GiphyActivityToolbar extends Toolbar {
   public interface OnLayoutChangedListener {
     public static final int LAYOUT_GRID = 1;
     public static final int LAYOUT_LIST = 2;
+
     void onLayoutChanged(int type);
   }
-
-
 }

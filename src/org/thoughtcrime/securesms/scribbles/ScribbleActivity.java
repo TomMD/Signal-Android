@@ -15,10 +15,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
-
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 import org.thoughtcrime.securesms.PassphraseRequiredActionBarActivity;
 import org.thoughtcrime.securesms.R;
-import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.mms.GlideApp;
 import org.thoughtcrime.securesms.mms.GlideRequests;
 import org.thoughtcrime.securesms.providers.PersistentBlobProvider;
@@ -35,31 +36,29 @@ import org.thoughtcrime.securesms.util.MediaUtil;
 import org.thoughtcrime.securesms.util.Util;
 import org.thoughtcrime.securesms.util.concurrent.ListenableFuture;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-public class ScribbleActivity extends PassphraseRequiredActionBarActivity implements ScribbleToolbar.ScribbleToolbarListener, VerticalSlideColorPicker.OnColorChangeListener {
+public class ScribbleActivity extends PassphraseRequiredActionBarActivity
+    implements ScribbleToolbar.ScribbleToolbarListener,
+        VerticalSlideColorPicker.OnColorChangeListener {
 
   private static final String TAG = ScribbleActivity.class.getName();
 
   public static final int SELECT_STICKER_REQUEST_CODE = 123;
-  public static final int SCRIBBLE_REQUEST_CODE       = 31424;
+  public static final int SCRIBBLE_REQUEST_CODE = 31424;
 
   private VerticalSlideColorPicker colorPicker;
-  private ScribbleToolbar          toolbar;
-  private ScribbleView             scribbleView;
-  private GlideRequests            glideRequests;
+  private ScribbleToolbar toolbar;
+  private ScribbleView scribbleView;
+  private GlideRequests glideRequests;
 
   @Override
   protected void onCreate(Bundle savedInstanceState, boolean ready) {
     setContentView(R.layout.scribble_activity);
 
     this.glideRequests = GlideApp.with(this);
-    this.scribbleView  = findViewById(R.id.scribble_view);
-    this.toolbar       = findViewById(R.id.toolbar);
-    this.colorPicker   = findViewById(R.id.scribble_color_picker);
+    this.scribbleView = findViewById(R.id.scribble_view);
+    this.toolbar = findViewById(R.id.toolbar);
+    this.colorPicker = findViewById(R.id.scribble_color_picker);
 
     this.toolbar.setListener(this);
     this.toolbar.setToolColor(Color.RED);
@@ -78,12 +77,14 @@ public class ScribbleActivity extends PassphraseRequiredActionBarActivity implem
   }
 
   private void addSticker(final Bitmap pica) {
-    Util.runOnMain(() -> {
-      Layer       layer  = new Layer();
-      ImageEntity entity = new ImageEntity(layer, pica, scribbleView.getWidth(), scribbleView.getHeight());
+    Util.runOnMain(
+        () -> {
+          Layer layer = new Layer();
+          ImageEntity entity =
+              new ImageEntity(layer, pica, scribbleView.getWidth(), scribbleView.getHeight());
 
-      scribbleView.addEntityAndPosition(entity);
-    });
+          scribbleView.addEntityAndPosition(entity);
+        });
   }
 
   private void changeTextEntityColor(int selectedColor) {
@@ -115,8 +116,9 @@ public class ScribbleActivity extends PassphraseRequiredActionBarActivity implem
   }
 
   protected void addTextSticker() {
-    TextLayer  textLayer  = createTextLayer();
-    TextEntity textEntity = new TextEntity(textLayer, scribbleView.getWidth(), scribbleView.getHeight());
+    TextLayer textLayer = createTextLayer();
+    TextEntity textEntity =
+        new TextEntity(textLayer, scribbleView.getWidth(), scribbleView.getHeight());
     scribbleView.addEntityAndPosition(textEntity);
 
     // move text sticker up so that its not hidden under keyboard
@@ -155,8 +157,7 @@ public class ScribbleActivity extends PassphraseRequiredActionBarActivity implem
 
           new AsyncTask<Void, Void, Bitmap>() {
             @Override
-            protected @Nullable
-            Bitmap doInBackground(Void... params) {
+            protected @Nullable Bitmap doInBackground(Void... params) {
               try {
                 return BitmapFactory.decodeStream(getAssets().open(stickerFile));
               } catch (IOException e) {
@@ -220,52 +221,55 @@ public class ScribbleActivity extends PassphraseRequiredActionBarActivity implem
   public void onSave() {
     ListenableFuture<Bitmap> future = scribbleView.getRenderedImage(glideRequests);
 
-    future.addListener(new ListenableFuture.Listener<Bitmap>() {
-      @Override
-      public void onSuccess(Bitmap result) {
-        PersistentBlobProvider provider = PersistentBlobProvider.getInstance(ScribbleActivity.this);
-        ByteArrayOutputStream  baos     = new ByteArrayOutputStream();
-        result.compress(Bitmap.CompressFormat.JPEG, 80, baos);
+    future.addListener(
+        new ListenableFuture.Listener<Bitmap>() {
+          @Override
+          public void onSuccess(Bitmap result) {
+            PersistentBlobProvider provider =
+                PersistentBlobProvider.getInstance(ScribbleActivity.this);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            result.compress(Bitmap.CompressFormat.JPEG, 80, baos);
 
-        byte[] data = baos.toByteArray();
-        baos   = null;
-        result = null;
+            byte[] data = baos.toByteArray();
+            baos = null;
+            result = null;
 
-        Uri    uri    = provider.create(ScribbleActivity.this, data, MediaUtil.IMAGE_JPEG, null);
-        Intent intent = new Intent();
-        intent.setData(uri);
-        setResult(RESULT_OK, intent);
+            Uri uri = provider.create(ScribbleActivity.this, data, MediaUtil.IMAGE_JPEG, null);
+            Intent intent = new Intent();
+            intent.setData(uri);
+            setResult(RESULT_OK, intent);
 
-        finish();
-      }
+            finish();
+          }
 
-      @Override
-      public void onFailure(ExecutionException e) {
-        Log.w(TAG, e);
-      }
-    });
+          @Override
+          public void onFailure(ExecutionException e) {
+            Log.w(TAG, e);
+          }
+        });
   }
 
-  private final MotionView.MotionViewCallback motionViewCallback = new MotionView.MotionViewCallback() {
-    @Override
-    public void onEntitySelected(@Nullable MotionEntity entity) {
-      if (entity == null) {
-        toolbar.setNoneSelected();
-        colorPicker.setVisibility(View.GONE);
-      } else if (entity instanceof TextEntity) {
-        toolbar.setTextSelected(true);
-        colorPicker.setVisibility(View.VISIBLE);
-      } else {
-        toolbar.setStickerSelected(true);
-        colorPicker.setVisibility(View.GONE);
-      }
-    }
+  private final MotionView.MotionViewCallback motionViewCallback =
+      new MotionView.MotionViewCallback() {
+        @Override
+        public void onEntitySelected(@Nullable MotionEntity entity) {
+          if (entity == null) {
+            toolbar.setNoneSelected();
+            colorPicker.setVisibility(View.GONE);
+          } else if (entity instanceof TextEntity) {
+            toolbar.setTextSelected(true);
+            colorPicker.setVisibility(View.VISIBLE);
+          } else {
+            toolbar.setStickerSelected(true);
+            colorPicker.setVisibility(View.GONE);
+          }
+        }
 
-    @Override
-    public void onEntityDoubleTap(@NonNull MotionEntity entity) {
-      startTextEntityEditing();
-    }
-  };
+        @Override
+        public void onEntityDoubleTap(@NonNull MotionEntity entity) {
+          startTextEntityEditing();
+        }
+      };
 
   @Override
   public void onColorChange(int color) {

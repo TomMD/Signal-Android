@@ -28,10 +28,11 @@ public class TelephonyServiceState {
 
     @Override
     public void run() {
-      Looper         looper   = initializeLooper();
+      Looper looper = initializeLooper();
       ListenCallback callback = new ListenCallback(looper);
 
-      TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+      TelephonyManager telephonyManager =
+          (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
       telephonyManager.listen(callback, PhoneStateListener.LISTEN_SERVICE_STATE);
 
       Looper.loop();
@@ -64,7 +65,7 @@ public class TelephonyServiceState {
     }
 
     private synchronized void set(boolean result) {
-      this.result   = result;
+      this.result = result;
       this.complete = true;
       notifyAll();
     }
@@ -72,7 +73,7 @@ public class TelephonyServiceState {
 
   private static class ListenCallback extends PhoneStateListener {
 
-    private final    Looper  looper;
+    private final Looper looper;
     private volatile boolean connected;
 
     public ListenCallback(Looper looper) {

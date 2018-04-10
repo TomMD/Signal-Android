@@ -21,7 +21,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
-
+import java.io.IOException;
+import java.lang.ref.WeakReference;
 import org.thoughtcrime.securesms.components.ContactFilterToolbar;
 import org.thoughtcrime.securesms.contacts.ContactsCursorLoader.DisplayMode;
 import org.thoughtcrime.securesms.util.DirectoryHelper;
@@ -31,22 +32,17 @@ import org.thoughtcrime.securesms.util.DynamicTheme;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
 import org.thoughtcrime.securesms.util.ViewUtil;
 
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-
 /**
  * Base activity container for selecting a list of contacts.
  *
  * @author Moxie Marlinspike
- *
  */
 public abstract class ContactSelectionActivity extends PassphraseRequiredActionBarActivity
-                                               implements SwipeRefreshLayout.OnRefreshListener,
-                                                          ContactSelectionListFragment.OnContactSelectedListener
-{
+    implements SwipeRefreshLayout.OnRefreshListener,
+        ContactSelectionListFragment.OnContactSelectedListener {
   private static final String TAG = ContactSelectionActivity.class.getSimpleName();
 
-  private final DynamicTheme    dynamicTheme    = new DynamicNoActionBarTheme();
+  private final DynamicTheme dynamicTheme = new DynamicNoActionBarTheme();
   private final DynamicLanguage dynamicLanguage = new DynamicLanguage();
 
   protected ContactSelectionListFragment contactsFragment;
@@ -62,8 +58,10 @@ public abstract class ContactSelectionActivity extends PassphraseRequiredActionB
   @Override
   protected void onCreate(Bundle icicle, boolean ready) {
     if (!getIntent().hasExtra(ContactSelectionListFragment.DISPLAY_MODE)) {
-      int displayMode = TextSecurePreferences.isSmsEnabled(this) ? DisplayMode.FLAG_ALL
-                                                                 : DisplayMode.FLAG_PUSH | DisplayMode.FLAG_GROUPS;
+      int displayMode =
+          TextSecurePreferences.isSmsEnabled(this)
+              ? DisplayMode.FLAG_ALL
+              : DisplayMode.FLAG_PUSH | DisplayMode.FLAG_GROUPS;
       getIntent().putExtra(ContactSelectionListFragment.DISPLAY_MODE, displayMode);
     }
 
@@ -89,7 +87,7 @@ public abstract class ContactSelectionActivity extends PassphraseRequiredActionB
     this.toolbar = ViewUtil.findById(this, R.id.toolbar);
     setSupportActionBar(toolbar);
 
-    assert  getSupportActionBar() != null;
+    assert getSupportActionBar() != null;
     getSupportActionBar().setDisplayHomeAsUpEnabled(false);
     getSupportActionBar().setDisplayShowTitleEnabled(false);
     getSupportActionBar().setIcon(null);
@@ -97,7 +95,9 @@ public abstract class ContactSelectionActivity extends PassphraseRequiredActionB
   }
 
   private void initializeResources() {
-    contactsFragment = (ContactSelectionListFragment) getSupportFragmentManager().findFragmentById(R.id.contact_selection_list_fragment);
+    contactsFragment =
+        (ContactSelectionListFragment)
+            getSupportFragmentManager().findFragmentById(R.id.contact_selection_list_fragment);
     contactsFragment.setOnContactSelectedListener(this);
     contactsFragment.setOnRefreshListener(this);
   }
@@ -108,7 +108,8 @@ public abstract class ContactSelectionActivity extends PassphraseRequiredActionB
 
   @Override
   public void onRefresh() {
-    new RefreshDirectoryTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, getApplicationContext());
+    new RefreshDirectoryTask(this)
+        .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, getApplicationContext());
   }
 
   @Override

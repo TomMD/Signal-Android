@@ -8,7 +8,7 @@ public class AttachmentId {
   private final long uniqueId;
 
   public AttachmentId(long rowId, long uniqueId) {
-    this.rowId    = rowId;
+    this.rowId = rowId;
     this.uniqueId = uniqueId;
   }
 
@@ -37,7 +37,7 @@ public class AttachmentId {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
 
-    AttachmentId attachmentId = (AttachmentId)o;
+    AttachmentId attachmentId = (AttachmentId) o;
 
     if (rowId != attachmentId.rowId) return false;
     return uniqueId == attachmentId.uniqueId;

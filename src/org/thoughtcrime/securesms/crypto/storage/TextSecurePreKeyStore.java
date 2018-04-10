@@ -2,15 +2,13 @@ package org.thoughtcrime.securesms.crypto.storage;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-
+import java.util.List;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.whispersystems.libsignal.InvalidKeyIdException;
 import org.whispersystems.libsignal.state.PreKeyRecord;
 import org.whispersystems.libsignal.state.PreKeyStore;
 import org.whispersystems.libsignal.state.SignedPreKeyRecord;
 import org.whispersystems.libsignal.state.SignedPreKeyStore;
-
-import java.util.List;
 
 public class TextSecurePreKeyStore implements PreKeyStore, SignedPreKeyStore {
 
@@ -19,8 +17,7 @@ public class TextSecurePreKeyStore implements PreKeyStore, SignedPreKeyStore {
 
   private static final Object FILE_LOCK = new Object();
 
-  @NonNull
-  private final Context context;
+  @NonNull private final Context context;
 
   public TextSecurePreKeyStore(@NonNull Context context) {
     this.context = context;
@@ -32,17 +29,19 @@ public class TextSecurePreKeyStore implements PreKeyStore, SignedPreKeyStore {
       PreKeyRecord preKeyRecord = DatabaseFactory.getPreKeyDatabase(context).getPreKey(preKeyId);
 
       if (preKeyRecord == null) throw new InvalidKeyIdException("No such key: " + preKeyId);
-      else                      return preKeyRecord;
+      else return preKeyRecord;
     }
   }
 
   @Override
   public SignedPreKeyRecord loadSignedPreKey(int signedPreKeyId) throws InvalidKeyIdException {
     synchronized (FILE_LOCK) {
-      SignedPreKeyRecord signedPreKeyRecord = DatabaseFactory.getSignedPreKeyDatabase(context).getSignedPreKey(signedPreKeyId);
+      SignedPreKeyRecord signedPreKeyRecord =
+          DatabaseFactory.getSignedPreKeyDatabase(context).getSignedPreKey(signedPreKeyId);
 
-      if (signedPreKeyRecord == null) throw new InvalidKeyIdException("No such signed prekey: " + signedPreKeyId);
-      else                            return signedPreKeyRecord;
+      if (signedPreKeyRecord == null)
+        throw new InvalidKeyIdException("No such signed prekey: " + signedPreKeyId);
+      else return signedPreKeyRecord;
     }
   }
 
@@ -86,5 +85,4 @@ public class TextSecurePreKeyStore implements PreKeyStore, SignedPreKeyStore {
   public void removeSignedPreKey(int signedPreKeyId) {
     DatabaseFactory.getSignedPreKeyDatabase(context).removeSignedPreKey(signedPreKeyId);
   }
-  
 }

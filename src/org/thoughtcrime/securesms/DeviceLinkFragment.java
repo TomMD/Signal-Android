@@ -11,13 +11,14 @@ import android.widget.LinearLayout;
 
 public class DeviceLinkFragment extends Fragment implements View.OnClickListener {
 
-  private LinearLayout        container;
+  private LinearLayout container;
   private LinkClickedListener linkClickedListener;
-  private Uri                 uri;
+  private Uri uri;
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup, Bundle bundle) {
-    this.container = (LinearLayout) inflater.inflate(R.layout.device_link_fragment, container, false);
+    this.container =
+        (LinearLayout) inflater.inflate(R.layout.device_link_fragment, container, false);
     this.container.findViewById(R.id.link_device).setOnClickListener(this);
 
     if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -39,7 +40,7 @@ public class DeviceLinkFragment extends Fragment implements View.OnClickListener
   }
 
   public void setLinkClickedListener(Uri uri, LinkClickedListener linkClickedListener) {
-    this.uri                 = uri;
+    this.uri = uri;
     this.linkClickedListener = linkClickedListener;
   }
 

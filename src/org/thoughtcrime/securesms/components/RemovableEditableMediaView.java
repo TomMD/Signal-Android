@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-
 import org.thoughtcrime.securesms.R;
 
 public class RemovableEditableMediaView extends FrameLayout {
@@ -32,11 +31,15 @@ public class RemovableEditableMediaView extends FrameLayout {
   public RemovableEditableMediaView(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
 
-    this.remove     = (ImageView)LayoutInflater.from(context).inflate(R.layout.media_view_remove_button, this, false);
-    this.edit       = (ImageView)LayoutInflater.from(context).inflate(R.layout.media_view_edit_button, this, false);
+    this.remove =
+        (ImageView)
+            LayoutInflater.from(context).inflate(R.layout.media_view_remove_button, this, false);
+    this.edit =
+        (ImageView)
+            LayoutInflater.from(context).inflate(R.layout.media_view_edit_button, this, false);
 
     this.removeSize = getResources().getDimensionPixelSize(R.dimen.media_bubble_remove_button_size);
-    this.editSize   = getResources().getDimensionPixelSize(R.dimen.media_bubble_edit_button_size);
+    this.editSize = getResources().getDimensionPixelSize(R.dimen.media_bubble_edit_button_size);
 
     this.remove.setVisibility(View.GONE);
     this.edit.setVisibility(View.GONE);
@@ -51,7 +54,7 @@ public class RemovableEditableMediaView extends FrameLayout {
 
   public void display(@Nullable View view, boolean editable) {
     edit.setVisibility(editable ? View.VISIBLE : View.GONE);
-    
+
     if (view == current) return;
     if (current != null) current.setVisibility(View.GONE);
 

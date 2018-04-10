@@ -1,31 +1,30 @@
 package org.thoughtcrime.securesms.util;
 
-
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
-import org.thoughtcrime.securesms.R;
-import org.thoughtcrime.securesms.database.NoExternalStorageException;
-import org.whispersystems.libsignal.util.ByteUtil;
-
 import java.io.File;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Locale;
+import org.thoughtcrime.securesms.R;
+import org.thoughtcrime.securesms.database.NoExternalStorageException;
+import org.whispersystems.libsignal.util.ByteUtil;
 
 public class BackupUtil {
 
   private static final String TAG = BackupUtil.class.getSimpleName();
 
-  public static @NonNull String getLastBackupTime(@NonNull Context context, @NonNull Locale locale) {
+  public static @NonNull String getLastBackupTime(
+      @NonNull Context context, @NonNull Locale locale) {
     try {
       BackupInfo backup = getLatestBackup();
 
       if (backup == null) return context.getString(R.string.BackupUtil_never);
-      else                return DateUtils.getExtendedRelativeTimeSpanString(context, locale, backup.getTimestamp());
+      else
+        return DateUtils.getExtendedRelativeTimeSpanString(context, locale, backup.getTimestamp());
     } catch (NoExternalStorageException e) {
       Log.w(TAG, e);
       return context.getString(R.string.BackupUtil_unknown);
@@ -33,14 +32,15 @@ public class BackupUtil {
   }
 
   public static @Nullable BackupInfo getLatestBackup() throws NoExternalStorageException {
-    File       backupDirectory = StorageUtil.getBackupDirectory();
-    File[]     backups         = backupDirectory.listFiles();
-    BackupInfo latestBackup    = null;
+    File backupDirectory = StorageUtil.getBackupDirectory();
+    File[] backups = backupDirectory.listFiles();
+    BackupInfo latestBackup = null;
 
     for (File backup : backups) {
       long backupTimestamp = getBackupTimestamp(backup);
 
-      if (latestBackup == null || (backupTimestamp != -1 && backupTimestamp > latestBackup.getTimestamp())) {
+      if (latestBackup == null
+          || (backupTimestamp != -1 && backupTimestamp > latestBackup.getTimestamp())) {
         latestBackup = new BackupInfo(backupTimestamp, backup.length(), backup);
       }
     }
@@ -51,8 +51,8 @@ public class BackupUtil {
   @SuppressWarnings("ResultOfMethodCallIgnored")
   public static void deleteAllBackups() {
     try {
-      File   backupDirectory = StorageUtil.getBackupDirectory();
-      File[] backups         = backupDirectory.listFiles();
+      File backupDirectory = StorageUtil.getBackupDirectory();
+      File[] backups = backupDirectory.listFiles();
 
       for (File backup : backups) {
         if (backup.isFile()) backup.delete();
@@ -64,22 +64,24 @@ public class BackupUtil {
 
   public static void deleteOldBackups() {
     try {
-      File   backupDirectory = StorageUtil.getBackupDirectory();
-      File[] backups         = backupDirectory.listFiles();
+      File backupDirectory = StorageUtil.getBackupDirectory();
+      File[] backups = backupDirectory.listFiles();
 
       if (backups != null && backups.length > 5) {
-        Arrays.sort(backups, (left, right) -> {
-          long leftTimestamp  = getBackupTimestamp(left);
-          long rightTimestamp = getBackupTimestamp(right);
+        Arrays.sort(
+            backups,
+            (left, right) -> {
+              long leftTimestamp = getBackupTimestamp(left);
+              long rightTimestamp = getBackupTimestamp(right);
 
-          if      (leftTimestamp == -1 && rightTimestamp == -1) return 0;
-          else if (leftTimestamp == -1)                         return 1;
-          else if (rightTimestamp == -1)                        return -1;
+              if (leftTimestamp == -1 && rightTimestamp == -1) return 0;
+              else if (leftTimestamp == -1) return 1;
+              else if (rightTimestamp == -1) return -1;
 
-          return (int)(rightTimestamp - leftTimestamp);
-        });
+              return (int) (rightTimestamp - leftTimestamp);
+            });
 
-        for (int i=5;i<backups.length;i++) {
+        for (int i = 5; i < backups.length; i++) {
           Log.w(TAG, "Deleting: " + backups[i].getAbsolutePath());
 
           if (!backups[i].delete()) {
@@ -94,19 +96,19 @@ public class BackupUtil {
 
   public static @NonNull String[] generateBackupPassphrase() {
     String[] result = new String[6];
-    byte[]   random = new byte[30];
+    byte[] random = new byte[30];
 
     new SecureRandom().nextBytes(random);
 
-    for (int i=0;i<30;i+=5) {
-      result[i/5] = String.format("%05d", ByteUtil.byteArray5ToLong(random, i) % 100000);
+    for (int i = 0; i < 30; i += 5) {
+      result[i / 5] = String.format("%05d", ByteUtil.byteArray5ToLong(random, i) % 100000);
     }
 
     return result;
   }
 
   private static long getBackupTimestamp(File backup) {
-    String   name  = backup.getName();
+    String name = backup.getName();
     String[] prefixSuffix = name.split("[.]");
 
     if (prefixSuffix.length == 2) {
@@ -141,8 +143,8 @@ public class BackupUtil {
 
     BackupInfo(long timestamp, long size, File file) {
       this.timestamp = timestamp;
-      this.size      = size;
-      this.file      = file;
+      this.size = size;
+      this.file = file;
     }
 
     public long getTimestamp() {

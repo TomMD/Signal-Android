@@ -1,5 +1,7 @@
 package org.thoughtcrime.securesms;
 
+import static org.whispersystems.libsignal.SessionCipher.SESSION_LOCK;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -10,7 +12,7 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.widget.TextView;
-
+import java.io.IOException;
 import org.thoughtcrime.securesms.crypto.storage.TextSecureIdentityKeyStore;
 import org.thoughtcrime.securesms.database.Address;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
@@ -29,10 +31,6 @@ import org.whispersystems.libsignal.SignalProtocolAddress;
 import org.whispersystems.signalservice.api.messages.SignalServiceEnvelope;
 import org.whispersystems.signalservice.internal.push.SignalServiceProtos;
 
-import java.io.IOException;
-
-import static org.whispersystems.libsignal.SessionCipher.SESSION_LOCK;
-
 public class ConfirmIdentityDialog extends AlertDialog {
 
   @SuppressWarnings("unused")
@@ -40,34 +38,49 @@ public class ConfirmIdentityDialog extends AlertDialog {
 
   private OnClickListener callback;
 
-  public ConfirmIdentityDialog(Context context,
-                               MessageRecord messageRecord,
-                               IdentityKeyMismatch mismatch)
-  {
+  public ConfirmIdentityDialog(
+      Context context, MessageRecord messageRecord, IdentityKeyMismatch mismatch) {
     super(context);
 
-      Recipient       recipient       = Recipient.from(context, mismatch.getAddress(), false);
-      String          name            = recipient.toShortString();
-      String          introduction    = String.format(context.getString(R.string.ConfirmIdentityDialog_your_safety_number_with_s_has_changed), name, name);
-      SpannableString spannableString = new SpannableString(introduction + " " +
-                                                            context.getString(R.string.ConfirmIdentityDialog_you_may_wish_to_verify_your_safety_number_with_this_contact));
+    Recipient recipient = Recipient.from(context, mismatch.getAddress(), false);
+    String name = recipient.toShortString();
+    String introduction =
+        String.format(
+            context.getString(R.string.ConfirmIdentityDialog_your_safety_number_with_s_has_changed),
+            name,
+            name);
+    SpannableString spannableString =
+        new SpannableString(
+            introduction
+                + " "
+                + context.getString(
+                    R.string
+                        .ConfirmIdentityDialog_you_may_wish_to_verify_your_safety_number_with_this_contact));
 
-      spannableString.setSpan(new VerifySpan(context, mismatch),
-                              introduction.length()+1, spannableString.length(),
-                              Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+    spannableString.setSpan(
+        new VerifySpan(context, mismatch),
+        introduction.length() + 1,
+        spannableString.length(),
+        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-      setTitle(name);
-      setMessage(spannableString);
+    setTitle(name);
+    setMessage(spannableString);
 
-      setButton(AlertDialog.BUTTON_POSITIVE, context.getString(R.string.ConfirmIdentityDialog_accept), new AcceptListener(messageRecord, mismatch, recipient.getAddress()));
-      setButton(AlertDialog.BUTTON_NEGATIVE, context.getString(android.R.string.cancel),               new CancelListener());
+    setButton(
+        AlertDialog.BUTTON_POSITIVE,
+        context.getString(R.string.ConfirmIdentityDialog_accept),
+        new AcceptListener(messageRecord, mismatch, recipient.getAddress()));
+    setButton(
+        AlertDialog.BUTTON_NEGATIVE,
+        context.getString(android.R.string.cancel),
+        new CancelListener());
   }
 
   @Override
   public void show() {
     super.show();
-    ((TextView)this.findViewById(android.R.id.message))
-                   .setMovementMethod(LinkMovementMethod.getInstance());
+    ((TextView) this.findViewById(android.R.id.message))
+        .setMovementMethod(LinkMovementMethod.getInstance());
   }
 
   public void setCallback(OnClickListener callback) {
@@ -76,26 +89,28 @@ public class ConfirmIdentityDialog extends AlertDialog {
 
   private class AcceptListener implements OnClickListener {
 
-    private final MessageRecord       messageRecord;
+    private final MessageRecord messageRecord;
     private final IdentityKeyMismatch mismatch;
-    private final Address             address;
+    private final Address address;
 
-    private AcceptListener(MessageRecord messageRecord, IdentityKeyMismatch mismatch, Address address) {
+    private AcceptListener(
+        MessageRecord messageRecord, IdentityKeyMismatch mismatch, Address address) {
       this.messageRecord = messageRecord;
-      this.mismatch      = mismatch;
-      this.address       = address;
+      this.mismatch = mismatch;
+      this.address = address;
     }
 
     @SuppressLint("StaticFieldLeak")
     @Override
     public void onClick(DialogInterface dialog, int which) {
-      new AsyncTask<Void, Void, Void>()
-      {
+      new AsyncTask<Void, Void, Void>() {
         @Override
         protected Void doInBackground(Void... params) {
           synchronized (SESSION_LOCK) {
-            SignalProtocolAddress      mismatchAddress  = new SignalProtocolAddress(address.toPhoneString(), 1);
-            TextSecureIdentityKeyStore identityKeyStore = new TextSecureIdentityKeyStore(getContext());
+            SignalProtocolAddress mismatchAddress =
+                new SignalProtocolAddress(address.toPhoneString(), 1);
+            TextSecureIdentityKeyStore identityKeyStore =
+                new TextSecureIdentityKeyStore(getContext());
 
             identityKeyStore.saveIdentity(mismatchAddress, mismatch.getIdentityKey(), true);
           }
@@ -108,14 +123,14 @@ public class ConfirmIdentityDialog extends AlertDialog {
 
         private void processMessageRecord(MessageRecord messageRecord) {
           if (messageRecord.isOutgoing()) processOutgoingMessageRecord(messageRecord);
-          else                            processIncomingMessageRecord(messageRecord);
+          else processIncomingMessageRecord(messageRecord);
         }
 
         private void processPendingMessageRecords(long threadId, IdentityKeyMismatch mismatch) {
-          MmsSmsDatabase        mmsSmsDatabase = DatabaseFactory.getMmsSmsDatabase(getContext());
-          Cursor                cursor         = mmsSmsDatabase.getIdentityConflictMessagesForThread(threadId);
-          MmsSmsDatabase.Reader reader         = mmsSmsDatabase.readerFor(cursor);
-          MessageRecord         record;
+          MmsSmsDatabase mmsSmsDatabase = DatabaseFactory.getMmsSmsDatabase(getContext());
+          Cursor cursor = mmsSmsDatabase.getIdentityConflictMessagesForThread(threadId);
+          MmsSmsDatabase.Reader reader = mmsSmsDatabase.readerFor(cursor);
+          MessageRecord record;
 
           try {
             while ((record = reader.getNext()) != null) {
@@ -126,19 +141,17 @@ public class ConfirmIdentityDialog extends AlertDialog {
               }
             }
           } finally {
-            if (reader != null)
-              reader.close();
+            if (reader != null) reader.close();
           }
         }
 
         private void processOutgoingMessageRecord(MessageRecord messageRecord) {
-          SmsDatabase        smsDatabase        = DatabaseFactory.getSmsDatabase(getContext());
-          MmsDatabase        mmsDatabase        = DatabaseFactory.getMmsDatabase(getContext());
+          SmsDatabase smsDatabase = DatabaseFactory.getSmsDatabase(getContext());
+          MmsDatabase mmsDatabase = DatabaseFactory.getMmsDatabase(getContext());
 
           if (messageRecord.isMms()) {
-            mmsDatabase.removeMismatchedIdentity(messageRecord.getId(),
-                                                 mismatch.getAddress(),
-                                                 mismatch.getIdentityKey());
+            mmsDatabase.removeMismatchedIdentity(
+                messageRecord.getId(), mismatch.getAddress(), mismatch.getIdentityKey());
 
             if (messageRecord.getRecipient().isPushGroupRecipient()) {
               MessageSender.resendGroupMessage(getContext(), messageRecord, mismatch.getAddress());
@@ -146,9 +159,8 @@ public class ConfirmIdentityDialog extends AlertDialog {
               MessageSender.resend(getContext(), messageRecord);
             }
           } else {
-            smsDatabase.removeMismatchedIdentity(messageRecord.getId(),
-                                                 mismatch.getAddress(),
-                                                 mismatch.getIdentityKey());
+            smsDatabase.removeMismatchedIdentity(
+                messageRecord.getId(), mismatch.getAddress(), mismatch.getIdentityKey());
 
             MessageSender.resend(getContext(), messageRecord);
           }
@@ -157,31 +169,32 @@ public class ConfirmIdentityDialog extends AlertDialog {
         private void processIncomingMessageRecord(MessageRecord messageRecord) {
           try {
             PushDatabase pushDatabase = DatabaseFactory.getPushDatabase(getContext());
-            SmsDatabase  smsDatabase  = DatabaseFactory.getSmsDatabase(getContext());
+            SmsDatabase smsDatabase = DatabaseFactory.getSmsDatabase(getContext());
 
-            smsDatabase.removeMismatchedIdentity(messageRecord.getId(),
-                                                 mismatch.getAddress(),
-                                                 mismatch.getIdentityKey());
+            smsDatabase.removeMismatchedIdentity(
+                messageRecord.getId(), mismatch.getAddress(), mismatch.getIdentityKey());
 
             boolean legacy = !messageRecord.isContentBundleKeyExchange();
 
-            SignalServiceEnvelope envelope = new SignalServiceEnvelope(SignalServiceProtos.Envelope.Type.PREKEY_BUNDLE_VALUE,
-                                                                       messageRecord.getIndividualRecipient().getAddress().toPhoneString(),
-                                                                       messageRecord.getRecipientDeviceId(), "",
-                                                                       messageRecord.getDateSent(),
-                                                                       legacy ? Base64.decode(messageRecord.getBody()) : null,
-                                                                       !legacy ? Base64.decode(messageRecord.getBody()) : null);
+            SignalServiceEnvelope envelope =
+                new SignalServiceEnvelope(
+                    SignalServiceProtos.Envelope.Type.PREKEY_BUNDLE_VALUE,
+                    messageRecord.getIndividualRecipient().getAddress().toPhoneString(),
+                    messageRecord.getRecipientDeviceId(),
+                    "",
+                    messageRecord.getDateSent(),
+                    legacy ? Base64.decode(messageRecord.getBody()) : null,
+                    !legacy ? Base64.decode(messageRecord.getBody()) : null);
 
             long pushId = pushDatabase.insert(envelope);
 
             ApplicationContext.getInstance(getContext())
-                              .getJobManager()
-                              .add(new PushDecryptJob(getContext(), pushId, messageRecord.getId()));
+                .getJobManager()
+                .add(new PushDecryptJob(getContext(), pushId, messageRecord.getId()));
           } catch (IOException e) {
             throw new AssertionError(e);
           }
         }
-
       }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
       if (callback != null) callback.onClick(null, 0);
@@ -194,5 +207,4 @@ public class ConfirmIdentityDialog extends AlertDialog {
       if (callback != null) callback.onClick(null, 0);
     }
   }
-
 }

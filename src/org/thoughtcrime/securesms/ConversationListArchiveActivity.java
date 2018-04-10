@@ -3,16 +3,14 @@ package org.thoughtcrime.securesms;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
-
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.util.DynamicLanguage;
 import org.thoughtcrime.securesms.util.DynamicTheme;
 
 public class ConversationListArchiveActivity extends PassphraseRequiredActionBarActivity
-    implements ConversationListFragment.ConversationSelectedListener
-{
+    implements ConversationListFragment.ConversationSelectedListener {
 
-  private final DynamicTheme    dynamicTheme    = new DynamicTheme();
+  private final DynamicTheme dynamicTheme = new DynamicTheme();
   private final DynamicLanguage dynamicLanguage = new DynamicLanguage();
 
   @Override
@@ -29,7 +27,11 @@ public class ConversationListArchiveActivity extends PassphraseRequiredActionBar
     Bundle bundle = new Bundle();
     bundle.putBoolean(ConversationListFragment.ARCHIVE, true);
 
-    initFragment(android.R.id.content, new ConversationListFragment(), dynamicLanguage.getCurrentLocale(), bundle);
+    initFragment(
+        android.R.id.content,
+        new ConversationListFragment(),
+        dynamicLanguage.getCurrentLocale(),
+        bundle);
   }
 
   @Override
@@ -44,14 +46,17 @@ public class ConversationListArchiveActivity extends PassphraseRequiredActionBar
     super.onOptionsItemSelected(item);
 
     switch (item.getItemId()) {
-      case R.id.home: super.onBackPressed(); return true;
+      case R.id.home:
+        super.onBackPressed();
+        return true;
     }
 
     return false;
   }
 
   @Override
-  public void onCreateConversation(long threadId, Recipient recipient, int distributionType, long lastSeenTime) {
+  public void onCreateConversation(
+      long threadId, Recipient recipient, int distributionType, long lastSeenTime) {
     Intent intent = new Intent(this, ConversationActivity.class);
     intent.putExtra(ConversationActivity.ADDRESS_EXTRA, recipient.getAddress());
     intent.putExtra(ConversationActivity.THREAD_ID_EXTRA, threadId);
@@ -67,5 +72,4 @@ public class ConversationListArchiveActivity extends PassphraseRequiredActionBar
   public void onSwitchToArchive() {
     throw new AssertionError();
   }
-
 }

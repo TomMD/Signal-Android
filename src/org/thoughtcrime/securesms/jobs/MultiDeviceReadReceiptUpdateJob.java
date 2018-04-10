@@ -1,9 +1,9 @@
 package org.thoughtcrime.securesms.jobs;
 
-
 import android.content.Context;
 import android.util.Log;
-
+import java.io.IOException;
+import javax.inject.Inject;
 import org.thoughtcrime.securesms.dependencies.InjectableType;
 import org.whispersystems.jobqueue.JobParameters;
 import org.whispersystems.jobqueue.requirements.NetworkRequirement;
@@ -13,10 +13,6 @@ import org.whispersystems.signalservice.api.crypto.UntrustedIdentityException;
 import org.whispersystems.signalservice.api.messages.multidevice.ConfigurationMessage;
 import org.whispersystems.signalservice.api.messages.multidevice.SignalServiceSyncMessage;
 import org.whispersystems.signalservice.api.push.exceptions.PushNetworkException;
-
-import java.io.IOException;
-
-import javax.inject.Inject;
 
 public class MultiDeviceReadReceiptUpdateJob extends ContextJob implements InjectableType {
 
@@ -29,11 +25,13 @@ public class MultiDeviceReadReceiptUpdateJob extends ContextJob implements Injec
   private final boolean enabled;
 
   public MultiDeviceReadReceiptUpdateJob(Context context, boolean enabled) {
-    super(context, JobParameters.newBuilder()
-                                .withPersistence()
-                                .withGroupId("__MULTI_DEVICE_READ_RECEIPT_UPDATE_JOB__")
-                                .withRequirement(new NetworkRequirement(context))
-                                .create());
+    super(
+        context,
+        JobParameters.newBuilder()
+            .withPersistence()
+            .withGroupId("__MULTI_DEVICE_READ_RECEIPT_UPDATE_JOB__")
+            .withRequirement(new NetworkRequirement(context))
+            .create());
 
     this.enabled = enabled;
   }
@@ -43,7 +41,8 @@ public class MultiDeviceReadReceiptUpdateJob extends ContextJob implements Injec
 
   @Override
   public void onRun() throws IOException, UntrustedIdentityException {
-    messageSender.sendMessage(SignalServiceSyncMessage.forConfiguration(new ConfigurationMessage(Optional.of(enabled))));
+    messageSender.sendMessage(
+        SignalServiceSyncMessage.forConfiguration(new ConfigurationMessage(Optional.of(enabled))));
   }
 
   @Override

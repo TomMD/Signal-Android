@@ -1,18 +1,16 @@
-/** 
+/**
  * Copyright (C) 2011 Whisper Systems
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * <p>This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * <p>You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  */
 package org.thoughtcrime.securesms.mms;
 
@@ -22,8 +20,8 @@ import android.net.Uri;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Pair;
-
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import org.thoughtcrime.securesms.attachments.Attachment;
 import org.thoughtcrime.securesms.attachments.UriAttachment;
 import org.thoughtcrime.securesms.database.AttachmentDatabase;
@@ -31,18 +29,14 @@ import org.thoughtcrime.securesms.util.MediaUtil;
 import org.thoughtcrime.securesms.util.Util;
 import org.whispersystems.libsignal.util.guava.Optional;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-
 public abstract class Slide {
 
   protected final Attachment attachment;
-  protected final Context    context;
+  protected final Context context;
 
   public Slide(@NonNull Context context, @NonNull Attachment attachment) {
-    this.context    = context;
+    this.context = context;
     this.attachment = attachment;
-
   }
 
   public String getContentType() {
@@ -98,7 +92,9 @@ public abstract class Slide {
     return false;
   }
 
-  public @NonNull String getContentDescription() { return ""; }
+  public @NonNull String getContentDescription() {
+    return "";
+  }
 
   public Attachment asAttachment() {
     return attachment;
@@ -109,8 +105,8 @@ public abstract class Slide {
   }
 
   public boolean isPendingDownload() {
-    return getTransferState() == AttachmentDatabase.TRANSFER_PROGRESS_FAILED ||
-           getTransferState() == AttachmentDatabase.TRANSFER_PROGRESS_PENDING;
+    return getTransferState() == AttachmentDatabase.TRANSFER_PROGRESS_FAILED
+        || getTransferState() == AttachmentDatabase.TRANSFER_PROGRESS_PENDING;
   }
 
   public long getTransferState() {
@@ -129,29 +125,31 @@ public abstract class Slide {
     return false;
   }
 
-  protected static Attachment constructAttachmentFromUri(@NonNull  Context context,
-                                                         @NonNull  Uri     uri,
-                                                         @NonNull  String  defaultMime,
-                                                                   long     size,
-                                                                   int      width,
-                                                                   int      height,
-                                                                   boolean  hasThumbnail,
-                                                         @Nullable String   fileName,
-                                                                   boolean  voiceNote)
-  {
+  protected static Attachment constructAttachmentFromUri(
+      @NonNull Context context,
+      @NonNull Uri uri,
+      @NonNull String defaultMime,
+      long size,
+      int width,
+      int height,
+      boolean hasThumbnail,
+      @Nullable String fileName,
+      boolean voiceNote) {
     try {
-      String                 resolvedType    = Optional.fromNullable(MediaUtil.getMimeType(context, uri)).or(defaultMime);
-      String                 fastPreflightId = String.valueOf(SecureRandom.getInstance("SHA1PRNG").nextLong());
-      return new UriAttachment(uri,
-                               hasThumbnail ? uri : null,
-                               resolvedType,
-                               AttachmentDatabase.TRANSFER_PROGRESS_STARTED,
-                               size,
-                               width,
-                               height,
-                               fileName,
-                               fastPreflightId,
-                               voiceNote);
+      String resolvedType =
+          Optional.fromNullable(MediaUtil.getMimeType(context, uri)).or(defaultMime);
+      String fastPreflightId = String.valueOf(SecureRandom.getInstance("SHA1PRNG").nextLong());
+      return new UriAttachment(
+          uri,
+          hasThumbnail ? uri : null,
+          resolvedType,
+          AttachmentDatabase.TRANSFER_PROGRESS_STARTED,
+          size,
+          width,
+          height,
+          fileName,
+          fastPreflightId,
+          voiceNote);
     } catch (NoSuchAlgorithmException e) {
       throw new AssertionError(e);
     }
@@ -159,23 +157,29 @@ public abstract class Slide {
 
   @Override
   public boolean equals(Object other) {
-    if (other == null)             return false;
+    if (other == null) return false;
     if (!(other instanceof Slide)) return false;
 
-    Slide that = (Slide)other;
+    Slide that = (Slide) other;
 
-    return Util.equals(this.getContentType(), that.getContentType()) &&
-           this.hasAudio() == that.hasAudio()                        &&
-           this.hasImage() == that.hasImage()                        &&
-           this.hasVideo() == that.hasVideo()                        &&
-           this.getTransferState() == that.getTransferState()        &&
-           Util.equals(this.getUri(), that.getUri())                 &&
-           Util.equals(this.getThumbnailUri(), that.getThumbnailUri());
+    return Util.equals(this.getContentType(), that.getContentType())
+        && this.hasAudio() == that.hasAudio()
+        && this.hasImage() == that.hasImage()
+        && this.hasVideo() == that.hasVideo()
+        && this.getTransferState() == that.getTransferState()
+        && Util.equals(this.getUri(), that.getUri())
+        && Util.equals(this.getThumbnailUri(), that.getThumbnailUri());
   }
 
   @Override
   public int hashCode() {
-    return Util.hashCode(getContentType(), hasAudio(), hasImage(),
-                         hasVideo(), getUri(), getThumbnailUri(), getTransferState());
+    return Util.hashCode(
+        getContentType(),
+        hasAudio(),
+        hasImage(),
+        hasVideo(),
+        getUri(),
+        getThumbnailUri(),
+        getTransferState());
   }
 }
