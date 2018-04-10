@@ -10,9 +10,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import org.thoughtcrime.securesms.R;
-
 import pl.tajchert.sample.DotsTextView;
 
 public class DeliveryStatusView extends FrameLayout {
@@ -37,15 +35,16 @@ public class DeliveryStatusView extends FrameLayout {
 
     inflate(context, R.layout.delivery_status_view, this);
 
-    this.deliveredIndicator   = (ImageView) findViewById(R.id.delivered_indicator);
-    this.sentIndicator        = (ImageView) findViewById(R.id.sent_indicator);
+    this.deliveredIndicator = (ImageView) findViewById(R.id.delivered_indicator);
+    this.sentIndicator = (ImageView) findViewById(R.id.sent_indicator);
     this.pendingIndicatorStub = (ViewGroup) findViewById(R.id.pending_indicator_stub);
-    this.readIndicator        = (ImageView) findViewById(R.id.read_indicator);
+    this.readIndicator = (ImageView) findViewById(R.id.read_indicator);
 
     int iconColor = Color.GRAY;
 
     if (attrs != null) {
-      TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.DeliveryStatusView, 0, 0);
+      TypedArray typedArray =
+          context.getTheme().obtainStyledAttributes(attrs, R.styleable.DeliveryStatusView, 0, 0);
       iconColor = typedArray.getColor(R.styleable.DeliveryStatusView_iconColor, iconColor);
       typedArray.recycle();
     }

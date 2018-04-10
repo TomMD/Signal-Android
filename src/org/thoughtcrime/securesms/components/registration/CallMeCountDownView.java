@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms.components.registration;
 
-
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -12,17 +11,16 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import org.thoughtcrime.securesms.R;
 
 public class CallMeCountDownView extends RelativeLayout {
 
   private ImageView phone;
-  private TextView  callMeText;
-  private TextView  availableInText;
-  private TextView  countDownText;
+  private TextView callMeText;
+  private TextView availableInText;
+  private TextView countDownText;
 
-  private int             countDown;
+  private int countDown;
   private OnClickListener listener;
 
   public CallMeCountDownView(Context context) {
@@ -41,7 +39,8 @@ public class CallMeCountDownView extends RelativeLayout {
   }
 
   @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-  public CallMeCountDownView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+  public CallMeCountDownView(
+      Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
     super(context, attrs, defStyleAttr, defStyleRes);
     initialize();
   }
@@ -49,10 +48,10 @@ public class CallMeCountDownView extends RelativeLayout {
   private void initialize() {
     inflate(getContext(), R.layout.registration_call_me_view, this);
 
-    this.phone           = findViewById(R.id.phone_icon);
-    this.callMeText      = findViewById(R.id.call_me_text);
+    this.phone = findViewById(R.id.phone_icon);
+    this.callMeText = findViewById(R.id.call_me_text);
     this.availableInText = findViewById(R.id.available_in_text);
-    this.countDownText   = findViewById(R.id.countdown);
+    this.countDownText = findViewById(R.id.countdown);
   }
 
   public void setOnClickListener(@Nullable OnClickListener listener) {
@@ -76,7 +75,9 @@ public class CallMeCountDownView extends RelativeLayout {
 
   public void setCallEnabled() {
     setVisibility(View.VISIBLE);
-    this.phone.setColorFilter(new PorterDuffColorFilter(getResources().getColor(R.color.signal_primary), PorterDuff.Mode.SRC_IN));
+    this.phone.setColorFilter(
+        new PorterDuffColorFilter(
+            getResources().getColor(R.color.signal_primary), PorterDuff.Mode.SRC_IN));
     this.callMeText.setTextColor(getResources().getColor(R.color.signal_primary));
 
     this.availableInText.setVisibility(View.GONE);
@@ -103,5 +104,4 @@ public class CallMeCountDownView extends RelativeLayout {
   private void handlePhoneCallRequest() {
     if (listener != null) listener.onClick(this);
   }
-
 }

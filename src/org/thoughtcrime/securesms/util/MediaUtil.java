@@ -3,21 +3,21 @@ package org.thoughtcrime.securesms.util;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
-import android.support.media.ExifInterface;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.webkit.MimeTypeMap;
-
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
-
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.concurrent.ExecutionException;
 import org.thoughtcrime.securesms.attachments.Attachment;
 import org.thoughtcrime.securesms.mms.AudioSlide;
 import org.thoughtcrime.securesms.mms.DecryptableStreamUriLoader.DecryptableUri;
@@ -31,22 +31,16 @@ import org.thoughtcrime.securesms.mms.Slide;
 import org.thoughtcrime.securesms.mms.VideoSlide;
 import org.thoughtcrime.securesms.providers.PersistentBlobProvider;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.concurrent.ExecutionException;
-
 public class MediaUtil {
 
   private static final String TAG = MediaUtil.class.getSimpleName();
 
-  public static final String IMAGE_PNG         = "image/png";
-  public static final String IMAGE_JPEG        = "image/jpeg";
-  public static final String IMAGE_GIF         = "image/gif";
-  public static final String AUDIO_AAC         = "audio/aac";
+  public static final String IMAGE_PNG = "image/png";
+  public static final String IMAGE_JPEG = "image/jpeg";
+  public static final String IMAGE_GIF = "image/gif";
+  public static final String AUDIO_AAC = "audio/aac";
   public static final String AUDIO_UNSPECIFIED = "audio/*";
   public static final String VIDEO_UNSPECIFIED = "video/*";
-
 
   public static Slide getSlideForAttachment(Context context, Attachment attachment) {
     Slide slide = null;
@@ -85,13 +79,11 @@ public class MediaUtil {
   public static @Nullable String getCorrectedMimeType(@Nullable String mimeType) {
     if (mimeType == null) return null;
 
-    switch(mimeType) {
-    case "image/jpg":
-      return MimeTypeMap.getSingleton().hasMimeType(IMAGE_JPEG)
-             ? IMAGE_JPEG
-             : mimeType;
-    default:
-      return mimeType;
+    switch (mimeType) {
+      case "image/jpg":
+        return MimeTypeMap.getSingleton().hasMimeType(IMAGE_JPEG) ? IMAGE_JPEG : mimeType;
+      default:
+        return mimeType;
     }
   }
 
@@ -99,9 +91,9 @@ public class MediaUtil {
     InputStream in = PartAuthority.getAttachmentStream(context, uri);
     if (in == null) throw new IOException("Couldn't obtain input stream.");
 
-    long   size   = 0;
+    long size = 0;
     byte[] buffer = new byte[4096];
-    int    read;
+    int read;
 
     while ((read = in.read(buffer)) != -1) {
       size += read;
@@ -112,7 +104,8 @@ public class MediaUtil {
   }
 
   @WorkerThread
-  public static Pair<Integer, Integer> getDimensions(@NonNull Context context, @Nullable String contentType, @Nullable Uri uri) {
+  public static Pair<Integer, Integer> getDimensions(
+      @NonNull Context context, @Nullable String contentType, @Nullable Uri uri) {
     if (uri == null || !MediaUtil.isImageType(contentType)) {
       return new Pair<>(0, 0);
     }
@@ -121,7 +114,8 @@ public class MediaUtil {
 
     if (MediaUtil.isGif(contentType)) {
       try {
-        GifDrawable drawable = GlideApp.with(context)
+        GifDrawable drawable =
+            GlideApp.with(context)
                 .asGif()
                 .skipMemoryCache(true)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -207,7 +201,10 @@ public class MediaUtil {
   }
 
   public static boolean isFile(Attachment attachment) {
-    return !isGif(attachment) && !isImage(attachment) && !isAudio(attachment) && !isVideo(attachment);
+    return !isGif(attachment)
+        && !isImage(attachment)
+        && !isAudio(attachment)
+        && !isVideo(attachment);
   }
 
   public static boolean isTextType(String contentType) {
@@ -244,10 +241,8 @@ public class MediaUtil {
     if ("com.android.providers.media.documents".equals(uri.getAuthority())) {
       long videoId = Long.parseLong(uri.getLastPathSegment().split(":")[1]);
 
-      return MediaStore.Video.Thumbnails.getThumbnail(context.getContentResolver(),
-                                                      videoId,
-                                                      MediaStore.Images.Thumbnails.MINI_KIND,
-                                                      null);
+      return MediaStore.Video.Thumbnails.getThumbnail(
+          context.getContentResolver(), videoId, MediaStore.Images.Thumbnails.MINI_KIND, null);
     }
 
     return null;
@@ -263,7 +258,7 @@ public class MediaUtil {
     float aspectRatio;
 
     public ThumbnailData(Bitmap bitmap) {
-      this.bitmap      = bitmap;
+      this.bitmap = bitmap;
       this.aspectRatio = (float) bitmap.getWidth() / (float) bitmap.getHeight();
     }
 

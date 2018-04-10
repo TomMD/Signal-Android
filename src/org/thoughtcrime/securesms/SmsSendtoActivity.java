@@ -9,13 +9,11 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
-
+import java.net.URISyntaxException;
 import org.thoughtcrime.securesms.database.Address;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.util.Rfc5724Uri;
-
-import java.net.URISyntaxException;
 
 public class SmsSendtoActivity extends Activity {
 
@@ -44,10 +42,12 @@ public class SmsSendtoActivity extends Activity {
     if (TextUtils.isEmpty(destination.destination)) {
       nextIntent = new Intent(this, NewConversationActivity.class);
       nextIntent.putExtra(ConversationActivity.TEXT_EXTRA, destination.getBody());
-      Toast.makeText(this, R.string.ConversationActivity_specify_recipient, Toast.LENGTH_LONG).show();
+      Toast.makeText(this, R.string.ConversationActivity_specify_recipient, Toast.LENGTH_LONG)
+          .show();
     } else {
-      Recipient recipient = Recipient.from(this, Address.fromExternal(this, destination.getDestination()), true);
-      long      threadId  = DatabaseFactory.getThreadDatabase(this).getThreadIdIfExistsFor(recipient);
+      Recipient recipient =
+          Recipient.from(this, Address.fromExternal(this, destination.getDestination()), true);
+      long threadId = DatabaseFactory.getThreadDatabase(this).getThreadIdIfExistsFor(recipient);
 
       nextIntent = new Intent(this, ConversationActivity.class);
       nextIntent.putExtra(ConversationActivity.TEXT_EXTRA, destination.getBody());
@@ -58,8 +58,8 @@ public class SmsSendtoActivity extends Activity {
   }
 
   private @NonNull DestinationAndBody getDestinationForSendTo(Intent intent) {
-    return new DestinationAndBody(intent.getData().getSchemeSpecificPart(),
-                                  intent.getStringExtra("sms_body"));
+    return new DestinationAndBody(
+        intent.getData().getSchemeSpecificPart(), intent.getStringExtra("sms_body"));
   }
 
   private @NonNull DestinationAndBody getDestinationForView(Intent intent) {
@@ -79,7 +79,9 @@ public class SmsSendtoActivity extends Activity {
       cursor = getContentResolver().query(intent.getData(), null, null, null, null);
 
       if (cursor != null && cursor.moveToNext()) {
-        return new DestinationAndBody(cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.RawContacts.Data.DATA1)), "");
+        return new DestinationAndBody(
+            cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.RawContacts.Data.DATA1)),
+            "");
       }
 
       return new DestinationAndBody("", "");

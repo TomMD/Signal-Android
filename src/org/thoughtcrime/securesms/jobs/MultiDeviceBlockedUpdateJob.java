@@ -1,7 +1,10 @@
 package org.thoughtcrime.securesms.jobs;
 
 import android.content.Context;
-
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import javax.inject.Inject;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.RecipientDatabase;
@@ -17,12 +20,6 @@ import org.whispersystems.signalservice.api.messages.multidevice.BlockedListMess
 import org.whispersystems.signalservice.api.messages.multidevice.SignalServiceSyncMessage;
 import org.whispersystems.signalservice.api.push.exceptions.PushNetworkException;
 
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.inject.Inject;
-
 public class MultiDeviceBlockedUpdateJob extends MasterSecretJob implements InjectableType {
 
   private static final long serialVersionUID = 1L;
@@ -32,21 +29,21 @@ public class MultiDeviceBlockedUpdateJob extends MasterSecretJob implements Inje
   @Inject transient SignalServiceMessageSender messageSender;
 
   public MultiDeviceBlockedUpdateJob(Context context) {
-    super(context, JobParameters.newBuilder()
-                                .withRequirement(new NetworkRequirement(context))
-                                .withRequirement(new MasterSecretRequirement(context))
-                                .withGroupId(MultiDeviceBlockedUpdateJob.class.getSimpleName())
-                                .withPersistence()
-                                .create());
+    super(
+        context,
+        JobParameters.newBuilder()
+            .withRequirement(new NetworkRequirement(context))
+            .withRequirement(new MasterSecretRequirement(context))
+            .withGroupId(MultiDeviceBlockedUpdateJob.class.getSimpleName())
+            .withPersistence()
+            .create());
   }
 
   @Override
-  public void onRun(MasterSecret masterSecret)
-      throws IOException, UntrustedIdentityException
-  {
+  public void onRun(MasterSecret masterSecret) throws IOException, UntrustedIdentityException {
     RecipientDatabase database = DatabaseFactory.getRecipientDatabase(context);
-    BlockedReader     reader   = database.readerForBlocked(database.getBlocked());
-    List<String>      blocked  = new LinkedList<>();
+    BlockedReader reader = database.readerForBlocked(database.getBlocked());
+    List<String> blocked = new LinkedList<>();
 
     Recipient recipient;
 
@@ -66,12 +63,8 @@ public class MultiDeviceBlockedUpdateJob extends MasterSecretJob implements Inje
   }
 
   @Override
-  public void onAdded() {
-
-  }
+  public void onAdded() {}
 
   @Override
-  public void onCanceled() {
-
-  }
+  public void onCanceled() {}
 }

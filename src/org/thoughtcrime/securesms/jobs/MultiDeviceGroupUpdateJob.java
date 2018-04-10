@@ -3,7 +3,14 @@ package org.thoughtcrime.securesms.jobs;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import javax.inject.Inject;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.database.Address;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
@@ -24,16 +31,6 @@ import org.whispersystems.signalservice.api.messages.multidevice.DeviceGroupsOut
 import org.whispersystems.signalservice.api.messages.multidevice.SignalServiceSyncMessage;
 import org.whispersystems.signalservice.api.push.exceptions.PushNetworkException;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.inject.Inject;
-
 public class MultiDeviceGroupUpdateJob extends MasterSecretJob implements InjectableType {
 
   private static final long serialVersionUID = 1L;
@@ -42,23 +39,26 @@ public class MultiDeviceGroupUpdateJob extends MasterSecretJob implements Inject
   @Inject transient SignalServiceMessageSender messageSender;
 
   public MultiDeviceGroupUpdateJob(Context context) {
-    super(context, JobParameters.newBuilder()
-                                .withRequirement(new NetworkRequirement(context))
-                                .withRequirement(new MasterSecretRequirement(context))
-                                .withGroupId(MultiDeviceGroupUpdateJob.class.getSimpleName())
-                                .withPersistence()
-                                .create());
+    super(
+        context,
+        JobParameters.newBuilder()
+            .withRequirement(new NetworkRequirement(context))
+            .withRequirement(new MasterSecretRequirement(context))
+            .withGroupId(MultiDeviceGroupUpdateJob.class.getSimpleName())
+            .withPersistence()
+            .create());
   }
 
   @Override
   public void onRun(MasterSecret masterSecret) throws Exception {
-    File                 contactDataFile = createTempFile("multidevice-contact-update");
-    GroupDatabase.Reader reader          = null;
+    File contactDataFile = createTempFile("multidevice-contact-update");
+    GroupDatabase.Reader reader = null;
 
     GroupDatabase.GroupRecord record;
 
     try {
-      DeviceGroupsOutputStream out = new DeviceGroupsOutputStream(new FileOutputStream(contactDataFile));
+      DeviceGroupsOutputStream out =
+          new DeviceGroupsOutputStream(new FileOutputStream(contactDataFile));
 
       reader = DatabaseFactory.getGroupDatabase(context).getGroups();
 
@@ -70,12 +70,24 @@ public class MultiDeviceGroupUpdateJob extends MasterSecretJob implements Inject
             members.add(member.serialize());
           }
 
-          Recipient         recipient       = Recipient.from(context, Address.fromSerialized(GroupUtil.getEncodedId(record.getId(), record.isMms())), false);
-          Optional<Integer> expirationTimer = recipient.getExpireMessages() > 0 ? Optional.of(recipient.getExpireMessages()) : Optional.absent();
+          Recipient recipient =
+              Recipient.from(
+                  context,
+                  Address.fromSerialized(GroupUtil.getEncodedId(record.getId(), record.isMms())),
+                  false);
+          Optional<Integer> expirationTimer =
+              recipient.getExpireMessages() > 0
+                  ? Optional.of(recipient.getExpireMessages())
+                  : Optional.absent();
 
-          out.write(new DeviceGroup(record.getId(), Optional.fromNullable(record.getTitle()),
-                                    members, getAvatar(record.getAvatar()),
-                                    record.isActive(), expirationTimer));
+          out.write(
+              new DeviceGroup(
+                  record.getId(),
+                  Optional.fromNullable(record.getTitle()),
+                  members,
+                  getAvatar(record.getAvatar()),
+                  record.isActive(),
+                  expirationTimer));
         }
       }
 
@@ -89,9 +101,8 @@ public class MultiDeviceGroupUpdateJob extends MasterSecretJob implements Inject
 
     } finally {
       if (contactDataFile != null) contactDataFile.delete();
-      if (reader != null)          reader.close();
+      if (reader != null) reader.close();
     }
-
   }
 
   @Override
@@ -101,37 +112,33 @@ public class MultiDeviceGroupUpdateJob extends MasterSecretJob implements Inject
   }
 
   @Override
-  public void onAdded() {
-
-  }
+  public void onAdded() {}
 
   @Override
-  public void onCanceled() {
-
-  }
+  public void onCanceled() {}
 
   private void sendUpdate(SignalServiceMessageSender messageSender, File contactsFile)
-      throws IOException, UntrustedIdentityException
-  {
-    FileInputStream               contactsFileStream = new FileInputStream(contactsFile);
-    SignalServiceAttachmentStream attachmentStream   = SignalServiceAttachment.newStreamBuilder()
-                                                                              .withStream(contactsFileStream)
-                                                                              .withContentType("application/octet-stream")
-                                                                              .withLength(contactsFile.length())
-                                                                              .build();
+      throws IOException, UntrustedIdentityException {
+    FileInputStream contactsFileStream = new FileInputStream(contactsFile);
+    SignalServiceAttachmentStream attachmentStream =
+        SignalServiceAttachment.newStreamBuilder()
+            .withStream(contactsFileStream)
+            .withContentType("application/octet-stream")
+            .withLength(contactsFile.length())
+            .build();
 
     messageSender.sendMessage(SignalServiceSyncMessage.forGroups(attachmentStream));
   }
 
-
   private Optional<SignalServiceAttachmentStream> getAvatar(@Nullable byte[] avatar) {
     if (avatar == null) return Optional.absent();
 
-    return Optional.of(SignalServiceAttachment.newStreamBuilder()
-                                              .withStream(new ByteArrayInputStream(avatar))
-                                              .withContentType("image/*")
-                                              .withLength(avatar.length)
-                                              .build());
+    return Optional.of(
+        SignalServiceAttachment.newStreamBuilder()
+            .withStream(new ByteArrayInputStream(avatar))
+            .withContentType("image/*")
+            .withLength(avatar.length)
+            .build());
   }
 
   private File createTempFile(String prefix) throws IOException {
@@ -140,6 +147,4 @@ public class MultiDeviceGroupUpdateJob extends MasterSecretJob implements Inject
 
     return file;
   }
-
-
 }

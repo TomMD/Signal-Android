@@ -5,11 +5,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.telephony.SmsMessage;
 import android.util.Log;
-
+import java.util.LinkedList;
+import java.util.List;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.MessagingDatabase.InsertResult;
 import org.thoughtcrime.securesms.database.SmsDatabase;
-import org.thoughtcrime.securesms.jobs.requirements.MasterSecretRequirement;
 import org.thoughtcrime.securesms.jobs.requirements.SqlCipherMigrationRequirement;
 import org.thoughtcrime.securesms.notifications.MessageNotifier;
 import org.thoughtcrime.securesms.recipients.Recipient;
@@ -18,9 +18,6 @@ import org.thoughtcrime.securesms.util.TextSecurePreferences;
 import org.whispersystems.jobqueue.JobParameters;
 import org.whispersystems.libsignal.util.guava.Optional;
 
-import java.util.LinkedList;
-import java.util.List;
-
 public class SmsReceiveJob extends ContextJob {
 
   private static final long serialVersionUID = 1L;
@@ -28,16 +25,18 @@ public class SmsReceiveJob extends ContextJob {
   private static final String TAG = SmsReceiveJob.class.getSimpleName();
 
   private final @Nullable Object[] pdus;
-  private final int      subscriptionId;
+  private final int subscriptionId;
 
   public SmsReceiveJob(@NonNull Context context, @Nullable Object[] pdus, int subscriptionId) {
-    super(context, JobParameters.newBuilder()
-                                .withPersistence()
-                                .withWakeLock(true)
-                                .withRequirement(new SqlCipherMigrationRequirement(context))
-                                .create());
+    super(
+        context,
+        JobParameters.newBuilder()
+            .withPersistence()
+            .withWakeLock(true)
+            .withRequirement(new SqlCipherMigrationRequirement(context))
+            .create());
 
-    this.pdus           = pdus;
+    this.pdus = pdus;
     this.subscriptionId = subscriptionId;
   }
 
@@ -47,7 +46,7 @@ public class SmsReceiveJob extends ContextJob {
   @Override
   public void onRun() throws MigrationPendingException {
     Log.w(TAG, "onRun()");
-    
+
     Optional<IncomingTextMessage> message = assembleMessageFragments(pdus, subscriptionId);
 
     if (message.isPresent() && !isBlocked(message.get())) {
@@ -64,9 +63,7 @@ public class SmsReceiveJob extends ContextJob {
   }
 
   @Override
-  public void onCanceled() {
-
-  }
+  public void onCanceled() {}
 
   @Override
   public boolean onShouldRetry(Exception exception) {
@@ -82,7 +79,8 @@ public class SmsReceiveJob extends ContextJob {
     return false;
   }
 
-  private Optional<InsertResult> storeMessage(IncomingTextMessage message) throws MigrationPendingException {
+  private Optional<InsertResult> storeMessage(IncomingTextMessage message)
+      throws MigrationPendingException {
     SmsDatabase database = DatabaseFactory.getSmsDatabase(context);
     database.ensureMigration();
 
@@ -91,7 +89,7 @@ public class SmsReceiveJob extends ContextJob {
     }
 
     if (message.isSecureMessage()) {
-      IncomingTextMessage    placeholder  = new IncomingTextMessage(message, "");
+      IncomingTextMessage placeholder = new IncomingTextMessage(message, "");
       Optional<InsertResult> insertResult = database.insertMessageInbox(placeholder);
       database.markAsLegacyVersion(insertResult.get().getMessageId());
 
@@ -101,7 +99,8 @@ public class SmsReceiveJob extends ContextJob {
     }
   }
 
-  private Optional<IncomingTextMessage> assembleMessageFragments(@Nullable Object[] pdus, int subscriptionId) {
+  private Optional<IncomingTextMessage> assembleMessageFragments(
+      @Nullable Object[] pdus, int subscriptionId) {
     if (pdus == null) {
       return Optional.absent();
     }
@@ -109,7 +108,8 @@ public class SmsReceiveJob extends ContextJob {
     List<IncomingTextMessage> messages = new LinkedList<>();
 
     for (Object pdu : pdus) {
-      messages.add(new IncomingTextMessage(context, SmsMessage.createFromPdu((byte[])pdu), subscriptionId));
+      messages.add(
+          new IncomingTextMessage(context, SmsMessage.createFromPdu((byte[]) pdu), subscriptionId));
     }
 
     if (messages.isEmpty()) {
@@ -119,7 +119,5 @@ public class SmsReceiveJob extends ContextJob {
     return Optional.of(new IncomingTextMessage(messages));
   }
 
-  private class MigrationPendingException extends Exception {
-
-  }
+  private class MigrationPendingException extends Exception {}
 }

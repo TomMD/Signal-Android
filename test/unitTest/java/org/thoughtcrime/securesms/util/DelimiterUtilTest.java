@@ -1,10 +1,9 @@
 package org.thoughtcrime.securesms.util;
 
+import static junit.framework.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import static junit.framework.Assert.assertEquals;
 
 public class DelimiterUtilTest {
 
@@ -36,21 +35,20 @@ public class DelimiterUtilTest {
 
   @Test
   public void testEscapeSplit() {
-    String   input        = "MTV Music";
-    String   intermediate = DelimiterUtil.escape(input, ' ');
-    String[] parts        = DelimiterUtil.split(intermediate, ' ');
+    String input = "MTV Music";
+    String intermediate = DelimiterUtil.escape(input, ' ');
+    String[] parts = DelimiterUtil.split(intermediate, ' ');
 
     assertEquals(parts.length, 1);
     assertEquals(parts[0], "MTV\\ Music");
     assertEquals(DelimiterUtil.unescape(parts[0], ' '), "MTV Music");
 
-    input        = "MTV\\ Music";
+    input = "MTV\\ Music";
     intermediate = DelimiterUtil.escape(input, ' ');
-    parts        = DelimiterUtil.split(intermediate, ' ');
+    parts = DelimiterUtil.split(intermediate, ' ');
 
     assertEquals(parts.length, 1);
     assertEquals(parts[0], "MTV\\\\ Music");
     assertEquals(DelimiterUtil.unescape(parts[0], ' '), "MTV\\ Music");
   }
-
 }

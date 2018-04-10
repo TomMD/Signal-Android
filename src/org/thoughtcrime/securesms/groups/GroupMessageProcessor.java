@@ -1,13 +1,18 @@
 package org.thoughtcrime.securesms.groups;
 
+import static org.thoughtcrime.securesms.database.GroupDatabase.GroupRecord;
+import static org.whispersystems.signalservice.internal.push.SignalServiceProtos.AttachmentPointer;
+import static org.whispersystems.signalservice.internal.push.SignalServiceProtos.GroupContext;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
 import com.google.protobuf.ByteString;
-
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import org.thoughtcrime.securesms.ApplicationContext;
 import org.thoughtcrime.securesms.database.Address;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
@@ -32,33 +37,24 @@ import org.whispersystems.signalservice.api.messages.SignalServiceEnvelope;
 import org.whispersystems.signalservice.api.messages.SignalServiceGroup;
 import org.whispersystems.signalservice.api.messages.SignalServiceGroup.Type;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
-import static org.thoughtcrime.securesms.database.GroupDatabase.GroupRecord;
-import static org.whispersystems.signalservice.internal.push.SignalServiceProtos.AttachmentPointer;
-import static org.whispersystems.signalservice.internal.push.SignalServiceProtos.GroupContext;
-
 public class GroupMessageProcessor {
 
   private static final String TAG = GroupMessageProcessor.class.getSimpleName();
 
-  public static @Nullable Long process(@NonNull Context context,
-                                       @NonNull SignalServiceEnvelope envelope,
-                                       @NonNull SignalServiceDataMessage message,
-                                       boolean outgoing)
-  {
+  public static @Nullable Long process(
+      @NonNull Context context,
+      @NonNull SignalServiceEnvelope envelope,
+      @NonNull SignalServiceDataMessage message,
+      boolean outgoing) {
     if (!message.getGroupInfo().isPresent() || message.getGroupInfo().get().getGroupId() == null) {
       Log.w(TAG, "Received group message with no id! Ignoring...");
       return null;
     }
 
-    GroupDatabase         database = DatabaseFactory.getGroupDatabase(context);
-    SignalServiceGroup    group    = message.getGroupInfo().get();
-    String                id       = GroupUtil.getEncodedId(group.getGroupId(), false);
-    Optional<GroupRecord> record   = database.getGroup(id);
+    GroupDatabase database = DatabaseFactory.getGroupDatabase(context);
+    SignalServiceGroup group = message.getGroupInfo().get();
+    String id = GroupUtil.getEncodedId(group.getGroupId(), false);
+    Optional<GroupRecord> record = database.getGroup(id);
 
     if (record.isPresent() && group.getType() == Type.UPDATE) {
       return handleGroupUpdate(context, envelope, group, record.get(), outgoing);
@@ -74,18 +70,18 @@ public class GroupMessageProcessor {
     }
   }
 
-  private static @Nullable Long handleGroupCreate(@NonNull Context context,
-                                                  @NonNull SignalServiceEnvelope envelope,
-                                                  @NonNull SignalServiceGroup group,
-                                                  boolean outgoing)
-  {
-    GroupDatabase        database = DatabaseFactory.getGroupDatabase(context);
-    String               id       = GroupUtil.getEncodedId(group.getGroupId(), false);
-    GroupContext.Builder builder  = createGroupContext(group);
+  private static @Nullable Long handleGroupCreate(
+      @NonNull Context context,
+      @NonNull SignalServiceEnvelope envelope,
+      @NonNull SignalServiceGroup group,
+      boolean outgoing) {
+    GroupDatabase database = DatabaseFactory.getGroupDatabase(context);
+    String id = GroupUtil.getEncodedId(group.getGroupId(), false);
+    GroupContext.Builder builder = createGroupContext(group);
     builder.setType(GroupContext.Type.UPDATE);
 
-    SignalServiceAttachment avatar  = group.getAvatar().orNull();
-    List<Address>           members = group.getMembers().isPresent() ? new LinkedList<Address>() : null;
+    SignalServiceAttachment avatar = group.getAvatar().orNull();
+    List<Address> members = group.getMembers().isPresent() ? new LinkedList<Address>() : null;
 
     if (group.getMembers().isPresent()) {
       for (String member : group.getMembers().get()) {
@@ -93,22 +89,25 @@ public class GroupMessageProcessor {
       }
     }
 
-    database.create(id, group.getName().orNull(), members,
-                    avatar != null && avatar.isPointer() ? avatar.asPointer() : null,
-                    envelope.getRelay());
+    database.create(
+        id,
+        group.getName().orNull(),
+        members,
+        avatar != null && avatar.isPointer() ? avatar.asPointer() : null,
+        envelope.getRelay());
 
     return storeMessage(context, envelope, group, builder.build(), outgoing);
   }
 
-  private static @Nullable Long handleGroupUpdate(@NonNull Context context,
-                                                  @NonNull SignalServiceEnvelope envelope,
-                                                  @NonNull SignalServiceGroup group,
-                                                  @NonNull GroupRecord groupRecord,
-                                                  boolean outgoing)
-  {
+  private static @Nullable Long handleGroupUpdate(
+      @NonNull Context context,
+      @NonNull SignalServiceEnvelope envelope,
+      @NonNull SignalServiceGroup group,
+      @NonNull GroupRecord groupRecord,
+      boolean outgoing) {
 
     GroupDatabase database = DatabaseFactory.getGroupDatabase(context);
-    String        id       = GroupUtil.getEncodedId(group.getGroupId(), false);
+    String id = GroupUtil.getEncodedId(group.getGroupId(), false);
 
     Set<Address> recordMembers = new HashSet<>(groupRecord.getMembers());
     Set<Address> messageMembers = new HashSet<>();
@@ -158,29 +157,29 @@ public class GroupMessageProcessor {
     return storeMessage(context, envelope, group, builder.build(), outgoing);
   }
 
-  private static Long handleGroupInfoRequest(@NonNull Context context,
-                                             @NonNull SignalServiceEnvelope envelope,
-                                             @NonNull SignalServiceGroup group,
-                                             @NonNull GroupRecord record)
-  {
+  private static Long handleGroupInfoRequest(
+      @NonNull Context context,
+      @NonNull SignalServiceEnvelope envelope,
+      @NonNull SignalServiceGroup group,
+      @NonNull GroupRecord record) {
     if (record.getMembers().contains(Address.fromExternal(context, envelope.getSource()))) {
       ApplicationContext.getInstance(context)
-                        .getJobManager()
-                        .add(new PushGroupUpdateJob(context, envelope.getSource(), group.getGroupId()));
+          .getJobManager()
+          .add(new PushGroupUpdateJob(context, envelope.getSource(), group.getGroupId()));
     }
 
     return null;
   }
 
-  private static Long handleGroupLeave(@NonNull Context               context,
-                                       @NonNull SignalServiceEnvelope envelope,
-                                       @NonNull SignalServiceGroup    group,
-                                       @NonNull GroupRecord           record,
-                                       boolean  outgoing)
-  {
+  private static Long handleGroupLeave(
+      @NonNull Context context,
+      @NonNull SignalServiceEnvelope envelope,
+      @NonNull SignalServiceGroup group,
+      @NonNull GroupRecord record,
+      boolean outgoing) {
     GroupDatabase database = DatabaseFactory.getGroupDatabase(context);
-    String        id       = GroupUtil.getEncodedId(group.getGroupId(), false);
-    List<Address> members  = record.getMembers();
+    String id = GroupUtil.getEncodedId(group.getGroupId(), false);
+    List<Address> members = record.getMembers();
 
     GroupContext.Builder builder = createGroupContext(group);
     builder.setType(GroupContext.Type.QUIT);
@@ -195,34 +194,43 @@ public class GroupMessageProcessor {
     return null;
   }
 
-
-  private static @Nullable Long storeMessage(@NonNull Context context,
-                                             @NonNull SignalServiceEnvelope envelope,
-                                             @NonNull SignalServiceGroup group,
-                                             @NonNull GroupContext storage,
-                                             boolean  outgoing)
-  {
+  private static @Nullable Long storeMessage(
+      @NonNull Context context,
+      @NonNull SignalServiceEnvelope envelope,
+      @NonNull SignalServiceGroup group,
+      @NonNull GroupContext storage,
+      boolean outgoing) {
     if (group.getAvatar().isPresent()) {
-      ApplicationContext.getInstance(context).getJobManager()
-                        .add(new AvatarDownloadJob(context, group.getGroupId()));
+      ApplicationContext.getInstance(context)
+          .getJobManager()
+          .add(new AvatarDownloadJob(context, group.getGroupId()));
     }
 
     try {
       if (outgoing) {
-        MmsDatabase               mmsDatabase     = DatabaseFactory.getMmsDatabase(context);
-        Address                   addres          = Address.fromExternal(context, GroupUtil.getEncodedId(group.getGroupId(), false));
-        Recipient                 recipient       = Recipient.from(context, addres, false);
-        OutgoingGroupMediaMessage outgoingMessage = new OutgoingGroupMediaMessage(recipient, storage, null, envelope.getTimestamp(), 0);
-        long                      threadId        = DatabaseFactory.getThreadDatabase(context).getThreadIdFor(recipient);
-        long                      messageId       = mmsDatabase.insertMessageOutbox(outgoingMessage, threadId, false, null);
+        MmsDatabase mmsDatabase = DatabaseFactory.getMmsDatabase(context);
+        Address addres =
+            Address.fromExternal(context, GroupUtil.getEncodedId(group.getGroupId(), false));
+        Recipient recipient = Recipient.from(context, addres, false);
+        OutgoingGroupMediaMessage outgoingMessage =
+            new OutgoingGroupMediaMessage(recipient, storage, null, envelope.getTimestamp(), 0);
+        long threadId = DatabaseFactory.getThreadDatabase(context).getThreadIdFor(recipient);
+        long messageId = mmsDatabase.insertMessageOutbox(outgoingMessage, threadId, false, null);
 
         mmsDatabase.markAsSent(messageId, true);
 
         return threadId;
       } else {
-        SmsDatabase          smsDatabase  = DatabaseFactory.getSmsDatabase(context);
-        String               body         = Base64.encodeBytes(storage.toByteArray());
-        IncomingTextMessage  incoming     = new IncomingTextMessage(Address.fromExternal(context, envelope.getSource()), envelope.getSourceDevice(), envelope.getTimestamp(), body, Optional.of(group), 0);
+        SmsDatabase smsDatabase = DatabaseFactory.getSmsDatabase(context);
+        String body = Base64.encodeBytes(storage.toByteArray());
+        IncomingTextMessage incoming =
+            new IncomingTextMessage(
+                Address.fromExternal(context, envelope.getSource()),
+                envelope.getSourceDevice(),
+                envelope.getTimestamp(),
+                body,
+                Optional.of(group),
+                0);
         IncomingGroupMessage groupMessage = new IncomingGroupMessage(incoming, storage, body);
 
         Optional<InsertResult> insertResult = smsDatabase.insertMessageInbox(groupMessage);
@@ -246,10 +254,11 @@ public class GroupMessageProcessor {
     builder.setId(ByteString.copyFrom(group.getGroupId()));
 
     if (group.getAvatar().isPresent() && group.getAvatar().get().isPointer()) {
-      builder.setAvatar(AttachmentPointer.newBuilder()
-                                         .setId(group.getAvatar().get().asPointer().getId())
-                                         .setKey(ByteString.copyFrom(group.getAvatar().get().asPointer().getKey()))
-                                         .setContentType(group.getAvatar().get().getContentType()));
+      builder.setAvatar(
+          AttachmentPointer.newBuilder()
+              .setId(group.getAvatar().get().asPointer().getId())
+              .setKey(ByteString.copyFrom(group.getAvatar().get().asPointer().getKey()))
+              .setContentType(group.getAvatar().get().getContentType()));
     }
 
     if (group.getName().isPresent()) {
@@ -262,5 +271,4 @@ public class GroupMessageProcessor {
 
     return builder;
   }
-
 }

@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms.components.identity;
 
-
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -13,20 +12,17 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
+import java.util.List;
 import org.thoughtcrime.securesms.R;
-import org.thoughtcrime.securesms.database.IdentityDatabase;
 import org.thoughtcrime.securesms.database.IdentityDatabase.IdentityRecord;
 import org.thoughtcrime.securesms.util.ViewUtil;
-
-import java.util.List;
 
 public class UnverifiedBannerView extends LinearLayout {
 
   private static final String TAG = UnverifiedBannerView.class.getSimpleName();
 
-  private View      container;
-  private TextView  text;
+  private View container;
+  private TextView text;
   private ImageView closeButton;
 
   public UnverifiedBannerView(Context context) {
@@ -46,41 +42,44 @@ public class UnverifiedBannerView extends LinearLayout {
   }
 
   @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-  public UnverifiedBannerView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+  public UnverifiedBannerView(
+      Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
     super(context, attrs, defStyleAttr, defStyleRes);
     initialize();
   }
 
   private void initialize() {
     LayoutInflater.from(getContext()).inflate(R.layout.unverified_banner_view, this, true);
-    this.container   = ViewUtil.findById(this, R.id.container);
-    this.text        = ViewUtil.findById(this, R.id.unverified_text);
+    this.container = ViewUtil.findById(this, R.id.container);
+    this.text = ViewUtil.findById(this, R.id.unverified_text);
     this.closeButton = ViewUtil.findById(this, R.id.cancel);
   }
 
-  public void display(@NonNull final String text,
-                      @NonNull final List<IdentityRecord> unverifiedIdentities,
-                      @NonNull final ClickListener clickListener,
-                      @NonNull final DismissListener dismissListener)
-  {
+  public void display(
+      @NonNull final String text,
+      @NonNull final List<IdentityRecord> unverifiedIdentities,
+      @NonNull final ClickListener clickListener,
+      @NonNull final DismissListener dismissListener) {
     this.text.setText(text);
     setVisibility(View.VISIBLE);
 
-    this.container.setOnClickListener(new OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        Log.w(TAG, "onClick()");
-        clickListener.onClicked(unverifiedIdentities);
-      }
-    });
+    this.container.setOnClickListener(
+        new OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            Log.w(TAG, "onClick()");
+            clickListener.onClicked(unverifiedIdentities);
+          }
+        });
 
-    this.closeButton.setOnClickListener(new OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        hide();
-        dismissListener.onDismissed(unverifiedIdentities);
-      }
-    });
+    this.closeButton.setOnClickListener(
+        new OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            hide();
+            dismissListener.onDismissed(unverifiedIdentities);
+          }
+        });
   }
 
   public void hide() {
@@ -94,5 +93,4 @@ public class UnverifiedBannerView extends LinearLayout {
   public interface ClickListener {
     public void onClicked(List<IdentityRecord> unverifiedIdentities);
   }
-
 }

@@ -15,10 +15,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
-
-import org.thoughtcrime.securesms.util.ServiceUtil;
-
 import java.util.List;
+import org.thoughtcrime.securesms.util.ServiceUtil;
 
 public class BluetoothStateManager {
 
@@ -32,31 +30,34 @@ public class BluetoothStateManager {
 
   private final Object LOCK = new Object();
 
-  private final Context                     context;
-  private final BluetoothAdapter            bluetoothAdapter;
-  private       BluetoothScoReceiver        bluetoothScoReceiver;
-  private       BluetoothConnectionReceiver bluetoothConnectionReceiver;
-  private final BluetoothStateListener      listener;
+  private final Context context;
+  private final BluetoothAdapter bluetoothAdapter;
+  private BluetoothScoReceiver bluetoothScoReceiver;
+  private BluetoothConnectionReceiver bluetoothConnectionReceiver;
+  private final BluetoothStateListener listener;
 
   private BluetoothHeadset bluetoothHeadset = null;
-  private ScoConnection    scoConnection    = ScoConnection.DISCONNECTED;
-  private boolean          wantsConnection  = false;
+  private ScoConnection scoConnection = ScoConnection.DISCONNECTED;
+  private boolean wantsConnection = false;
 
-  public BluetoothStateManager(@NonNull Context context, @Nullable BluetoothStateListener listener) {
-    this.context                     = context.getApplicationContext();
-    this.bluetoothAdapter            = BluetoothAdapter.getDefaultAdapter();
-    this.bluetoothScoReceiver        = new BluetoothScoReceiver();
+  public BluetoothStateManager(
+      @NonNull Context context, @Nullable BluetoothStateListener listener) {
+    this.context = context.getApplicationContext();
+    this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    this.bluetoothScoReceiver = new BluetoothScoReceiver();
     this.bluetoothConnectionReceiver = new BluetoothConnectionReceiver();
-    this.listener                    = listener;
+    this.listener = listener;
 
-    if (this.bluetoothAdapter == null)
-      return;
+    if (this.bluetoothAdapter == null) return;
 
     requestHeadsetProxyProfile();
 
-    this.context.registerReceiver(bluetoothConnectionReceiver, new IntentFilter(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED));
+    this.context.registerReceiver(
+        bluetoothConnectionReceiver,
+        new IntentFilter(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED));
 
-    Intent sticky = this.context.registerReceiver(bluetoothScoReceiver, new IntentFilter(getScoChangeIntent()));
+    Intent sticky =
+        this.context.registerReceiver(bluetoothScoReceiver, new IntentFilter(getScoChangeIntent()));
 
     if (sticky != null) {
       bluetoothScoReceiver.onReceive(context, sticky);
@@ -89,7 +90,9 @@ public class BluetoothStateManager {
 
       this.wantsConnection = enabled;
 
-      if (wantsConnection && isBluetoothAvailable() && scoConnection == ScoConnection.DISCONNECTED) {
+      if (wantsConnection
+          && isBluetoothAvailable()
+          && scoConnection == ScoConnection.DISCONNECTED) {
         audioManager.startBluetoothSco();
         scoConnection = ScoConnection.IN_PROGRESS;
       } else if (!wantsConnection && scoConnection == ScoConnection.CONNECTED) {
@@ -113,7 +116,7 @@ public class BluetoothStateManager {
         AudioManager audioManager = ServiceUtil.getAudioManager(context);
 
         if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) return false;
-        if (!audioManager.isBluetoothScoAvailableOffCall())            return false;
+        if (!audioManager.isBluetoothScoAvailableOffCall()) return false;
 
         return bluetoothHeadset != null && !bluetoothHeadset.getConnectedDevices().isEmpty();
       }
@@ -131,41 +134,46 @@ public class BluetoothStateManager {
     }
   }
 
-
   private void requestHeadsetProxyProfile() {
-    this.bluetoothAdapter.getProfileProxy(context, new BluetoothProfile.ServiceListener() {
-      @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
-      @Override
-      public void onServiceConnected(int profile, BluetoothProfile proxy) {
-        if (profile == BluetoothProfile.HEADSET) {
-          synchronized (LOCK) {
-            bluetoothHeadset = (BluetoothHeadset) proxy;
-          }
+    this.bluetoothAdapter.getProfileProxy(
+        context,
+        new BluetoothProfile.ServiceListener() {
+          @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
+          @Override
+          public void onServiceConnected(int profile, BluetoothProfile proxy) {
+            if (profile == BluetoothProfile.HEADSET) {
+              synchronized (LOCK) {
+                bluetoothHeadset = (BluetoothHeadset) proxy;
+              }
 
-          Intent sticky = context.registerReceiver(null, new IntentFilter(getScoChangeIntent()));
-          bluetoothScoReceiver.onReceive(context, sticky);
+              Intent sticky =
+                  context.registerReceiver(null, new IntentFilter(getScoChangeIntent()));
+              bluetoothScoReceiver.onReceive(context, sticky);
 
-          synchronized (LOCK) {
-            if (wantsConnection && isBluetoothAvailable() && scoConnection == ScoConnection.DISCONNECTED) {
-              AudioManager audioManager = ServiceUtil.getAudioManager(context);
-              audioManager.startBluetoothSco();
-              scoConnection = ScoConnection.IN_PROGRESS;
+              synchronized (LOCK) {
+                if (wantsConnection
+                    && isBluetoothAvailable()
+                    && scoConnection == ScoConnection.DISCONNECTED) {
+                  AudioManager audioManager = ServiceUtil.getAudioManager(context);
+                  audioManager.startBluetoothSco();
+                  scoConnection = ScoConnection.IN_PROGRESS;
+                }
+              }
+
+              handleBluetoothStateChange();
             }
           }
 
-          handleBluetoothStateChange();
-        }
-      }
-
-      @Override
-      public void onServiceDisconnected(int profile) {
-        Log.w(TAG, "onServiceDisconnected");
-        if (profile == BluetoothProfile.HEADSET) {
-          bluetoothHeadset = null;
-          handleBluetoothStateChange();
-        }
-      }
-    }, BluetoothProfile.HEADSET);
+          @Override
+          public void onServiceDisconnected(int profile) {
+            Log.w(TAG, "onServiceDisconnected");
+            if (profile == BluetoothProfile.HEADSET) {
+              bluetoothHeadset = null;
+              handleBluetoothStateChange();
+            }
+          }
+        },
+        BluetoothProfile.HEADSET);
   }
 
   private class BluetoothScoReceiver extends BroadcastReceiver {
@@ -176,7 +184,9 @@ public class BluetoothStateManager {
 
       synchronized (LOCK) {
         if (getScoChangeIntent().equals(intent.getAction())) {
-          int status = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, AudioManager.SCO_AUDIO_STATE_ERROR);
+          int status =
+              intent.getIntExtra(
+                  AudioManager.EXTRA_SCO_AUDIO_STATE, AudioManager.SCO_AUDIO_STATE_ERROR);
 
           if (status == AudioManager.SCO_AUDIO_STATE_CONNECTED) {
             if (bluetoothHeadset != null) {
@@ -186,10 +196,9 @@ public class BluetoothStateManager {
                 if (bluetoothHeadset.isAudioConnected(device)) {
                   int deviceClass = device.getBluetoothClass().getDeviceClass();
 
-                  if (deviceClass == BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE ||
-                      deviceClass == BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO ||
-                      deviceClass == BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET)
-                  {
+                  if (deviceClass == BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE
+                      || deviceClass == BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO
+                      || deviceClass == BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET) {
                     scoConnection = ScoConnection.CONNECTED;
 
                     if (wantsConnection) {
@@ -199,7 +208,6 @@ public class BluetoothStateManager {
                   }
                 }
               }
-
             }
           }
         }
@@ -220,5 +228,4 @@ public class BluetoothStateManager {
   public interface BluetoothStateListener {
     public void onBluetoothStateChanged(boolean isAvailable);
   }
-
 }

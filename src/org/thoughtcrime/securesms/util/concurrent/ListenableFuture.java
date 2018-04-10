@@ -8,6 +8,7 @@ public interface ListenableFuture<T> extends Future<T> {
 
   public interface Listener<T> {
     public void onSuccess(T result);
+
     public void onFailure(ExecutionException e);
   }
 }

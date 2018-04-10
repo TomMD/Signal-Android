@@ -1,14 +1,11 @@
 package org.thoughtcrime.securesms.crypto;
 
-
 import android.content.Context;
 import android.support.annotation.NonNull;
-
+import java.io.IOException;
 import org.thoughtcrime.securesms.util.Base64;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
 import org.thoughtcrime.securesms.util.Util;
-
-import java.io.IOException;
 
 public class ProfileKeyUtil {
 
@@ -30,5 +27,4 @@ public class ProfileKeyUtil {
       throw new AssertionError(e);
     }
   }
-
 }

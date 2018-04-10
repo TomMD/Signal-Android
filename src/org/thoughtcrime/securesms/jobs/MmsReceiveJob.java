@@ -3,12 +3,10 @@ package org.thoughtcrime.securesms.jobs;
 import android.content.Context;
 import android.util.Log;
 import android.util.Pair;
-
 import com.google.android.mms.pdu_alt.GenericPdu;
 import com.google.android.mms.pdu_alt.NotificationInd;
 import com.google.android.mms.pdu_alt.PduHeaders;
 import com.google.android.mms.pdu_alt.PduParser;
-
 import org.thoughtcrime.securesms.ApplicationContext;
 import org.thoughtcrime.securesms.database.Address;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
@@ -24,21 +22,17 @@ public class MmsReceiveJob extends ContextJob {
   private static final String TAG = MmsReceiveJob.class.getSimpleName();
 
   private final byte[] data;
-  private final int    subscriptionId;
+  private final int subscriptionId;
 
   public MmsReceiveJob(Context context, byte[] data, int subscriptionId) {
-    super(context, JobParameters.newBuilder()
-                                .withWakeLock(true)
-                                .withPersistence().create());
+    super(context, JobParameters.newBuilder().withWakeLock(true).withPersistence().create());
 
-    this.data           = data;
+    this.data = data;
     this.subscriptionId = subscriptionId;
   }
 
   @Override
-  public void onAdded() {
-
-  }
+  public void onAdded() {}
 
   @Override
   public void onRun() {
@@ -47,8 +41,8 @@ public class MmsReceiveJob extends ContextJob {
       return;
     }
 
-    PduParser  parser = new PduParser(data);
-    GenericPdu pdu    = null;
+    PduParser parser = new PduParser(data);
+    GenericPdu pdu = null;
 
     try {
       pdu = parser.parse();
@@ -57,17 +51,17 @@ public class MmsReceiveJob extends ContextJob {
     }
 
     if (isNotification(pdu) && !isBlocked(pdu)) {
-      MmsDatabase database                = DatabaseFactory.getMmsDatabase(context);
-      Pair<Long, Long> messageAndThreadId = database.insertMessageInbox((NotificationInd)pdu, subscriptionId);
+      MmsDatabase database = DatabaseFactory.getMmsDatabase(context);
+      Pair<Long, Long> messageAndThreadId =
+          database.insertMessageInbox((NotificationInd) pdu, subscriptionId);
 
       Log.w(TAG, "Inserted received MMS notification...");
 
       ApplicationContext.getInstance(context)
-                        .getJobManager()
-                        .add(new MmsDownloadJob(context,
-                                                messageAndThreadId.first,
-                                                messageAndThreadId.second,
-                                                true));
+          .getJobManager()
+          .add(
+              new MmsDownloadJob(
+                  context, messageAndThreadId.first, messageAndThreadId.second, true));
     } else if (isNotification(pdu)) {
       Log.w(TAG, "*** Received blocked MMS, ignoring...");
     }
@@ -85,7 +79,11 @@ public class MmsReceiveJob extends ContextJob {
 
   private boolean isBlocked(GenericPdu pdu) {
     if (pdu.getFrom() != null && pdu.getFrom().getTextString() != null) {
-      Recipient recipients = Recipient.from(context, Address.fromExternal(context, Util.toIsoString(pdu.getFrom().getTextString())), false);
+      Recipient recipients =
+          Recipient.from(
+              context,
+              Address.fromExternal(context, Util.toIsoString(pdu.getFrom().getTextString())),
+              false);
       return recipients.isBlocked();
     }
 

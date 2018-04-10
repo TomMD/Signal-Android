@@ -1,22 +1,16 @@
 package org.thoughtcrime.securesms.glide;
 
 import android.support.annotation.Nullable;
-
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
-
+import java.io.InputStream;
+import okhttp3.OkHttpClient;
 import org.thoughtcrime.securesms.giph.net.GiphyProxySelector;
 
-import java.io.InputStream;
-
-import okhttp3.OkHttpClient;
-
-/**
- * A simple model loader for fetching media over http/https using OkHttp.
- */
+/** A simple model loader for fetching media over http/https using OkHttp. */
 public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
   private final OkHttpClient client;
@@ -27,7 +21,8 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
   @Nullable
   @Override
-  public LoadData<InputStream> buildLoadData(GlideUrl glideUrl, int width, int height, Options options) {
+  public LoadData<InputStream> buildLoadData(
+      GlideUrl glideUrl, int width, int height, Options options) {
     return new LoadData<>(glideUrl, new OkHttpStreamFetcher(client, glideUrl));
   }
 
@@ -44,9 +39,8 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
       if (internalClient == null) {
         synchronized (Factory.class) {
           if (internalClient == null) {
-            internalClient = new OkHttpClient.Builder()
-                                             .proxySelector(new GiphyProxySelector())
-                                             .build();
+            internalClient =
+                new OkHttpClient.Builder().proxySelector(new GiphyProxySelector()).build();
           }
         }
       }

@@ -2,7 +2,9 @@ package org.thoughtcrime.securesms.jobs;
 
 import android.content.Context;
 import android.util.Log;
-
+import java.io.IOException;
+import java.util.List;
+import javax.inject.Inject;
 import org.thoughtcrime.securesms.ApplicationContext;
 import org.thoughtcrime.securesms.crypto.IdentityKeyUtil;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
@@ -19,11 +21,6 @@ import org.whispersystems.signalservice.api.SignalServiceAccountManager;
 import org.whispersystems.signalservice.api.push.exceptions.NonSuccessfulResponseCodeException;
 import org.whispersystems.signalservice.api.push.exceptions.PushNetworkException;
 
-import java.io.IOException;
-import java.util.List;
-
-import javax.inject.Inject;
-
 public class RefreshPreKeysJob extends MasterSecretJob implements InjectableType {
 
   private static final String TAG = RefreshPreKeysJob.class.getSimpleName();
@@ -33,18 +30,18 @@ public class RefreshPreKeysJob extends MasterSecretJob implements InjectableType
   @Inject transient SignalServiceAccountManager accountManager;
 
   public RefreshPreKeysJob(Context context) {
-    super(context, JobParameters.newBuilder()
-                                .withGroupId(RefreshPreKeysJob.class.getSimpleName())
-                                .withRequirement(new NetworkRequirement(context))
-                                .withRequirement(new MasterSecretRequirement(context))
-                                .withRetryCount(5)
-                                .create());
+    super(
+        context,
+        JobParameters.newBuilder()
+            .withGroupId(RefreshPreKeysJob.class.getSimpleName())
+            .withRequirement(new NetworkRequirement(context))
+            .withRequirement(new MasterSecretRequirement(context))
+            .withRetryCount(5)
+            .create());
   }
 
   @Override
-  public void onAdded() {
-
-  }
+  public void onAdded() {}
 
   @Override
   public void onRun(MasterSecret masterSecret) throws IOException {
@@ -52,14 +49,16 @@ public class RefreshPreKeysJob extends MasterSecretJob implements InjectableType
 
     int availableKeys = accountManager.getPreKeysCount();
 
-    if (availableKeys >= PREKEY_MINIMUM && TextSecurePreferences.isSignedPreKeyRegistered(context)) {
+    if (availableKeys >= PREKEY_MINIMUM
+        && TextSecurePreferences.isSignedPreKeyRegistered(context)) {
       Log.w(TAG, "Available keys sufficient: " + availableKeys);
       return;
     }
 
-    List<PreKeyRecord> preKeyRecords       = PreKeyUtil.generatePreKeys(context);
-    IdentityKeyPair    identityKey         = IdentityKeyUtil.getIdentityKeyPair(context);
-    SignedPreKeyRecord signedPreKeyRecord  = PreKeyUtil.generateSignedPreKey(context, identityKey, false);
+    List<PreKeyRecord> preKeyRecords = PreKeyUtil.generatePreKeys(context);
+    IdentityKeyPair identityKey = IdentityKeyUtil.getIdentityKeyPair(context);
+    SignedPreKeyRecord signedPreKeyRecord =
+        PreKeyUtil.generateSignedPreKey(context, identityKey, false);
 
     Log.w(TAG, "Registering new prekeys...");
 
@@ -68,22 +67,17 @@ public class RefreshPreKeysJob extends MasterSecretJob implements InjectableType
     PreKeyUtil.setActiveSignedPreKeyId(context, signedPreKeyRecord.getId());
     TextSecurePreferences.setSignedPreKeyRegistered(context, true);
 
-    ApplicationContext.getInstance(context)
-                      .getJobManager()
-                      .add(new CleanPreKeysJob(context));
+    ApplicationContext.getInstance(context).getJobManager().add(new CleanPreKeysJob(context));
   }
 
   @Override
   public boolean onShouldRetryThrowable(Exception exception) {
     if (exception instanceof NonSuccessfulResponseCodeException) return false;
-    if (exception instanceof PushNetworkException)               return true;
+    if (exception instanceof PushNetworkException) return true;
 
     return false;
   }
 
   @Override
-  public void onCanceled() {
-
-  }
-
+  public void onCanceled() {}
 }

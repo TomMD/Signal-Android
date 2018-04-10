@@ -28,7 +28,6 @@ import android.widget.FrameLayout;
 import android.widget.MediaController;
 import android.widget.Toast;
 import android.widget.VideoView;
-
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -50,7 +49,7 @@ import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-
+import java.io.IOException;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.attachments.AttachmentServer;
 import org.thoughtcrime.securesms.mms.PartAuthority;
@@ -58,18 +57,16 @@ import org.thoughtcrime.securesms.mms.VideoSlide;
 import org.thoughtcrime.securesms.util.ViewUtil;
 import org.thoughtcrime.securesms.video.exo.AttachmentDataSourceFactory;
 
-import java.io.IOException;
-
 public class VideoPlayer extends FrameLayout {
 
   private static final String TAG = VideoPlayer.class.getName();
 
-  @Nullable private final VideoView           videoView;
+  @Nullable private final VideoView videoView;
   @Nullable private final SimpleExoPlayerView exoView;
 
-  @Nullable private       SimpleExoPlayer     exoPlayer;
-  @Nullable private       AttachmentServer    attachmentServer;
-  @Nullable private       Window              window;
+  @Nullable private SimpleExoPlayer exoPlayer;
+  @Nullable private AttachmentServer attachmentServer;
+  @Nullable private Window window;
 
   public VideoPlayer(Context context) {
     this(context, null);
@@ -85,20 +82,18 @@ public class VideoPlayer extends FrameLayout {
     inflate(context, R.layout.video_player, this);
 
     if (Build.VERSION.SDK_INT >= 16) {
-      this.exoView   = ViewUtil.findById(this, R.id.video_view);
+      this.exoView = ViewUtil.findById(this, R.id.video_view);
       this.videoView = null;
     } else {
       this.videoView = ViewUtil.findById(this, R.id.video_view);
-      this.exoView   = null;
+      this.exoView = null;
       initializeVideoViewControls(videoView);
     }
   }
 
-  public void setVideoSource(@NonNull VideoSlide videoSource, boolean autoplay)
-      throws IOException
-  {
+  public void setVideoSource(@NonNull VideoSlide videoSource, boolean autoplay) throws IOException {
     if (Build.VERSION.SDK_INT >= 16) setExoViewSource(videoSource, autoplay);
-    else                             setVideoViewSource(videoSource, autoplay);
+    else setVideoViewSource(videoSource, autoplay);
   }
 
   public void pause() {
@@ -124,31 +119,34 @@ public class VideoPlayer extends FrameLayout {
   }
 
   private void setExoViewSource(@NonNull VideoSlide videoSource, boolean autoplay)
-      throws IOException
-  {
-    BandwidthMeter         bandwidthMeter             = new DefaultBandwidthMeter();
-    TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
-    TrackSelector          trackSelector              = new DefaultTrackSelector(videoTrackSelectionFactory);
-    LoadControl            loadControl                = new DefaultLoadControl();
+      throws IOException {
+    BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+    TrackSelection.Factory videoTrackSelectionFactory =
+        new AdaptiveTrackSelection.Factory(bandwidthMeter);
+    TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+    LoadControl loadControl = new DefaultLoadControl();
 
     exoPlayer = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, loadControl);
     exoPlayer.addListener(new ExoPlayerListener(window));
     //noinspection ConstantConditions
     exoView.setPlayer(exoPlayer);
 
-    DefaultDataSourceFactory    defaultDataSourceFactory    = new DefaultDataSourceFactory(getContext(), "GenericUserAgent", null);
-    AttachmentDataSourceFactory attachmentDataSourceFactory = new AttachmentDataSourceFactory(getContext(), defaultDataSourceFactory, null);
-    ExtractorsFactory           extractorsFactory           = new DefaultExtractorsFactory();
+    DefaultDataSourceFactory defaultDataSourceFactory =
+        new DefaultDataSourceFactory(getContext(), "GenericUserAgent", null);
+    AttachmentDataSourceFactory attachmentDataSourceFactory =
+        new AttachmentDataSourceFactory(getContext(), defaultDataSourceFactory, null);
+    ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
 
-    MediaSource mediaSource = new ExtractorMediaSource(videoSource.getUri(), attachmentDataSourceFactory, extractorsFactory, null, null);
+    MediaSource mediaSource =
+        new ExtractorMediaSource(
+            videoSource.getUri(), attachmentDataSourceFactory, extractorsFactory, null, null);
 
     exoPlayer.prepare(mediaSource);
     exoPlayer.setPlayWhenReady(autoplay);
   }
 
   private void setVideoViewSource(@NonNull VideoSlide videoSource, boolean autoplay)
-    throws IOException
-  {
+      throws IOException {
     if (this.attachmentServer != null) {
       this.attachmentServer.stop();
     }
@@ -165,7 +163,11 @@ public class VideoPlayer extends FrameLayout {
       //noinspection ConstantConditions
       this.videoView.setVideoURI(videoSource.getUri());
     } else {
-      Toast.makeText(getContext(), getContext().getString(R.string.VideoPlayer_error_playing_video), Toast.LENGTH_LONG).show();
+      Toast.makeText(
+              getContext(),
+              getContext().getString(R.string.VideoPlayer_error_playing_video),
+              Toast.LENGTH_LONG)
+          .show();
       return;
     }
 
@@ -189,7 +191,7 @@ public class VideoPlayer extends FrameLayout {
 
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-      switch(playbackState) {
+      switch (playbackState) {
         case ExoPlayer.STATE_IDLE:
         case ExoPlayer.STATE_BUFFERING:
         case ExoPlayer.STATE_ENDED:
@@ -208,18 +210,18 @@ public class VideoPlayer extends FrameLayout {
     }
 
     @Override
-    public void onTimelineChanged(Timeline timeline, Object manifest) { }
+    public void onTimelineChanged(Timeline timeline, Object manifest) {}
 
     @Override
-    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) { }
+    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {}
 
     @Override
-    public void onLoadingChanged(boolean isLoading) { }
+    public void onLoadingChanged(boolean isLoading) {}
 
     @Override
-    public void onPlayerError(ExoPlaybackException error) { }
+    public void onPlayerError(ExoPlaybackException error) {}
 
     @Override
-    public void onPositionDiscontinuity() { }
+    public void onPositionDiscontinuity() {}
   }
 }

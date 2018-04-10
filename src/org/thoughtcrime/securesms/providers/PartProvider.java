@@ -28,7 +28,10 @@ import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
 import android.util.Log;
-
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import org.thoughtcrime.securesms.attachments.AttachmentId;
 import org.thoughtcrime.securesms.attachments.DatabaseAttachment;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
@@ -37,18 +40,14 @@ import org.thoughtcrime.securesms.service.KeyCachingService;
 import org.thoughtcrime.securesms.util.MemoryFileUtil;
 import org.thoughtcrime.securesms.util.Util;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 public class PartProvider extends ContentProvider {
 
   private static final String TAG = PartProvider.class.getSimpleName();
 
-  private static final String CONTENT_URI_STRING = "content://org.thoughtcrime.provider.securesms/part";
-  private static final Uri    CONTENT_URI        = Uri.parse(CONTENT_URI_STRING);
-  private static final int    SINGLE_ROW         = 1;
+  private static final String CONTENT_URI_STRING =
+      "content://org.thoughtcrime.provider.securesms/part";
+  private static final Uri CONTENT_URI = Uri.parse(CONTENT_URI_STRING);
+  private static final int SINGLE_ROW = 1;
 
   private static final UriMatcher uriMatcher;
 
@@ -69,7 +68,8 @@ public class PartProvider extends ContentProvider {
   }
 
   @Override
-  public ParcelFileDescriptor openFile(@NonNull Uri uri, @NonNull String mode) throws FileNotFoundException {
+  public ParcelFileDescriptor openFile(@NonNull Uri uri, @NonNull String mode)
+      throws FileNotFoundException {
     Log.w(TAG, "openFile() called!");
 
     if (KeyCachingService.isLocked(getContext())) {
@@ -78,15 +78,15 @@ public class PartProvider extends ContentProvider {
     }
 
     switch (uriMatcher.match(uri)) {
-    case SINGLE_ROW:
-      Log.w(TAG, "Parting out a single row...");
-      try {
-        final PartUriParser partUri = new PartUriParser(uri);
-        return getParcelStreamForAttachment(partUri.getPartId());
-      } catch (IOException ioe) {
-        Log.w(TAG, ioe);
-        throw new FileNotFoundException("Error opening file");
-      }
+      case SINGLE_ROW:
+        Log.w(TAG, "Parting out a single row...");
+        try {
+          final PartUriParser partUri = new PartUriParser(uri);
+          return getParcelStreamForAttachment(partUri.getPartId());
+        } catch (IOException ioe) {
+          Log.w(TAG, ioe);
+          throw new FileNotFoundException("Error opening file");
+        }
     }
 
     throw new FileNotFoundException("Request for bad part.");
@@ -104,9 +104,10 @@ public class PartProvider extends ContentProvider {
 
     switch (uriMatcher.match(uri)) {
       case SINGLE_ROW:
-        PartUriParser      partUriParser = new PartUriParser(uri);
-        DatabaseAttachment attachment    = DatabaseFactory.getAttachmentDatabase(getContext())
-                                                          .getAttachment(partUriParser.getPartId());
+        PartUriParser partUriParser = new PartUriParser(uri);
+        DatabaseAttachment attachment =
+            DatabaseFactory.getAttachmentDatabase(getContext())
+                .getAttachment(partUriParser.getPartId());
 
         if (attachment != null) {
           return attachment.getContentType();
@@ -123,22 +124,28 @@ public class PartProvider extends ContentProvider {
   }
 
   @Override
-  public Cursor query(@NonNull Uri url, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+  public Cursor query(
+      @NonNull Uri url,
+      String[] projection,
+      String selection,
+      String[] selectionArgs,
+      String sortOrder) {
     Log.w(TAG, "query() called: " + url);
 
     if (projection == null || projection.length <= 0) return null;
 
     switch (uriMatcher.match(url)) {
       case SINGLE_ROW:
-        PartUriParser      partUri      = new PartUriParser(url);
-        DatabaseAttachment attachment   = DatabaseFactory.getAttachmentDatabase(getContext()).getAttachment(partUri.getPartId());
+        PartUriParser partUri = new PartUriParser(url);
+        DatabaseAttachment attachment =
+            DatabaseFactory.getAttachmentDatabase(getContext()).getAttachment(partUri.getPartId());
 
         if (attachment == null) return null;
 
-        MatrixCursor       matrixCursor = new MatrixCursor(projection, 1);
-        Object[]           resultRow    = new Object[projection.length];
+        MatrixCursor matrixCursor = new MatrixCursor(projection, 1);
+        Object[] resultRow = new Object[projection.length];
 
-        for (int i=0;i<projection.length;i++) {
+        for (int i = 0; i < projection.length; i++) {
           if (OpenableColumns.DISPLAY_NAME.equals(projection[i])) {
             resultRow[i] = attachment.getFileName();
           }
@@ -157,11 +164,17 @@ public class PartProvider extends ContentProvider {
     return 0;
   }
 
-  private ParcelFileDescriptor getParcelStreamForAttachment(AttachmentId attachmentId) throws IOException {
-    long       plaintextLength = Util.getStreamLength(DatabaseFactory.getAttachmentDatabase(getContext()).getAttachmentStream(attachmentId, 0));
-    MemoryFile memoryFile      = new MemoryFile(attachmentId.toString(), Util.toIntExact(plaintextLength));
+  private ParcelFileDescriptor getParcelStreamForAttachment(AttachmentId attachmentId)
+      throws IOException {
+    long plaintextLength =
+        Util.getStreamLength(
+            DatabaseFactory.getAttachmentDatabase(getContext())
+                .getAttachmentStream(attachmentId, 0));
+    MemoryFile memoryFile =
+        new MemoryFile(attachmentId.toString(), Util.toIntExact(plaintextLength));
 
-    InputStream  in  = DatabaseFactory.getAttachmentDatabase(getContext()).getAttachmentStream(attachmentId, 0);
+    InputStream in =
+        DatabaseFactory.getAttachmentDatabase(getContext()).getAttachmentStream(attachmentId, 0);
     OutputStream out = memoryFile.getOutputStream();
 
     Util.copy(in, out);

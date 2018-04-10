@@ -1,18 +1,16 @@
 /**
  * Copyright (C) 2015 Open Whisper Systems
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * <p>This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * <p>You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  */
 package org.thoughtcrime.securesms.mms;
 
@@ -21,26 +19,23 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
 import com.google.android.mms.InvalidHeaderValueException;
 import com.google.android.mms.pdu_alt.NotifyRespInd;
 import com.google.android.mms.pdu_alt.PduComposer;
 import com.google.android.mms.pdu_alt.PduHeaders;
 import com.google.android.mms.pdu_alt.PduParser;
 import com.google.android.mms.pdu_alt.RetrieveConf;
-
+import java.io.IOException;
+import java.util.Arrays;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGetHC4;
 import org.apache.http.client.methods.HttpUriRequest;
 
-import java.io.IOException;
-import java.util.Arrays;
-
-
 @SuppressWarnings("deprecation")
-public class IncomingLegacyMmsConnection extends LegacyMmsConnection implements IncomingMmsConnection {
+public class IncomingLegacyMmsConnection extends LegacyMmsConnection
+    implements IncomingMmsConnection {
   private static final String TAG = IncomingLegacyMmsConnection.class.getSimpleName();
 
   public IncomingLegacyMmsConnection(Context context) throws ApnUnavailableException {
@@ -70,12 +65,17 @@ public class IncomingLegacyMmsConnection extends LegacyMmsConnection implements 
   }
 
   @Override
-  public @Nullable RetrieveConf retrieve(@NonNull String contentLocation,
-                                         byte[] transactionId, int subscriptionId)
-      throws MmsRadioException, ApnUnavailableException, IOException
-  {
+  public @Nullable RetrieveConf retrieve(
+      @NonNull String contentLocation, byte[] transactionId, int subscriptionId)
+      throws MmsRadioException, ApnUnavailableException, IOException {
     MmsRadio radio = MmsRadio.getInstance(context);
-    Apn contentApn = new Apn(contentLocation, apn.getProxy(), Integer.toString(apn.getPort()), apn.getUsername(), apn.getPassword());
+    Apn contentApn =
+        new Apn(
+            contentLocation,
+            apn.getProxy(),
+            Integer.toString(apn.getPort()),
+            apn.getUsername(),
+            apn.getPassword());
 
     if (isDirectConnect()) {
       Log.w(TAG, "Connecting directly...");
@@ -107,15 +107,14 @@ public class IncomingLegacyMmsConnection extends LegacyMmsConnection implements 
     }
   }
 
-  public RetrieveConf retrieve(Apn contentApn, byte[] transactionId, boolean usingMmsRadio, boolean useProxyIfAvailable)
-      throws IOException, ApnUnavailableException
-  {
+  public RetrieveConf retrieve(
+      Apn contentApn, byte[] transactionId, boolean usingMmsRadio, boolean useProxyIfAvailable)
+      throws IOException, ApnUnavailableException {
     byte[] pdu = null;
 
-    final boolean useProxy   = useProxyIfAvailable && contentApn.hasProxy();
-    final String  targetHost = useProxy
-                             ? contentApn.getProxy()
-                             : Uri.parse(contentApn.getMmsc()).getHost();
+    final boolean useProxy = useProxyIfAvailable && contentApn.hasProxy();
+    final String targetHost =
+        useProxy ? contentApn.getProxy() : Uri.parse(contentApn.getMmsc()).getHost();
     if (checkRouteToHost(context, targetHost, usingMmsRadio)) {
       Log.w(TAG, "got successful route to host " + targetHost);
       pdu = execute(constructRequest(contentApn, useProxy));
@@ -125,7 +124,7 @@ public class IncomingLegacyMmsConnection extends LegacyMmsConnection implements 
       throw new IOException("Connection manager could not obtain route to host.");
     }
 
-    RetrieveConf retrieved = (RetrieveConf)new PduParser(pdu).parse();
+    RetrieveConf retrieved = (RetrieveConf) new PduParser(pdu).parse();
 
     if (retrieved == null) {
       Log.w(TAG, "Couldn't parse PDU, byte response: " + Arrays.toString(pdu));
@@ -137,18 +136,16 @@ public class IncomingLegacyMmsConnection extends LegacyMmsConnection implements 
     return retrieved;
   }
 
-  private void sendRetrievedAcknowledgement(byte[] transactionId,
-                                            boolean usingRadio,
-                                            boolean useProxy)
-      throws ApnUnavailableException
-  {
+  private void sendRetrievedAcknowledgement(
+      byte[] transactionId, boolean usingRadio, boolean useProxy) throws ApnUnavailableException {
     try {
-      NotifyRespInd notifyResponse = new NotifyRespInd(PduHeaders.CURRENT_MMS_VERSION,
-                                                       transactionId,
-                                                       PduHeaders.STATUS_RETRIEVED);
+      NotifyRespInd notifyResponse =
+          new NotifyRespInd(
+              PduHeaders.CURRENT_MMS_VERSION, transactionId, PduHeaders.STATUS_RETRIEVED);
 
       OutgoingLegacyMmsConnection connection = new OutgoingLegacyMmsConnection(context);
-      connection.sendNotificationReceived(new PduComposer(context, notifyResponse).make(), usingRadio, useProxy);
+      connection.sendNotificationReceived(
+          new PduComposer(context, notifyResponse).make(), usingRadio, useProxy);
     } catch (InvalidHeaderValueException | IOException e) {
       Log.w(TAG, e);
     }

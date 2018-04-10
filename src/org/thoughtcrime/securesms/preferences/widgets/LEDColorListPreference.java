@@ -1,18 +1,16 @@
 /**
  * Copyright (C) 2017 Whisper Systems
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * <p>This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * <p>You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  */
 package org.thoughtcrime.securesms.preferences.widgets;
 
@@ -23,7 +21,6 @@ import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.PreferenceViewHolder;
 import android.util.AttributeSet;
 import android.widget.ImageView;
-
 import org.thoughtcrime.securesms.R;
 
 /**
@@ -31,7 +28,6 @@ import org.thoughtcrime.securesms.R;
  *
  * @author Taylor Kline
  */
-
 public class LEDColorListPreference extends ListPreference {
 
   private static final String TAG = LEDColorListPreference.class.getSimpleName();
@@ -70,7 +66,7 @@ public class LEDColorListPreference extends ListPreference {
   @Override
   public void onBindViewHolder(PreferenceViewHolder view) {
     super.onBindViewHolder(view);
-    this.colorImageView = (ImageView)view.findViewById(R.id.color_view);
+    this.colorImageView = (ImageView) view.findViewById(R.id.color_view);
     setPreviewColor(getValue());
   }
 
@@ -83,14 +79,30 @@ public class LEDColorListPreference extends ListPreference {
     int color;
 
     switch (value) {
-      case "green":   color = getContext().getResources().getColor(R.color.green_500);   break;
-      case "red":     color = getContext().getResources().getColor(R.color.red_500);     break;
-      case "blue":    color = getContext().getResources().getColor(R.color.blue_500);    break;
-      case "yellow":  color = getContext().getResources().getColor(R.color.yellow_500);  break;
-      case "cyan":    color = getContext().getResources().getColor(R.color.cyan_500);    break;
-      case "magenta": color = getContext().getResources().getColor(R.color.pink_500);    break;
-      case "white":   color = getContext().getResources().getColor(R.color.white);       break;
-      default:        color = getContext().getResources().getColor(R.color.transparent); break;
+      case "green":
+        color = getContext().getResources().getColor(R.color.green_500);
+        break;
+      case "red":
+        color = getContext().getResources().getColor(R.color.red_500);
+        break;
+      case "blue":
+        color = getContext().getResources().getColor(R.color.blue_500);
+        break;
+      case "yellow":
+        color = getContext().getResources().getColor(R.color.yellow_500);
+        break;
+      case "cyan":
+        color = getContext().getResources().getColor(R.color.cyan_500);
+        break;
+      case "magenta":
+        color = getContext().getResources().getColor(R.color.pink_500);
+        break;
+      case "white":
+        color = getContext().getResources().getColor(R.color.white);
+        break;
+      default:
+        color = getContext().getResources().getColor(R.color.transparent);
+        break;
     }
 
     if (colorImageView != null) {
@@ -101,7 +113,4 @@ public class LEDColorListPreference extends ListPreference {
       colorImageView.setImageDrawable(drawable);
     }
   }
-
-
-
 }

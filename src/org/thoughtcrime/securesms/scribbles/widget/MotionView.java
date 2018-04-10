@@ -1,23 +1,20 @@
 /**
  * Copyright (c) 2016 UPTech
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
+ * <p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * <p>The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+ * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package org.thoughtcrime.securesms.scribbles.widget;
 
@@ -48,17 +45,15 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-
+import java.util.ArrayList;
+import java.util.List;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.scribbles.multitouch.MoveGestureDetector;
 import org.thoughtcrime.securesms.scribbles.multitouch.RotateGestureDetector;
 import org.thoughtcrime.securesms.scribbles.widget.entity.MotionEntity;
 import org.thoughtcrime.securesms.scribbles.widget.entity.TextEntity;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class MotionView  extends FrameLayout implements TextWatcher {
+public class MotionView extends FrameLayout implements TextWatcher {
 
   private static final String TAG = MotionView.class.getSimpleName();
 
@@ -68,19 +63,18 @@ public class MotionView  extends FrameLayout implements TextWatcher {
 
   public interface MotionViewCallback {
     void onEntitySelected(@Nullable MotionEntity entity);
+
     void onEntityDoubleTap(@NonNull MotionEntity entity);
   }
 
   // layers
   private final List<MotionEntity> entities = new ArrayList<>();
-  @Nullable
-  private MotionEntity selectedEntity;
+  @Nullable private MotionEntity selectedEntity;
 
   private Paint selectedLayerPaint;
 
   // callback
-  @Nullable
-  private MotionViewCallback motionViewCallback;
+  @Nullable private MotionViewCallback motionViewCallback;
 
   private EditText editText;
 
@@ -127,7 +121,10 @@ public class MotionView  extends FrameLayout implements TextWatcher {
     this.editText.setClickable(false);
     this.editText.setBackgroundColor(Color.TRANSPARENT);
     this.editText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 1);
-    this.editText.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+    this.editText.setInputType(
+        InputType.TYPE_TEXT_FLAG_MULTI_LINE
+            | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
     this.addView(editText);
     this.editText.clearFocus();
     this.editText.addTextChangedListener(this);
@@ -150,7 +147,8 @@ public class MotionView  extends FrameLayout implements TextWatcher {
     editText.setText(entity.getLayer().getText());
     Selection.setSelection(editText.getText(), editText.length());
 
-    InputMethodManager ims = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+    InputMethodManager ims =
+        (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
     ims.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
   }
 
@@ -182,7 +180,7 @@ public class MotionView  extends FrameLayout implements TextWatcher {
     }
   }
 
-  private void initEntityBorder(@NonNull MotionEntity entity ) {
+  private void initEntityBorder(@NonNull MotionEntity entity) {
     // init stroke
     int strokeSize = getResources().getDimensionPixelSize(R.dimen.scribble_stroke_size);
     Paint borderPaint = new Paint();
@@ -198,7 +196,8 @@ public class MotionView  extends FrameLayout implements TextWatcher {
     super.dispatchDraw(canvas);
 
     // dispatch draw is called after child views is drawn.
-    // the idea that is we draw background stickers, than child views (if any), and than selected item
+    // the idea that is we draw background stickers, than child views (if any), and than selected
+    // item
     // to draw on top of child views - do it in dispatchDraw(Canvas)
     // to draw below that - do it in onDraw(Canvas)
     if (selectedEntity != null) {
@@ -219,6 +218,7 @@ public class MotionView  extends FrameLayout implements TextWatcher {
 
   /**
    * draws all entities on the canvas
+   *
    * @param canvas Canvas where to draw all entities
    */
   private void drawAllEntities(Canvas canvas) {
@@ -229,6 +229,7 @@ public class MotionView  extends FrameLayout implements TextWatcher {
 
   /**
    * as a side effect - the method deselects Entity (if any selected)
+   *
    * @return bitmap with all the Entities at their current positions
    */
   public Bitmap getThumbnailImage() {
@@ -281,10 +282,10 @@ public class MotionView  extends FrameLayout implements TextWatcher {
         editText.clearComposingText();
         editText.clearFocus();
 
-        InputMethodManager imm = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm =
+            (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
       }
-
     }
     if (entity != null) {
       entity.setIsSelected(true);
@@ -380,19 +381,20 @@ public class MotionView  extends FrameLayout implements TextWatcher {
 
   // gesture detectors
 
-  private final View.OnTouchListener onTouchListener = new View.OnTouchListener() {
+  private final View.OnTouchListener onTouchListener =
+      new View.OnTouchListener() {
 
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-      if (scaleGestureDetector != null) {
-        scaleGestureDetector.onTouchEvent(event);
-        rotateGestureDetector.onTouchEvent(event);
-        moveGestureDetector.onTouchEvent(event);
-        gestureDetectorCompat.onTouchEvent(event);
-      }
-      return true;
-    }
-  };
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+          if (scaleGestureDetector != null) {
+            scaleGestureDetector.onTouchEvent(event);
+            rotateGestureDetector.onTouchEvent(event);
+            moveGestureDetector.onTouchEvent(event);
+            gestureDetectorCompat.onTouchEvent(event);
+          }
+          return true;
+        }
+      };
 
   private class TapsListener extends GestureDetector.SimpleOnGestureListener {
     @Override
@@ -456,11 +458,11 @@ public class MotionView  extends FrameLayout implements TextWatcher {
 
   @Override
   public void afterTextChanged(Editable s) {
-    String       text   = s.toString();
+    String text = s.toString();
     MotionEntity entity = getSelectedEntity();
 
     if (entity != null && entity instanceof TextEntity) {
-      TextEntity textEntity = (TextEntity)entity;
+      TextEntity textEntity = (TextEntity) entity;
 
       if (!textEntity.getLayer().getText().equals(text)) {
         textEntity.getLayer().setText(text);
@@ -469,5 +471,4 @@ public class MotionView  extends FrameLayout implements TextWatcher {
       }
     }
   }
-
 }

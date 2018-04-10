@@ -18,7 +18,7 @@ package org.thoughtcrime.securesms.database.model;
 
 import android.content.Context;
 import android.text.SpannableString;
-
+import java.util.LinkedList;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.database.MmsDatabase;
 import org.thoughtcrime.securesms.database.SmsDatabase.Status;
@@ -27,41 +27,65 @@ import org.thoughtcrime.securesms.database.documents.NetworkFailure;
 import org.thoughtcrime.securesms.mms.SlideDeck;
 import org.thoughtcrime.securesms.recipients.Recipient;
 
-import java.util.LinkedList;
-
 /**
- * Represents the message record model for MMS messages that are
- * notifications (ie: they're pointers to undownloaded media).
+ * Represents the message record model for MMS messages that are notifications (ie: they're pointers
+ * to undownloaded media).
  *
  * @author Moxie Marlinspike
- *
  */
-
 public class NotificationMmsMessageRecord extends MmsMessageRecord {
 
   private final byte[] contentLocation;
-  private final long   messageSize;
-  private final long   expiry;
-  private final int    status;
+  private final long messageSize;
+  private final long expiry;
+  private final int status;
   private final byte[] transactionId;
 
-  public NotificationMmsMessageRecord(Context context, long id, Recipient conversationRecipient,
-                                      Recipient individualRecipient, int recipientDeviceId,
-                                      long dateSent, long dateReceived, int deliveryReceiptCount,
-                                      long threadId, byte[] contentLocation, long messageSize,
-                                      long expiry, int status, byte[] transactionId, long mailbox,
-                                      int subscriptionId, SlideDeck slideDeck, int readReceiptCount)
-  {
-    super(context, id, "", conversationRecipient, individualRecipient, recipientDeviceId,
-          dateSent, dateReceived, threadId, Status.STATUS_NONE, deliveryReceiptCount, mailbox,
-          new LinkedList<IdentityKeyMismatch>(), new LinkedList<NetworkFailure>(), subscriptionId,
-          0, 0, slideDeck, readReceiptCount);
+  public NotificationMmsMessageRecord(
+      Context context,
+      long id,
+      Recipient conversationRecipient,
+      Recipient individualRecipient,
+      int recipientDeviceId,
+      long dateSent,
+      long dateReceived,
+      int deliveryReceiptCount,
+      long threadId,
+      byte[] contentLocation,
+      long messageSize,
+      long expiry,
+      int status,
+      byte[] transactionId,
+      long mailbox,
+      int subscriptionId,
+      SlideDeck slideDeck,
+      int readReceiptCount) {
+    super(
+        context,
+        id,
+        "",
+        conversationRecipient,
+        individualRecipient,
+        recipientDeviceId,
+        dateSent,
+        dateReceived,
+        threadId,
+        Status.STATUS_NONE,
+        deliveryReceiptCount,
+        mailbox,
+        new LinkedList<IdentityKeyMismatch>(),
+        new LinkedList<NetworkFailure>(),
+        subscriptionId,
+        0,
+        0,
+        slideDeck,
+        readReceiptCount);
 
     this.contentLocation = contentLocation;
-    this.messageSize     = messageSize;
-    this.expiry          = expiry;
-    this.status          = status;
-    this.transactionId   = transactionId;
+    this.messageSize = messageSize;
+    this.expiry = expiry;
+    this.status = status;
+    this.transactionId = transactionId;
   }
 
   public byte[] getTransactionId() {
@@ -112,11 +136,14 @@ public class NotificationMmsMessageRecord extends MmsMessageRecord {
   @Override
   public SpannableString getDisplayBody() {
     if (status == MmsDatabase.Status.DOWNLOAD_INITIALIZED) {
-      return emphasisAdded(context.getString(R.string.NotificationMmsMessageRecord_multimedia_message));
+      return emphasisAdded(
+          context.getString(R.string.NotificationMmsMessageRecord_multimedia_message));
     } else if (status == MmsDatabase.Status.DOWNLOAD_CONNECTING) {
-      return emphasisAdded(context.getString(R.string.NotificationMmsMessageRecord_downloading_mms_message));
+      return emphasisAdded(
+          context.getString(R.string.NotificationMmsMessageRecord_downloading_mms_message));
     } else {
-      return emphasisAdded(context.getString(R.string.NotificationMmsMessageRecord_error_downloading_mms_message));
+      return emphasisAdded(
+          context.getString(R.string.NotificationMmsMessageRecord_error_downloading_mms_message));
     }
   }
 }

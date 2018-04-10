@@ -1,21 +1,5 @@
 package org.thoughtcrime.securesms;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Handler;
-import android.os.Looper;
-import android.preference.PreferenceManager;
-import android.text.TextUtils;
-import android.util.Log;
-
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyFloat;
@@ -26,11 +10,26 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.Looper;
+import android.preference.PreferenceManager;
+import android.text.TextUtils;
+import android.util.Log;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ Log.class, Handler.class, Looper.class, TextUtils.class, PreferenceManager.class })
+@PrepareForTest({Log.class, Handler.class, Looper.class, TextUtils.class, PreferenceManager.class})
 public abstract class BaseUnitTest {
 
-  protected Context           context           = mock(Context.class);
+  protected Context context = mock(Context.class);
   protected SharedPreferences sharedPreferences = mock(SharedPreferences.class);
 
   @Before
@@ -41,31 +40,37 @@ public abstract class BaseUnitTest {
     mockStatic(TextUtils.class);
     mockStatic(PreferenceManager.class);
 
-    when(PreferenceManager.getDefaultSharedPreferences(any(Context.class))).thenReturn(sharedPreferences);
+    when(PreferenceManager.getDefaultSharedPreferences(any(Context.class)))
+        .thenReturn(sharedPreferences);
     when(Looper.getMainLooper()).thenReturn(null);
     PowerMockito.whenNew(Handler.class).withAnyArguments().thenReturn(null);
 
-    Answer<?> logAnswer = new Answer<Void>() {
-      @Override public Void answer(InvocationOnMock invocation) throws Throwable {
-        final String tag = (String)invocation.getArguments()[0];
-        final String msg = (String)invocation.getArguments()[1];
-        System.out.println(invocation.getMethod().getName().toUpperCase() + "/[" + tag + "] " + msg);
-        return null;
-      }
-    };
+    Answer<?> logAnswer =
+        new Answer<Void>() {
+          @Override
+          public Void answer(InvocationOnMock invocation) throws Throwable {
+            final String tag = (String) invocation.getArguments()[0];
+            final String msg = (String) invocation.getArguments()[1];
+            System.out.println(
+                invocation.getMethod().getName().toUpperCase() + "/[" + tag + "] " + msg);
+            return null;
+          }
+        };
     PowerMockito.doAnswer(logAnswer).when(Log.class, "d", anyString(), anyString());
     PowerMockito.doAnswer(logAnswer).when(Log.class, "i", anyString(), anyString());
     PowerMockito.doAnswer(logAnswer).when(Log.class, "w", anyString(), anyString());
     PowerMockito.doAnswer(logAnswer).when(Log.class, "e", anyString(), anyString());
     PowerMockito.doAnswer(logAnswer).when(Log.class, "wtf", anyString(), anyString());
 
-    PowerMockito.doAnswer(new Answer<Boolean>() {
-      @Override
-      public Boolean answer(InvocationOnMock invocation) throws Throwable {
-        final String s = (String)invocation.getArguments()[0];
-        return s == null || s.length() == 0;
-      }
-    }).when(TextUtils.class, "isEmpty", anyString());
+    PowerMockito.doAnswer(
+            new Answer<Boolean>() {
+              @Override
+              public Boolean answer(InvocationOnMock invocation) throws Throwable {
+                final String s = (String) invocation.getArguments()[0];
+                return s == null || s.length() == 0;
+              }
+            })
+        .when(TextUtils.class, "isEmpty", anyString());
 
     when(sharedPreferences.getString(anyString(), anyString())).thenReturn("");
     when(sharedPreferences.getLong(anyString(), anyLong())).thenReturn(0L);

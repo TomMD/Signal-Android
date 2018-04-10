@@ -1,16 +1,13 @@
 package org.thoughtcrime.securesms.service;
 
-
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-
+import java.util.concurrent.TimeUnit;
 import org.thoughtcrime.securesms.ApplicationContext;
 import org.thoughtcrime.securesms.BuildConfig;
 import org.thoughtcrime.securesms.jobs.UpdateApkJob;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
-
-import java.util.concurrent.TimeUnit;
 
 public class UpdateApkRefreshListener extends PersistentAlarmManagerListener {
 
@@ -29,9 +26,7 @@ public class UpdateApkRefreshListener extends PersistentAlarmManagerListener {
 
     if (scheduledTime != 0 && BuildConfig.PLAY_STORE_DISABLED) {
       Log.w(TAG, "Queueing APK update job...");
-      ApplicationContext.getInstance(context)
-                        .getJobManager()
-                        .add(new UpdateApkJob(context));
+      ApplicationContext.getInstance(context).getJobManager().add(new UpdateApkJob(context));
     }
 
     long newTime = System.currentTimeMillis() + INTERVAL;
@@ -43,5 +38,4 @@ public class UpdateApkRefreshListener extends PersistentAlarmManagerListener {
   public static void schedule(Context context) {
     new UpdateApkRefreshListener().onReceive(context, new Intent());
   }
-
 }

@@ -1,9 +1,9 @@
 package org.thoughtcrime.securesms.jobs;
 
-
 import android.content.Context;
 import android.util.Log;
-
+import java.io.IOException;
+import javax.inject.Inject;
 import org.thoughtcrime.securesms.database.Address;
 import org.thoughtcrime.securesms.database.IdentityDatabase.VerifiedStatus;
 import org.thoughtcrime.securesms.dependencies.InjectableType;
@@ -18,35 +18,36 @@ import org.whispersystems.signalservice.api.messages.multidevice.SignalServiceSy
 import org.whispersystems.signalservice.api.messages.multidevice.VerifiedMessage;
 import org.whispersystems.signalservice.api.push.exceptions.PushNetworkException;
 
-import java.io.IOException;
-
-import javax.inject.Inject;
-
 public class MultiDeviceVerifiedUpdateJob extends ContextJob implements InjectableType {
 
   private static final long serialVersionUID = 1L;
 
   private static final String TAG = MultiDeviceVerifiedUpdateJob.class.getSimpleName();
 
-  @Inject
-  transient SignalServiceMessageSender messageSender;
+  @Inject transient SignalServiceMessageSender messageSender;
 
-  private final String         destination;
-  private final byte[]         identityKey;
+  private final String destination;
+  private final byte[] identityKey;
   private final VerifiedStatus verifiedStatus;
-  private final long           timestamp;
+  private final long timestamp;
 
-  public MultiDeviceVerifiedUpdateJob(Context context, Address destination, IdentityKey identityKey, VerifiedStatus verifiedStatus) {
-    super(context, JobParameters.newBuilder()
-                                .withRequirement(new NetworkRequirement(context))
-                                .withPersistence()
-                                .withGroupId("__MULTI_DEVICE_VERIFIED_UPDATE__")
-                                .create());
+  public MultiDeviceVerifiedUpdateJob(
+      Context context,
+      Address destination,
+      IdentityKey identityKey,
+      VerifiedStatus verifiedStatus) {
+    super(
+        context,
+        JobParameters.newBuilder()
+            .withRequirement(new NetworkRequirement(context))
+            .withPersistence()
+            .withGroupId("__MULTI_DEVICE_VERIFIED_UPDATE__")
+            .create());
 
-    this.destination    = destination.serialize();
-    this.identityKey    = identityKey.serialize();
+    this.destination = destination.serialize();
+    this.identityKey = identityKey.serialize();
     this.verifiedStatus = verifiedStatus;
-    this.timestamp      = System.currentTimeMillis();
+    this.timestamp = System.currentTimeMillis();
   }
 
   @Override
@@ -62,9 +63,14 @@ public class MultiDeviceVerifiedUpdateJob extends ContextJob implements Injectab
         return;
       }
 
-      Address                       canonicalDestination = Address.fromSerialized(destination);
-      VerifiedMessage.VerifiedState verifiedState        = getVerifiedState(verifiedStatus);
-      VerifiedMessage               verifiedMessage      = new VerifiedMessage(canonicalDestination.toPhoneString(), new IdentityKey(identityKey, 0), verifiedState, timestamp);
+      Address canonicalDestination = Address.fromSerialized(destination);
+      VerifiedMessage.VerifiedState verifiedState = getVerifiedState(verifiedStatus);
+      VerifiedMessage verifiedMessage =
+          new VerifiedMessage(
+              canonicalDestination.toPhoneString(),
+              new IdentityKey(identityKey, 0),
+              verifiedState,
+              timestamp);
 
       messageSender.sendMessage(SignalServiceSyncMessage.forVerified(verifiedMessage));
     } catch (InvalidKeyException e) {
@@ -76,10 +82,17 @@ public class MultiDeviceVerifiedUpdateJob extends ContextJob implements Injectab
     VerifiedMessage.VerifiedState verifiedState;
 
     switch (status) {
-      case DEFAULT:    verifiedState = VerifiedMessage.VerifiedState.DEFAULT;    break;
-      case VERIFIED:   verifiedState = VerifiedMessage.VerifiedState.VERIFIED;   break;
-      case UNVERIFIED: verifiedState = VerifiedMessage.VerifiedState.UNVERIFIED; break;
-      default: throw new AssertionError("Unknown status: " + verifiedStatus);
+      case DEFAULT:
+        verifiedState = VerifiedMessage.VerifiedState.DEFAULT;
+        break;
+      case VERIFIED:
+        verifiedState = VerifiedMessage.VerifiedState.VERIFIED;
+        break;
+      case UNVERIFIED:
+        verifiedState = VerifiedMessage.VerifiedState.UNVERIFIED;
+        break;
+      default:
+        throw new AssertionError("Unknown status: " + verifiedStatus);
     }
 
     return verifiedState;
@@ -91,12 +104,8 @@ public class MultiDeviceVerifiedUpdateJob extends ContextJob implements Injectab
   }
 
   @Override
-  public void onAdded() {
-
-  }
+  public void onAdded() {}
 
   @Override
-  public void onCanceled() {
-
-  }
+  public void onCanceled() {}
 }

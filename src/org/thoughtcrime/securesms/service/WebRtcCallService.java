@@ -1,5 +1,9 @@
 package org.thoughtcrime.securesms.service;
 
+import static org.thoughtcrime.securesms.webrtc.CallNotificationBuilder.TYPE_ESTABLISHED;
+import static org.thoughtcrime.securesms.webrtc.CallNotificationBuilder.TYPE_INCOMING_CONNECTING;
+import static org.thoughtcrime.securesms.webrtc.CallNotificationBuilder.TYPE_INCOMING_RINGING;
+import static org.thoughtcrime.securesms.webrtc.CallNotificationBuilder.TYPE_OUTGOING_RINGING;
 
 import android.Manifest;
 import android.app.Service;
@@ -21,16 +25,26 @@ import android.support.annotation.WorkerThread;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Pair;
-
 import com.google.protobuf.InvalidProtocolBufferException;
-
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import javax.inject.Inject;
 import org.greenrobot.eventbus.EventBus;
 import org.thoughtcrime.securesms.ApplicationContext;
 import org.thoughtcrime.securesms.WebRtcCallActivity;
 import org.thoughtcrime.securesms.contacts.ContactAccessor;
 import org.thoughtcrime.securesms.database.Address;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
-import org.thoughtcrime.securesms.database.RecipientDatabase;
 import org.thoughtcrime.securesms.database.RecipientDatabase.VibrateState;
 import org.thoughtcrime.securesms.dependencies.InjectableType;
 import org.thoughtcrime.securesms.events.WebRtcViewModel;
@@ -84,101 +98,90 @@ import org.whispersystems.signalservice.api.push.SignalServiceAddress;
 import org.whispersystems.signalservice.api.push.exceptions.UnregisteredUserException;
 import org.whispersystems.signalservice.internal.util.concurrent.SettableFuture;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
-import javax.inject.Inject;
-
-import static org.thoughtcrime.securesms.webrtc.CallNotificationBuilder.TYPE_ESTABLISHED;
-import static org.thoughtcrime.securesms.webrtc.CallNotificationBuilder.TYPE_INCOMING_CONNECTING;
-import static org.thoughtcrime.securesms.webrtc.CallNotificationBuilder.TYPE_INCOMING_RINGING;
-import static org.thoughtcrime.securesms.webrtc.CallNotificationBuilder.TYPE_OUTGOING_RINGING;
-
-public class WebRtcCallService extends Service implements InjectableType, PeerConnection.Observer, DataChannel.Observer, BluetoothStateManager.BluetoothStateListener {
+public class WebRtcCallService extends Service
+    implements InjectableType,
+        PeerConnection.Observer,
+        DataChannel.Observer,
+        BluetoothStateManager.BluetoothStateListener {
 
   private static final String TAG = WebRtcCallService.class.getSimpleName();
 
   private enum CallState {
-    STATE_IDLE, STATE_DIALING, STATE_ANSWERING, STATE_REMOTE_RINGING, STATE_LOCAL_RINGING, STATE_CONNECTED
+    STATE_IDLE,
+    STATE_DIALING,
+    STATE_ANSWERING,
+    STATE_REMOTE_RINGING,
+    STATE_LOCAL_RINGING,
+    STATE_CONNECTED
   }
 
   private static final String DATA_CHANNEL_NAME = "signaling";
 
-  public static final String EXTRA_REMOTE_ADDRESS     = "remote_address";
-  public static final String EXTRA_MUTE               = "mute_value";
-  public static final String EXTRA_AVAILABLE          = "enabled_value";
+  public static final String EXTRA_REMOTE_ADDRESS = "remote_address";
+  public static final String EXTRA_MUTE = "mute_value";
+  public static final String EXTRA_AVAILABLE = "enabled_value";
   public static final String EXTRA_REMOTE_DESCRIPTION = "remote_description";
-  public static final String EXTRA_TIMESTAMP          = "timestamp";
-  public static final String EXTRA_CALL_ID            = "call_id";
-  public static final String EXTRA_ICE_SDP            = "ice_sdp";
-  public static final String EXTRA_ICE_SDP_MID        = "ice_sdp_mid";
+  public static final String EXTRA_TIMESTAMP = "timestamp";
+  public static final String EXTRA_CALL_ID = "call_id";
+  public static final String EXTRA_ICE_SDP = "ice_sdp";
+  public static final String EXTRA_ICE_SDP_MID = "ice_sdp_mid";
   public static final String EXTRA_ICE_SDP_LINE_INDEX = "ice_sdp_line_index";
-  public static final String EXTRA_RESULT_RECEIVER    = "result_receiver";
+  public static final String EXTRA_RESULT_RECEIVER = "result_receiver";
 
-  public static final String ACTION_INCOMING_CALL        = "CALL_INCOMING";
-  public static final String ACTION_OUTGOING_CALL        = "CALL_OUTGOING";
-  public static final String ACTION_ANSWER_CALL          = "ANSWER_CALL";
-  public static final String ACTION_DENY_CALL            = "DENY_CALL";
-  public static final String ACTION_LOCAL_HANGUP         = "LOCAL_HANGUP";
-  public static final String ACTION_SET_MUTE_AUDIO       = "SET_MUTE_AUDIO";
-  public static final String ACTION_SET_MUTE_VIDEO       = "SET_MUTE_VIDEO";
-  public static final String ACTION_BLUETOOTH_CHANGE     = "BLUETOOTH_CHANGE";
+  public static final String ACTION_INCOMING_CALL = "CALL_INCOMING";
+  public static final String ACTION_OUTGOING_CALL = "CALL_OUTGOING";
+  public static final String ACTION_ANSWER_CALL = "ANSWER_CALL";
+  public static final String ACTION_DENY_CALL = "DENY_CALL";
+  public static final String ACTION_LOCAL_HANGUP = "LOCAL_HANGUP";
+  public static final String ACTION_SET_MUTE_AUDIO = "SET_MUTE_AUDIO";
+  public static final String ACTION_SET_MUTE_VIDEO = "SET_MUTE_VIDEO";
+  public static final String ACTION_BLUETOOTH_CHANGE = "BLUETOOTH_CHANGE";
   public static final String ACTION_WIRED_HEADSET_CHANGE = "WIRED_HEADSET_CHANGE";
-  public static final String ACTION_SCREEN_OFF           = "SCREEN_OFF";
-  public static final String ACTION_CHECK_TIMEOUT        = "CHECK_TIMEOUT";
-  public static final String ACTION_IS_IN_CALL_QUERY     = "IS_IN_CALL";
+  public static final String ACTION_SCREEN_OFF = "SCREEN_OFF";
+  public static final String ACTION_CHECK_TIMEOUT = "CHECK_TIMEOUT";
+  public static final String ACTION_IS_IN_CALL_QUERY = "IS_IN_CALL";
 
-  public static final String ACTION_RESPONSE_MESSAGE  = "RESPONSE_MESSAGE";
-  public static final String ACTION_ICE_MESSAGE       = "ICE_MESSAGE";
-  public static final String ACTION_ICE_CANDIDATE     = "ICE_CANDIDATE";
-  public static final String ACTION_CALL_CONNECTED    = "CALL_CONNECTED";
-  public static final String ACTION_REMOTE_HANGUP     = "REMOTE_HANGUP";
-  public static final String ACTION_REMOTE_BUSY       = "REMOTE_BUSY";
+  public static final String ACTION_RESPONSE_MESSAGE = "RESPONSE_MESSAGE";
+  public static final String ACTION_ICE_MESSAGE = "ICE_MESSAGE";
+  public static final String ACTION_ICE_CANDIDATE = "ICE_CANDIDATE";
+  public static final String ACTION_CALL_CONNECTED = "CALL_CONNECTED";
+  public static final String ACTION_REMOTE_HANGUP = "REMOTE_HANGUP";
+  public static final String ACTION_REMOTE_BUSY = "REMOTE_BUSY";
   public static final String ACTION_REMOTE_VIDEO_MUTE = "REMOTE_VIDEO_MUTE";
-  public static final String ACTION_ICE_CONNECTED     = "ICE_CONNECTED";
+  public static final String ACTION_ICE_CONNECTED = "ICE_CONNECTED";
 
-  private CallState callState          = CallState.STATE_IDLE;
-  private boolean   microphoneEnabled  = true;
-  private boolean   localVideoEnabled  = false;
-  private boolean   remoteVideoEnabled = false;
-  private boolean   bluetoothAvailable = false;
+  private CallState callState = CallState.STATE_IDLE;
+  private boolean microphoneEnabled = true;
+  private boolean localVideoEnabled = false;
+  private boolean remoteVideoEnabled = false;
+  private boolean bluetoothAvailable = false;
 
-  @Inject public SignalServiceMessageSender  messageSender;
+  @Inject public SignalServiceMessageSender messageSender;
   @Inject public SignalServiceAccountManager accountManager;
 
-  private PeerConnectionFactory      peerConnectionFactory;
-  private SignalAudioManager         audioManager;
-  private BluetoothStateManager      bluetoothStateManager;
-  private WiredHeadsetStateReceiver  wiredHeadsetStateReceiver;
-  private PowerButtonReceiver        powerButtonReceiver;
-  private LockManager                lockManager;
+  private PeerConnectionFactory peerConnectionFactory;
+  private SignalAudioManager audioManager;
+  private BluetoothStateManager bluetoothStateManager;
+  private WiredHeadsetStateReceiver wiredHeadsetStateReceiver;
+  private PowerButtonReceiver powerButtonReceiver;
+  private LockManager lockManager;
 
-  private IncomingPstnCallReceiver        callReceiver;
+  private IncomingPstnCallReceiver callReceiver;
   private UncaughtExceptionHandlerManager uncaughtExceptionHandlerManager;
 
-  @Nullable private Long                   callId;
-  @Nullable private Recipient              recipient;
-  @Nullable private PeerConnectionWrapper  peerConnection;
-  @Nullable private DataChannel            dataChannel;
+  @Nullable private Long callId;
+  @Nullable private Recipient recipient;
+  @Nullable private PeerConnectionWrapper peerConnection;
+  @Nullable private DataChannel dataChannel;
   @Nullable private List<IceUpdateMessage> pendingOutgoingIceUpdates;
-  @Nullable private List<IceCandidate>     pendingIncomingIceUpdates;
+  @Nullable private List<IceCandidate> pendingIncomingIceUpdates;
 
-  @Nullable public  static SurfaceViewRenderer localRenderer;
-  @Nullable public  static SurfaceViewRenderer remoteRenderer;
-  @Nullable private static EglBase             eglBase;
+  @Nullable public static SurfaceViewRenderer localRenderer;
+  @Nullable public static SurfaceViewRenderer remoteRenderer;
+  @Nullable private static EglBase eglBase;
 
-  private ExecutorService          serviceExecutor = Executors.newSingleThreadExecutor();
-  private ExecutorService          networkExecutor = Executors.newSingleThreadExecutor();
+  private ExecutorService serviceExecutor = Executors.newSingleThreadExecutor();
+  private ExecutorService networkExecutor = Executors.newSingleThreadExecutor();
   private ScheduledExecutorService timeoutExecutor = Executors.newScheduledThreadPool(1);
 
   @Override
@@ -197,29 +200,35 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
     Log.w(TAG, "onStartCommand...");
     if (intent == null || intent.getAction() == null) return START_NOT_STICKY;
 
-    serviceExecutor.execute(() -> {
-      if      (intent.getAction().equals(ACTION_INCOMING_CALL) && isBusy()) handleBusyCall(intent);
-      else if (intent.getAction().equals(ACTION_REMOTE_BUSY))               handleBusyMessage(intent);
-      else if (intent.getAction().equals(ACTION_INCOMING_CALL))             handleIncomingCall(intent);
-      else if (intent.getAction().equals(ACTION_OUTGOING_CALL) && isIdle()) handleOutgoingCall(intent);
-      else if (intent.getAction().equals(ACTION_ANSWER_CALL))               handleAnswerCall(intent);
-      else if (intent.getAction().equals(ACTION_DENY_CALL))                 handleDenyCall(intent);
-      else if (intent.getAction().equals(ACTION_LOCAL_HANGUP))              handleLocalHangup(intent);
-      else if (intent.getAction().equals(ACTION_REMOTE_HANGUP))             handleRemoteHangup(intent);
-      else if (intent.getAction().equals(ACTION_SET_MUTE_AUDIO))            handleSetMuteAudio(intent);
-      else if (intent.getAction().equals(ACTION_SET_MUTE_VIDEO))            handleSetMuteVideo(intent);
-      else if (intent.getAction().equals(ACTION_BLUETOOTH_CHANGE))          handleBluetoothChange(intent);
-      else if (intent.getAction().equals(ACTION_WIRED_HEADSET_CHANGE))      handleWiredHeadsetChange(intent);
-      else if (intent.getAction().equals((ACTION_SCREEN_OFF)))              handleScreenOffChange(intent);
-      else if (intent.getAction().equals(ACTION_REMOTE_VIDEO_MUTE))         handleRemoteVideoMute(intent);
-      else if (intent.getAction().equals(ACTION_RESPONSE_MESSAGE))          handleResponseMessage(intent);
-      else if (intent.getAction().equals(ACTION_ICE_MESSAGE))               handleRemoteIceCandidate(intent);
-      else if (intent.getAction().equals(ACTION_ICE_CANDIDATE))             handleLocalIceCandidate(intent);
-      else if (intent.getAction().equals(ACTION_ICE_CONNECTED))             handleIceConnected(intent);
-      else if (intent.getAction().equals(ACTION_CALL_CONNECTED))            handleCallConnected(intent);
-      else if (intent.getAction().equals(ACTION_CHECK_TIMEOUT))             handleCheckTimeout(intent);
-      else if (intent.getAction().equals(ACTION_IS_IN_CALL_QUERY))          handleIsInCallQuery(intent);
-    });
+    serviceExecutor.execute(
+        () -> {
+          if (intent.getAction().equals(ACTION_INCOMING_CALL) && isBusy()) handleBusyCall(intent);
+          else if (intent.getAction().equals(ACTION_REMOTE_BUSY)) handleBusyMessage(intent);
+          else if (intent.getAction().equals(ACTION_INCOMING_CALL)) handleIncomingCall(intent);
+          else if (intent.getAction().equals(ACTION_OUTGOING_CALL) && isIdle())
+            handleOutgoingCall(intent);
+          else if (intent.getAction().equals(ACTION_ANSWER_CALL)) handleAnswerCall(intent);
+          else if (intent.getAction().equals(ACTION_DENY_CALL)) handleDenyCall(intent);
+          else if (intent.getAction().equals(ACTION_LOCAL_HANGUP)) handleLocalHangup(intent);
+          else if (intent.getAction().equals(ACTION_REMOTE_HANGUP)) handleRemoteHangup(intent);
+          else if (intent.getAction().equals(ACTION_SET_MUTE_AUDIO)) handleSetMuteAudio(intent);
+          else if (intent.getAction().equals(ACTION_SET_MUTE_VIDEO)) handleSetMuteVideo(intent);
+          else if (intent.getAction().equals(ACTION_BLUETOOTH_CHANGE))
+            handleBluetoothChange(intent);
+          else if (intent.getAction().equals(ACTION_WIRED_HEADSET_CHANGE))
+            handleWiredHeadsetChange(intent);
+          else if (intent.getAction().equals((ACTION_SCREEN_OFF))) handleScreenOffChange(intent);
+          else if (intent.getAction().equals(ACTION_REMOTE_VIDEO_MUTE))
+            handleRemoteVideoMute(intent);
+          else if (intent.getAction().equals(ACTION_RESPONSE_MESSAGE))
+            handleResponseMessage(intent);
+          else if (intent.getAction().equals(ACTION_ICE_MESSAGE)) handleRemoteIceCandidate(intent);
+          else if (intent.getAction().equals(ACTION_ICE_CANDIDATE)) handleLocalIceCandidate(intent);
+          else if (intent.getAction().equals(ACTION_ICE_CONNECTED)) handleIceConnected(intent);
+          else if (intent.getAction().equals(ACTION_CALL_CONNECTED)) handleCallConnected(intent);
+          else if (intent.getAction().equals(ACTION_CHECK_TIMEOUT)) handleCheckTimeout(intent);
+          else if (intent.getAction().equals(ACTION_IS_IN_CALL_QUERY)) handleIsInCallQuery(intent);
+        });
 
     return START_NOT_STICKY;
   }
@@ -267,10 +276,10 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
   private void initializeResources() {
     ApplicationContext.getInstance(this).injectDependencies(this);
 
-    this.callState             = CallState.STATE_IDLE;
-    this.lockManager           = new LockManager(this);
+    this.callState = CallState.STATE_IDLE;
+    this.lockManager = new LockManager(this);
     this.peerConnectionFactory = new PeerConnectionFactory(new PeerConnectionFactoryOptions());
-    this.audioManager          = new SignalAudioManager(this);
+    this.audioManager = new SignalAudioManager(this);
     this.bluetoothStateManager = new BluetoothStateManager(this, this);
     this.messageSender.setSoTimeoutMillis(TimeUnit.SECONDS.toMillis(10));
     this.accountManager.setSoTimeoutMillis(TimeUnit.SECONDS.toMillis(10));
@@ -324,10 +333,10 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
 
     final String offer = intent.getStringExtra(EXTRA_REMOTE_DESCRIPTION);
 
-    this.callState                 = CallState.STATE_ANSWERING;
-    this.callId                    = intent.getLongExtra(EXTRA_CALL_ID, -1);
+    this.callState = CallState.STATE_ANSWERING;
+    this.callId = intent.getLongExtra(EXTRA_CALL_ID, -1);
     this.pendingIncomingIceUpdates = new LinkedList<>();
-    this.recipient                 = getRemoteRecipient(intent);
+    this.recipient = getRemoteRecipient(intent);
 
     if (isIncomingMessageExpired(intent)) {
       insertMissedCall(this.recipient, true);
@@ -343,61 +352,93 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
 
     initializeVideo();
 
-    retrieveTurnServers().addListener(new SuccessOnlyListener<List<PeerConnection.IceServer>>(this.callState, this.callId) {
-      @Override
-      public void onSuccessContinue(List<PeerConnection.IceServer> result) {
-        try {
-          boolean isSystemContact = false;
+    retrieveTurnServers()
+        .addListener(
+            new SuccessOnlyListener<List<PeerConnection.IceServer>>(this.callState, this.callId) {
+              @Override
+              public void onSuccessContinue(List<PeerConnection.IceServer> result) {
+                try {
+                  boolean isSystemContact = false;
 
-          if (Permissions.hasAny(WebRtcCallService.this, Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS)) {
-            isSystemContact = ContactAccessor.getInstance().isSystemContact(WebRtcCallService.this, recipient.getAddress().serialize());
-          }
+                  if (Permissions.hasAny(
+                      WebRtcCallService.this,
+                      Manifest.permission.READ_CONTACTS,
+                      Manifest.permission.WRITE_CONTACTS)) {
+                    isSystemContact =
+                        ContactAccessor.getInstance()
+                            .isSystemContact(
+                                WebRtcCallService.this, recipient.getAddress().serialize());
+                  }
 
-          boolean isAlwaysTurn = TextSecurePreferences.isTurnOnly(WebRtcCallService.this);
+                  boolean isAlwaysTurn = TextSecurePreferences.isTurnOnly(WebRtcCallService.this);
 
-          WebRtcCallService.this.peerConnection = new PeerConnectionWrapper(WebRtcCallService.this, peerConnectionFactory, WebRtcCallService.this, localRenderer, result, !isSystemContact || isAlwaysTurn);
-          WebRtcCallService.this.peerConnection.setRemoteDescription(new SessionDescription(SessionDescription.Type.OFFER, offer));
-          WebRtcCallService.this.lockManager.updatePhoneState(LockManager.PhoneState.PROCESSING);
+                  WebRtcCallService.this.peerConnection =
+                      new PeerConnectionWrapper(
+                          WebRtcCallService.this,
+                          peerConnectionFactory,
+                          WebRtcCallService.this,
+                          localRenderer,
+                          result,
+                          !isSystemContact || isAlwaysTurn);
+                  WebRtcCallService.this.peerConnection.setRemoteDescription(
+                      new SessionDescription(SessionDescription.Type.OFFER, offer));
+                  WebRtcCallService.this.lockManager.updatePhoneState(
+                      LockManager.PhoneState.PROCESSING);
 
-          SessionDescription sdp = WebRtcCallService.this.peerConnection.createAnswer(new MediaConstraints());
-          Log.w(TAG, "Answer SDP: " + sdp.description);
-          WebRtcCallService.this.peerConnection.setLocalDescription(sdp);
+                  SessionDescription sdp =
+                      WebRtcCallService.this.peerConnection.createAnswer(new MediaConstraints());
+                  Log.w(TAG, "Answer SDP: " + sdp.description);
+                  WebRtcCallService.this.peerConnection.setLocalDescription(sdp);
 
-          ListenableFutureTask<Boolean> listenableFutureTask = sendMessage(recipient, SignalServiceCallMessage.forAnswer(new AnswerMessage(WebRtcCallService.this.callId, sdp.description)));
+                  ListenableFutureTask<Boolean> listenableFutureTask =
+                      sendMessage(
+                          recipient,
+                          SignalServiceCallMessage.forAnswer(
+                              new AnswerMessage(WebRtcCallService.this.callId, sdp.description)));
 
-          for (IceCandidate candidate : pendingIncomingIceUpdates) WebRtcCallService.this.peerConnection.addIceCandidate(candidate);
-          WebRtcCallService.this.pendingIncomingIceUpdates = null;
+                  for (IceCandidate candidate : pendingIncomingIceUpdates)
+                    WebRtcCallService.this.peerConnection.addIceCandidate(candidate);
+                  WebRtcCallService.this.pendingIncomingIceUpdates = null;
 
-          listenableFutureTask.addListener(new FailureListener<Boolean>(WebRtcCallService.this.callState, WebRtcCallService.this.callId) {
-            @Override
-            public void onFailureContinue(Throwable error) {
-              Log.w(TAG, error);
-              insertMissedCall(recipient, true);
-              terminate();
-            }
-          });
-        } catch (PeerConnectionException e) {
-          Log.w(TAG, e);
-          terminate();
-        }
-      }
-    });
+                  listenableFutureTask.addListener(
+                      new FailureListener<Boolean>(
+                          WebRtcCallService.this.callState, WebRtcCallService.this.callId) {
+                        @Override
+                        public void onFailureContinue(Throwable error) {
+                          Log.w(TAG, error);
+                          insertMissedCall(recipient, true);
+                          terminate();
+                        }
+                      });
+                } catch (PeerConnectionException e) {
+                  Log.w(TAG, e);
+                  terminate();
+                }
+              }
+            });
   }
 
   private void handleOutgoingCall(Intent intent) {
     Log.w(TAG, "handleOutgoingCall...");
 
-    if (callState != CallState.STATE_IDLE) throw new IllegalStateException("Dialing from non-idle?");
+    if (callState != CallState.STATE_IDLE)
+      throw new IllegalStateException("Dialing from non-idle?");
 
     try {
-      this.callState                 = CallState.STATE_DIALING;
-      this.recipient                 = getRemoteRecipient(intent);
-      this.callId                    = SecureRandom.getInstance("SHA1PRNG").nextLong();
+      this.callState = CallState.STATE_DIALING;
+      this.recipient = getRemoteRecipient(intent);
+      this.callId = SecureRandom.getInstance("SHA1PRNG").nextLong();
       this.pendingOutgoingIceUpdates = new LinkedList<>();
 
       initializeVideo();
 
-      sendMessage(WebRtcViewModel.State.CALL_OUTGOING, recipient, localVideoEnabled, remoteVideoEnabled, bluetoothAvailable, microphoneEnabled);
+      sendMessage(
+          WebRtcViewModel.State.CALL_OUTGOING,
+          recipient,
+          localVideoEnabled,
+          remoteVideoEnabled,
+          bluetoothAvailable,
+          microphoneEnabled);
       lockManager.updatePhoneState(LockManager.PhoneState.IN_CALL);
       audioManager.initializeAudioForCall();
       audioManager.startOutgoingRinger(OutgoingRinger.Type.SONAR);
@@ -408,45 +449,80 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
 
       timeoutExecutor.schedule(new TimeoutRunnable(this.callId), 2, TimeUnit.MINUTES);
 
-      retrieveTurnServers().addListener(new SuccessOnlyListener<List<PeerConnection.IceServer>>(this.callState, this.callId) {
-        @Override
-        public void onSuccessContinue(List<PeerConnection.IceServer> result) {
-          try {
-            boolean isAlwaysTurn = TextSecurePreferences.isTurnOnly(WebRtcCallService.this);
+      retrieveTurnServers()
+          .addListener(
+              new SuccessOnlyListener<List<PeerConnection.IceServer>>(this.callState, this.callId) {
+                @Override
+                public void onSuccessContinue(List<PeerConnection.IceServer> result) {
+                  try {
+                    boolean isAlwaysTurn = TextSecurePreferences.isTurnOnly(WebRtcCallService.this);
 
-            WebRtcCallService.this.peerConnection = new PeerConnectionWrapper(WebRtcCallService.this, peerConnectionFactory, WebRtcCallService.this, localRenderer, result, isAlwaysTurn);
-            WebRtcCallService.this.dataChannel    = WebRtcCallService.this.peerConnection.createDataChannel(DATA_CHANNEL_NAME);
-            WebRtcCallService.this.dataChannel.registerObserver(WebRtcCallService.this);
+                    WebRtcCallService.this.peerConnection =
+                        new PeerConnectionWrapper(
+                            WebRtcCallService.this,
+                            peerConnectionFactory,
+                            WebRtcCallService.this,
+                            localRenderer,
+                            result,
+                            isAlwaysTurn);
+                    WebRtcCallService.this.dataChannel =
+                        WebRtcCallService.this.peerConnection.createDataChannel(DATA_CHANNEL_NAME);
+                    WebRtcCallService.this.dataChannel.registerObserver(WebRtcCallService.this);
 
-            SessionDescription sdp = WebRtcCallService.this.peerConnection.createOffer(new MediaConstraints());
-            WebRtcCallService.this.peerConnection.setLocalDescription(sdp);
+                    SessionDescription sdp =
+                        WebRtcCallService.this.peerConnection.createOffer(new MediaConstraints());
+                    WebRtcCallService.this.peerConnection.setLocalDescription(sdp);
 
-            Log.w(TAG, "Sending offer: " + sdp.description);
+                    Log.w(TAG, "Sending offer: " + sdp.description);
 
-            ListenableFutureTask<Boolean> listenableFutureTask = sendMessage(recipient, SignalServiceCallMessage.forOffer(new OfferMessage(WebRtcCallService.this.callId, sdp.description)));
+                    ListenableFutureTask<Boolean> listenableFutureTask =
+                        sendMessage(
+                            recipient,
+                            SignalServiceCallMessage.forOffer(
+                                new OfferMessage(WebRtcCallService.this.callId, sdp.description)));
 
-            listenableFutureTask.addListener(new FailureListener<Boolean>(callState, callId) {
-              @Override
-              public void onFailureContinue(Throwable error) {
-                Log.w(TAG, error);
+                    listenableFutureTask.addListener(
+                        new FailureListener<Boolean>(callState, callId) {
+                          @Override
+                          public void onFailureContinue(Throwable error) {
+                            Log.w(TAG, error);
 
-                if (error instanceof UntrustedIdentityException) {
-                  sendMessage(WebRtcViewModel.State.UNTRUSTED_IDENTITY, recipient, ((UntrustedIdentityException)error).getIdentityKey(), localVideoEnabled, remoteVideoEnabled, bluetoothAvailable, microphoneEnabled);
-                } else if (error instanceof UnregisteredUserException) {
-                  sendMessage(WebRtcViewModel.State.NO_SUCH_USER, recipient, localVideoEnabled, remoteVideoEnabled, bluetoothAvailable, microphoneEnabled);
-                } else if (error instanceof IOException) {
-                  sendMessage(WebRtcViewModel.State.NETWORK_FAILURE, recipient, localVideoEnabled, remoteVideoEnabled, bluetoothAvailable, microphoneEnabled);
+                            if (error instanceof UntrustedIdentityException) {
+                              sendMessage(
+                                  WebRtcViewModel.State.UNTRUSTED_IDENTITY,
+                                  recipient,
+                                  ((UntrustedIdentityException) error).getIdentityKey(),
+                                  localVideoEnabled,
+                                  remoteVideoEnabled,
+                                  bluetoothAvailable,
+                                  microphoneEnabled);
+                            } else if (error instanceof UnregisteredUserException) {
+                              sendMessage(
+                                  WebRtcViewModel.State.NO_SUCH_USER,
+                                  recipient,
+                                  localVideoEnabled,
+                                  remoteVideoEnabled,
+                                  bluetoothAvailable,
+                                  microphoneEnabled);
+                            } else if (error instanceof IOException) {
+                              sendMessage(
+                                  WebRtcViewModel.State.NETWORK_FAILURE,
+                                  recipient,
+                                  localVideoEnabled,
+                                  remoteVideoEnabled,
+                                  bluetoothAvailable,
+                                  microphoneEnabled);
+                            }
+
+                            terminate();
+                          }
+                        });
+                  } catch (PeerConnectionException e) {
+                    Log.w(TAG, e);
+                    terminate();
+                  }
                 }
-
-                terminate();
-              }
-            });
-          } catch (PeerConnectionException e) {
-            Log.w(TAG, e);
-            terminate();
-          }
-        }
-      });
+              });
     } catch (NoSuchAlgorithmException e) {
       throw new AssertionError(e);
     }
@@ -456,8 +532,15 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
     try {
       Log.w(TAG, "Got response: " + intent.getStringExtra(EXTRA_REMOTE_DESCRIPTION));
 
-      if (callState != CallState.STATE_DIALING || !getRemoteRecipient(intent).equals(recipient) || !Util.isEquals(this.callId, getCallId(intent))) {
-        Log.w(TAG, "Got answer for recipient and call id we're not currently dialing: " + getCallId(intent) + ", " + getRemoteRecipient(intent));
+      if (callState != CallState.STATE_DIALING
+          || !getRemoteRecipient(intent).equals(recipient)
+          || !Util.isEquals(this.callId, getCallId(intent))) {
+        Log.w(
+            TAG,
+            "Got answer for recipient and call id we're not currently dialing: "
+                + getCallId(intent)
+                + ", "
+                + getRemoteRecipient(intent));
         return;
       }
 
@@ -466,20 +549,31 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
       }
 
       if (!pendingOutgoingIceUpdates.isEmpty()) {
-        ListenableFutureTask<Boolean> listenableFutureTask = sendMessage(recipient, SignalServiceCallMessage.forIceUpdates(pendingOutgoingIceUpdates));
+        ListenableFutureTask<Boolean> listenableFutureTask =
+            sendMessage(
+                recipient, SignalServiceCallMessage.forIceUpdates(pendingOutgoingIceUpdates));
 
-        listenableFutureTask.addListener(new FailureListener<Boolean>(callState, callId) {
-          @Override
-          public void onFailureContinue(Throwable error) {
-            Log.w(TAG, error);
-            sendMessage(WebRtcViewModel.State.NETWORK_FAILURE, recipient, localVideoEnabled, remoteVideoEnabled, bluetoothAvailable, microphoneEnabled);
+        listenableFutureTask.addListener(
+            new FailureListener<Boolean>(callState, callId) {
+              @Override
+              public void onFailureContinue(Throwable error) {
+                Log.w(TAG, error);
+                sendMessage(
+                    WebRtcViewModel.State.NETWORK_FAILURE,
+                    recipient,
+                    localVideoEnabled,
+                    remoteVideoEnabled,
+                    bluetoothAvailable,
+                    microphoneEnabled);
 
-            terminate();
-          }
-        });
+                terminate();
+              }
+            });
       }
 
-      this.peerConnection.setRemoteDescription(new SessionDescription(SessionDescription.Type.ANSWER, intent.getStringExtra(EXTRA_REMOTE_DESCRIPTION)));
+      this.peerConnection.setRemoteDescription(
+          new SessionDescription(
+              SessionDescription.Type.ANSWER, intent.getStringExtra(EXTRA_REMOTE_DESCRIPTION)));
       this.pendingOutgoingIceUpdates = null;
     } catch (PeerConnectionException e) {
       Log.w(TAG, e);
@@ -491,11 +585,13 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
     Log.w(TAG, "handleRemoteIceCandidate...");
 
     if (Util.isEquals(this.callId, getCallId(intent))) {
-      IceCandidate candidate = new IceCandidate(intent.getStringExtra(EXTRA_ICE_SDP_MID),
-                                                intent.getIntExtra(EXTRA_ICE_SDP_LINE_INDEX, 0),
-                                                intent.getStringExtra(EXTRA_ICE_SDP));
+      IceCandidate candidate =
+          new IceCandidate(
+              intent.getStringExtra(EXTRA_ICE_SDP_MID),
+              intent.getIntExtra(EXTRA_ICE_SDP_LINE_INDEX, 0),
+              intent.getStringExtra(EXTRA_ICE_SDP));
 
-      if       (peerConnection != null)           peerConnection.addIceCandidate(candidate);
+      if (peerConnection != null) peerConnection.addIceCandidate(candidate);
       else if (pendingIncomingIceUpdates != null) pendingIncomingIceUpdates.add(candidate);
     }
   }
@@ -510,9 +606,12 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
       throw new AssertionError("assert: " + callState + ", " + callId);
     }
 
-    IceUpdateMessage iceUpdateMessage = new IceUpdateMessage(this.callId, intent.getStringExtra(EXTRA_ICE_SDP_MID),
-                                                             intent.getIntExtra(EXTRA_ICE_SDP_LINE_INDEX, 0),
-                                                             intent.getStringExtra(EXTRA_ICE_SDP));
+    IceUpdateMessage iceUpdateMessage =
+        new IceUpdateMessage(
+            this.callId,
+            intent.getStringExtra(EXTRA_ICE_SDP_MID),
+            intent.getIntExtra(EXTRA_ICE_SDP_LINE_INDEX, 0),
+            intent.getStringExtra(EXTRA_ICE_SDP));
 
     if (pendingOutgoingIceUpdates != null) {
       Log.w(TAG, "Adding to pending ice candidates...");
@@ -520,17 +619,25 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
       return;
     }
 
-    ListenableFutureTask<Boolean> listenableFutureTask = sendMessage(recipient, SignalServiceCallMessage.forIceUpdate(iceUpdateMessage));
+    ListenableFutureTask<Boolean> listenableFutureTask =
+        sendMessage(recipient, SignalServiceCallMessage.forIceUpdate(iceUpdateMessage));
 
-    listenableFutureTask.addListener(new FailureListener<Boolean>(callState, callId) {
-      @Override
-      public void onFailureContinue(Throwable error) {
-        Log.w(TAG, error);
-        sendMessage(WebRtcViewModel.State.NETWORK_FAILURE, recipient, localVideoEnabled, remoteVideoEnabled, bluetoothAvailable, microphoneEnabled);
+    listenableFutureTask.addListener(
+        new FailureListener<Boolean>(callState, callId) {
+          @Override
+          public void onFailureContinue(Throwable error) {
+            Log.w(TAG, error);
+            sendMessage(
+                WebRtcViewModel.State.NETWORK_FAILURE,
+                recipient,
+                localVideoEnabled,
+                remoteVideoEnabled,
+                bluetoothAvailable,
+                microphoneEnabled);
 
-        terminate();
-      }
-    });
+            terminate();
+          }
+        });
   }
 
   private void handleIceConnected(Intent intent) {
@@ -540,17 +647,27 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
       this.callState = CallState.STATE_LOCAL_RINGING;
       this.lockManager.updatePhoneState(LockManager.PhoneState.INTERACTIVE);
 
-      sendMessage(WebRtcViewModel.State.CALL_INCOMING, recipient, localVideoEnabled, remoteVideoEnabled, bluetoothAvailable, microphoneEnabled);
+      sendMessage(
+          WebRtcViewModel.State.CALL_INCOMING,
+          recipient,
+          localVideoEnabled,
+          remoteVideoEnabled,
+          bluetoothAvailable,
+          microphoneEnabled);
       startCallCardActivity();
       audioManager.initializeAudioForCall();
 
       if (TextSecurePreferences.isCallNotificationsEnabled(this)) {
-        Uri          ringtone     = recipient.resolve().getCallRingtone();
+        Uri ringtone = recipient.resolve().getCallRingtone();
         VibrateState vibrateState = recipient.resolve().getCallVibrate();
 
         if (ringtone == null) ringtone = TextSecurePreferences.getCallNotificationRingtone(this);
 
-        audioManager.startIncomingRinger(ringtone, vibrateState == VibrateState.ENABLED || (vibrateState == VibrateState.DEFAULT && TextSecurePreferences.isCallNotificationVibrateEnabled(this)));
+        audioManager.startIncomingRinger(
+            ringtone,
+            vibrateState == VibrateState.ENABLED
+                || (vibrateState == VibrateState.DEFAULT
+                    && TextSecurePreferences.isCallNotificationVibrateEnabled(this)));
       }
 
       registerPowerButtonReceiver();
@@ -562,7 +679,13 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
       this.callState = CallState.STATE_REMOTE_RINGING;
       this.audioManager.startOutgoingRinger(OutgoingRinger.Type.RINGING);
 
-      sendMessage(WebRtcViewModel.State.CALL_RINGING, recipient, localVideoEnabled, remoteVideoEnabled, bluetoothAvailable, microphoneEnabled);
+      sendMessage(
+          WebRtcViewModel.State.CALL_RINGING,
+          recipient,
+          localVideoEnabled,
+          remoteVideoEnabled,
+          bluetoothAvailable,
+          microphoneEnabled);
     }
   }
 
@@ -587,9 +710,15 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
     callState = CallState.STATE_CONNECTED;
 
     if (localVideoEnabled) lockManager.updatePhoneState(LockManager.PhoneState.IN_VIDEO);
-    else                   lockManager.updatePhoneState(LockManager.PhoneState.IN_CALL);
+    else lockManager.updatePhoneState(LockManager.PhoneState.IN_CALL);
 
-    sendMessage(WebRtcViewModel.State.CALL_CONNECTED, recipient, localVideoEnabled, remoteVideoEnabled, bluetoothAvailable, microphoneEnabled);
+    sendMessage(
+        WebRtcViewModel.State.CALL_CONNECTED,
+        recipient,
+        localVideoEnabled,
+        remoteVideoEnabled,
+        bluetoothAvailable,
+        microphoneEnabled);
 
     unregisterPowerButtonReceiver();
 
@@ -599,26 +728,41 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
     this.peerConnection.setAudioEnabled(microphoneEnabled);
     this.peerConnection.setVideoEnabled(localVideoEnabled);
 
-    this.dataChannel.send(new DataChannel.Buffer(ByteBuffer.wrap(Data.newBuilder()
-                                                                     .setVideoStreamingStatus(WebRtcDataProtos.VideoStreamingStatus.newBuilder()
-                                                                                                                                   .setId(this.callId)
-                                                                                                                                   .setEnabled(localVideoEnabled))
-                                                                     .build().toByteArray()), false));
+    this.dataChannel.send(
+        new DataChannel.Buffer(
+            ByteBuffer.wrap(
+                Data.newBuilder()
+                    .setVideoStreamingStatus(
+                        WebRtcDataProtos.VideoStreamingStatus.newBuilder()
+                            .setId(this.callId)
+                            .setEnabled(localVideoEnabled))
+                    .build()
+                    .toByteArray()),
+            false));
   }
 
   private void handleBusyCall(Intent intent) {
     Recipient recipient = getRemoteRecipient(intent);
-    long      callId    = getCallId(intent);
+    long callId = getCallId(intent);
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       switch (callState) {
         case STATE_DIALING:
-        case STATE_REMOTE_RINGING: setCallInProgressNotification(TYPE_OUTGOING_RINGING, this.recipient);    break;
+        case STATE_REMOTE_RINGING:
+          setCallInProgressNotification(TYPE_OUTGOING_RINGING, this.recipient);
+          break;
         case STATE_IDLE:
-        case STATE_ANSWERING:      setCallInProgressNotification(TYPE_INCOMING_CONNECTING, this.recipient); break;
-        case STATE_LOCAL_RINGING:  setCallInProgressNotification(TYPE_INCOMING_RINGING, this.recipient);    break;
-        case STATE_CONNECTED:      setCallInProgressNotification(TYPE_ESTABLISHED, this.recipient);         break;
-        default:                   throw new AssertionError();
+        case STATE_ANSWERING:
+          setCallInProgressNotification(TYPE_INCOMING_CONNECTING, this.recipient);
+          break;
+        case STATE_LOCAL_RINGING:
+          setCallInProgressNotification(TYPE_INCOMING_RINGING, this.recipient);
+          break;
+        case STATE_CONNECTED:
+          setCallInProgressNotification(TYPE_ESTABLISHED, this.recipient);
+          break;
+        default:
+          throw new AssertionError();
       }
     }
 
@@ -634,38 +778,54 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
     Log.w(TAG, "handleBusyMessage...");
 
     final Recipient recipient = getRemoteRecipient(intent);
-    final long      callId    = getCallId(intent);
+    final long callId = getCallId(intent);
 
-    if (callState != CallState.STATE_DIALING || !Util.isEquals(this.callId, callId) || !recipient.equals(this.recipient)) {
+    if (callState != CallState.STATE_DIALING
+        || !Util.isEquals(this.callId, callId)
+        || !recipient.equals(this.recipient)) {
       Log.w(TAG, "Got busy message for inactive session...");
       return;
     }
 
-    sendMessage(WebRtcViewModel.State.CALL_BUSY, recipient, localVideoEnabled, remoteVideoEnabled, bluetoothAvailable, microphoneEnabled);
+    sendMessage(
+        WebRtcViewModel.State.CALL_BUSY,
+        recipient,
+        localVideoEnabled,
+        remoteVideoEnabled,
+        bluetoothAvailable,
+        microphoneEnabled);
 
     audioManager.startOutgoingRinger(OutgoingRinger.Type.BUSY);
-    Util.runOnMainDelayed(new Runnable() {
-      @Override
-      public void run() {
-        Intent intent = new Intent(WebRtcCallService.this, WebRtcCallService.class);
-        intent.setAction(ACTION_LOCAL_HANGUP);
-        intent.putExtra(EXTRA_CALL_ID, intent.getLongExtra(EXTRA_CALL_ID, -1));
-        intent.putExtra(EXTRA_REMOTE_ADDRESS, intent.getStringExtra(EXTRA_REMOTE_ADDRESS));
+    Util.runOnMainDelayed(
+        new Runnable() {
+          @Override
+          public void run() {
+            Intent intent = new Intent(WebRtcCallService.this, WebRtcCallService.class);
+            intent.setAction(ACTION_LOCAL_HANGUP);
+            intent.putExtra(EXTRA_CALL_ID, intent.getLongExtra(EXTRA_CALL_ID, -1));
+            intent.putExtra(EXTRA_REMOTE_ADDRESS, intent.getStringExtra(EXTRA_REMOTE_ADDRESS));
 
-        startService(intent);
-      }
-    }, WebRtcCallActivity.BUSY_SIGNAL_DELAY_FINISH);
+            startService(intent);
+          }
+        },
+        WebRtcCallActivity.BUSY_SIGNAL_DELAY_FINISH);
   }
 
   private void handleCheckTimeout(Intent intent) {
-    if (this.callId != null                                   &&
-        this.callId == intent.getLongExtra(EXTRA_CALL_ID, -1) &&
-        this.callState != CallState.STATE_CONNECTED)
-    {
+    if (this.callId != null
+        && this.callId == intent.getLongExtra(EXTRA_CALL_ID, -1)
+        && this.callState != CallState.STATE_CONNECTED) {
       Log.w(TAG, "Timing out call: " + this.callId);
-      sendMessage(WebRtcViewModel.State.CALL_DISCONNECTED, this.recipient, localVideoEnabled, remoteVideoEnabled, bluetoothAvailable, microphoneEnabled);
+      sendMessage(
+          WebRtcViewModel.State.CALL_DISCONNECTED,
+          this.recipient,
+          localVideoEnabled,
+          remoteVideoEnabled,
+          bluetoothAvailable,
+          microphoneEnabled);
 
-      if (this.callState == CallState.STATE_ANSWERING || this.callState == CallState.STATE_LOCAL_RINGING) {
+      if (this.callState == CallState.STATE_ANSWERING
+          || this.callState == CallState.STATE_LOCAL_RINGING) {
         insertMissedCall(this.recipient, true);
       }
 
@@ -682,7 +842,8 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
   }
 
   private void insertMissedCall(@NonNull Recipient recipient, boolean signal) {
-    Pair<Long, Long> messageAndThreadId = DatabaseFactory.getSmsDatabase(this).insertMissedCall(recipient.getAddress());
+    Pair<Long, Long> messageAndThreadId =
+        DatabaseFactory.getSmsDatabase(this).insertMissedCall(recipient.getAddress());
     MessageNotifier.updateNotification(this, messageAndThreadId.second, signal);
   }
 
@@ -700,7 +861,14 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
 
     this.peerConnection.setAudioEnabled(true);
     this.peerConnection.setVideoEnabled(true);
-    this.dataChannel.send(new DataChannel.Buffer(ByteBuffer.wrap(Data.newBuilder().setConnected(Connected.newBuilder().setId(this.callId)).build().toByteArray()), false));
+    this.dataChannel.send(
+        new DataChannel.Buffer(
+            ByteBuffer.wrap(
+                Data.newBuilder()
+                    .setConnected(Connected.newBuilder().setId(this.callId))
+                    .build()
+                    .toByteArray()),
+            false));
 
     intent.putExtra(EXTRA_CALL_ID, callId);
     intent.putExtra(EXTRA_REMOTE_ADDRESS, recipient.getAddress());
@@ -717,7 +885,14 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
       throw new AssertionError("assert");
     }
 
-    this.dataChannel.send(new DataChannel.Buffer(ByteBuffer.wrap(Data.newBuilder().setHangup(Hangup.newBuilder().setId(this.callId)).build().toByteArray()), false));
+    this.dataChannel.send(
+        new DataChannel.Buffer(
+            ByteBuffer.wrap(
+                Data.newBuilder()
+                    .setHangup(Hangup.newBuilder().setId(this.callId))
+                    .build()
+                    .toByteArray()),
+            false));
     sendMessage(this.recipient, SignalServiceCallMessage.forHangup(new HangupMessage(this.callId)));
 
     DatabaseFactory.getSmsDatabase(this).insertMissedCall(recipient.getAddress());
@@ -730,9 +905,23 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
       this.accountManager.cancelInFlightRequests();
       this.messageSender.cancelInFlightRequests();
 
-      this.dataChannel.send(new DataChannel.Buffer(ByteBuffer.wrap(Data.newBuilder().setHangup(Hangup.newBuilder().setId(this.callId)).build().toByteArray()), false));
-      sendMessage(this.recipient, SignalServiceCallMessage.forHangup(new HangupMessage(this.callId)));
-      sendMessage(WebRtcViewModel.State.CALL_DISCONNECTED, this.recipient, localVideoEnabled, remoteVideoEnabled, bluetoothAvailable, microphoneEnabled);
+      this.dataChannel.send(
+          new DataChannel.Buffer(
+              ByteBuffer.wrap(
+                  Data.newBuilder()
+                      .setHangup(Hangup.newBuilder().setId(this.callId))
+                      .build()
+                      .toByteArray()),
+              false));
+      sendMessage(
+          this.recipient, SignalServiceCallMessage.forHangup(new HangupMessage(this.callId)));
+      sendMessage(
+          WebRtcViewModel.State.CALL_DISCONNECTED,
+          this.recipient,
+          localVideoEnabled,
+          remoteVideoEnabled,
+          bluetoothAvailable,
+          microphoneEnabled);
     }
 
     terminate();
@@ -748,13 +937,27 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
       throw new AssertionError("assert");
     }
 
-    if (this.callState == CallState.STATE_DIALING || this.callState == CallState.STATE_REMOTE_RINGING) {
-      sendMessage(WebRtcViewModel.State.RECIPIENT_UNAVAILABLE, this.recipient, localVideoEnabled, remoteVideoEnabled, bluetoothAvailable, microphoneEnabled);
+    if (this.callState == CallState.STATE_DIALING
+        || this.callState == CallState.STATE_REMOTE_RINGING) {
+      sendMessage(
+          WebRtcViewModel.State.RECIPIENT_UNAVAILABLE,
+          this.recipient,
+          localVideoEnabled,
+          remoteVideoEnabled,
+          bluetoothAvailable,
+          microphoneEnabled);
     } else {
-      sendMessage(WebRtcViewModel.State.CALL_DISCONNECTED, this.recipient, localVideoEnabled, remoteVideoEnabled, bluetoothAvailable, microphoneEnabled);
+      sendMessage(
+          WebRtcViewModel.State.CALL_DISCONNECTED,
+          this.recipient,
+          localVideoEnabled,
+          remoteVideoEnabled,
+          bluetoothAvailable,
+          microphoneEnabled);
     }
 
-    if (this.callState == CallState.STATE_ANSWERING || this.callState == CallState.STATE_LOCAL_RINGING) {
+    if (this.callState == CallState.STATE_ANSWERING
+        || this.callState == CallState.STATE_LOCAL_RINGING) {
       insertMissedCall(this.recipient, true);
     }
 
@@ -772,7 +975,7 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
 
   private void handleSetMuteVideo(Intent intent) {
     AudioManager audioManager = ServiceUtil.getAudioManager(this);
-    boolean      muted        = intent.getBooleanExtra(EXTRA_MUTE, false);
+    boolean muted = intent.getBooleanExtra(EXTRA_MUTE, false);
 
     this.localVideoEnabled = !muted;
 
@@ -781,88 +984,120 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
     }
 
     if (this.callId != null && this.dataChannel != null) {
-      this.dataChannel.send(new DataChannel.Buffer(ByteBuffer.wrap(Data.newBuilder()
-                                                                       .setVideoStreamingStatus(WebRtcDataProtos.VideoStreamingStatus.newBuilder()
-                                                                                                                                     .setId(this.callId)
-                                                                                                                                     .setEnabled(localVideoEnabled))
-                                                                       .build().toByteArray()), false));
+      this.dataChannel.send(
+          new DataChannel.Buffer(
+              ByteBuffer.wrap(
+                  Data.newBuilder()
+                      .setVideoStreamingStatus(
+                          WebRtcDataProtos.VideoStreamingStatus.newBuilder()
+                              .setId(this.callId)
+                              .setEnabled(localVideoEnabled))
+                      .build()
+                      .toByteArray()),
+              false));
     }
 
     if (callState == CallState.STATE_CONNECTED) {
       if (localVideoEnabled) this.lockManager.updatePhoneState(LockManager.PhoneState.IN_VIDEO);
-      else                   this.lockManager.updatePhoneState(LockManager.PhoneState.IN_CALL);
+      else this.lockManager.updatePhoneState(LockManager.PhoneState.IN_CALL);
     }
 
-    if (localVideoEnabled &&
-        !audioManager.isSpeakerphoneOn() &&
-        !audioManager.isBluetoothScoOn() &&
-        !audioManager.isWiredHeadsetOn())
-    {
+    if (localVideoEnabled
+        && !audioManager.isSpeakerphoneOn()
+        && !audioManager.isBluetoothScoOn()
+        && !audioManager.isWiredHeadsetOn()) {
       audioManager.setSpeakerphoneOn(true);
     }
 
-    sendMessage(viewModelStateFor(callState), this.recipient, localVideoEnabled, remoteVideoEnabled, bluetoothAvailable, microphoneEnabled);
+    sendMessage(
+        viewModelStateFor(callState),
+        this.recipient,
+        localVideoEnabled,
+        remoteVideoEnabled,
+        bluetoothAvailable,
+        microphoneEnabled);
   }
 
   private void handleBluetoothChange(Intent intent) {
     this.bluetoothAvailable = intent.getBooleanExtra(EXTRA_AVAILABLE, false);
 
     if (recipient != null) {
-      sendMessage(viewModelStateFor(callState), recipient, localVideoEnabled, remoteVideoEnabled, bluetoothAvailable, microphoneEnabled);
+      sendMessage(
+          viewModelStateFor(callState),
+          recipient,
+          localVideoEnabled,
+          remoteVideoEnabled,
+          bluetoothAvailable,
+          microphoneEnabled);
     }
   }
 
   private void handleWiredHeadsetChange(Intent intent) {
     Log.w(TAG, "handleWiredHeadsetChange...");
 
-    if (callState == CallState.STATE_CONNECTED ||
-        callState == CallState.STATE_DIALING   ||
-        callState == CallState.STATE_REMOTE_RINGING)
-    {
+    if (callState == CallState.STATE_CONNECTED
+        || callState == CallState.STATE_DIALING
+        || callState == CallState.STATE_REMOTE_RINGING) {
       AudioManager audioManager = ServiceUtil.getAudioManager(this);
-      boolean      present      = intent.getBooleanExtra(EXTRA_AVAILABLE, false);
+      boolean present = intent.getBooleanExtra(EXTRA_AVAILABLE, false);
 
       if (present && audioManager.isSpeakerphoneOn()) {
         audioManager.setSpeakerphoneOn(false);
         audioManager.setBluetoothScoOn(false);
-      } else if (!present && !audioManager.isSpeakerphoneOn() && !audioManager.isBluetoothScoOn() && localVideoEnabled) {
+      } else if (!present
+          && !audioManager.isSpeakerphoneOn()
+          && !audioManager.isBluetoothScoOn()
+          && localVideoEnabled) {
         audioManager.setSpeakerphoneOn(true);
       }
 
       if (recipient != null) {
-        sendMessage(viewModelStateFor(callState), recipient, localVideoEnabled, remoteVideoEnabled, bluetoothAvailable, microphoneEnabled);
+        sendMessage(
+            viewModelStateFor(callState),
+            recipient,
+            localVideoEnabled,
+            remoteVideoEnabled,
+            bluetoothAvailable,
+            microphoneEnabled);
       }
     }
   }
 
   private void handleScreenOffChange(Intent intent) {
-    if (callState == CallState.STATE_ANSWERING ||
-        callState == CallState.STATE_LOCAL_RINGING)
-    {
+    if (callState == CallState.STATE_ANSWERING || callState == CallState.STATE_LOCAL_RINGING) {
       Log.w(TAG, "Silencing incoming ringer...");
       audioManager.silenceIncomingRinger();
     }
   }
 
   private void handleRemoteVideoMute(Intent intent) {
-    boolean muted  = intent.getBooleanExtra(EXTRA_MUTE, false);
-    long    callId = intent.getLongExtra(EXTRA_CALL_ID, -1);
+    boolean muted = intent.getBooleanExtra(EXTRA_MUTE, false);
+    long callId = intent.getLongExtra(EXTRA_CALL_ID, -1);
 
-    if (this.recipient == null || this.callState != CallState.STATE_CONNECTED || !Util.isEquals(this.callId, callId)) {
+    if (this.recipient == null
+        || this.callState != CallState.STATE_CONNECTED
+        || !Util.isEquals(this.callId, callId)) {
       Log.w(TAG, "Got video toggle for inactive call, ignoring...");
       return;
     }
 
     this.remoteVideoEnabled = !muted;
-    sendMessage(WebRtcViewModel.State.CALL_CONNECTED, this.recipient, localVideoEnabled, remoteVideoEnabled, bluetoothAvailable, microphoneEnabled);
+    sendMessage(
+        WebRtcViewModel.State.CALL_CONNECTED,
+        this.recipient,
+        localVideoEnabled,
+        remoteVideoEnabled,
+        bluetoothAvailable,
+        microphoneEnabled);
   }
 
   /// Helper Methods
 
   private boolean isBusy() {
-    TelephonyManager telephonyManager = (TelephonyManager)getSystemService(TELEPHONY_SERVICE);
+    TelephonyManager telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 
-    return callState != CallState.STATE_IDLE || telephonyManager.getCallState() != TelephonyManager.CALL_STATE_IDLE;
+    return callState != CallState.STATE_IDLE
+        || telephonyManager.getCallState() != TelephonyManager.CALL_STATE_IDLE;
   }
 
   private boolean isIdle() {
@@ -870,36 +1105,42 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
   }
 
   private boolean isIncomingMessageExpired(Intent intent) {
-    return System.currentTimeMillis() - intent.getLongExtra(WebRtcCallService.EXTRA_TIMESTAMP, -1) > TimeUnit.MINUTES.toMillis(2);
+    return System.currentTimeMillis() - intent.getLongExtra(WebRtcCallService.EXTRA_TIMESTAMP, -1)
+        > TimeUnit.MINUTES.toMillis(2);
   }
 
   private void initializeVideo() {
-    Util.runOnMainSync(new Runnable() {
-      @Override
-      public void run() {
-        eglBase        = EglBase.create();
-        localRenderer  = new SurfaceViewRenderer(WebRtcCallService.this);
-        remoteRenderer = new SurfaceViewRenderer(WebRtcCallService.this);
+    Util.runOnMainSync(
+        new Runnable() {
+          @Override
+          public void run() {
+            eglBase = EglBase.create();
+            localRenderer = new SurfaceViewRenderer(WebRtcCallService.this);
+            remoteRenderer = new SurfaceViewRenderer(WebRtcCallService.this);
 
-        localRenderer.init(eglBase.getEglBaseContext(), null);
-        remoteRenderer.init(eglBase.getEglBaseContext(), null);
+            localRenderer.init(eglBase.getEglBaseContext(), null);
+            remoteRenderer.init(eglBase.getEglBaseContext(), null);
 
-        peerConnectionFactory.setVideoHwAccelerationOptions(eglBase.getEglBaseContext(),
-                                                            eglBase.getEglBaseContext());
-      }
-    });
+            peerConnectionFactory.setVideoHwAccelerationOptions(
+                eglBase.getEglBaseContext(), eglBase.getEglBaseContext());
+          }
+        });
   }
 
   private void setCallInProgressNotification(int type, Recipient recipient) {
-    startForeground(CallNotificationBuilder.WEBRTC_NOTIFICATION,
-                    CallNotificationBuilder.getCallInProgressNotification(this, type, recipient));
+    startForeground(
+        CallNotificationBuilder.WEBRTC_NOTIFICATION,
+        CallNotificationBuilder.getCallInProgressNotification(this, type, recipient));
   }
 
   private synchronized void terminate() {
     lockManager.updatePhoneState(LockManager.PhoneState.PROCESSING);
     stopForeground(true);
 
-    audioManager.stop(callState == CallState.STATE_DIALING || callState == CallState.STATE_REMOTE_RINGING || callState == CallState.STATE_CONNECTED);
+    audioManager.stop(
+        callState == CallState.STATE_DIALING
+            || callState == CallState.STATE_REMOTE_RINGING
+            || callState == CallState.STATE_CONNECTED);
     bluetoothStateManager.setWantsConnection(false);
 
     if (peerConnection != null) {
@@ -912,52 +1153,74 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
       remoteRenderer.release();
       eglBase.release();
 
-      localRenderer  = null;
+      localRenderer = null;
       remoteRenderer = null;
-      eglBase        = null;
+      eglBase = null;
     }
 
-    this.callState                 = CallState.STATE_IDLE;
-    this.recipient                 = null;
-    this.callId                    = null;
-    this.microphoneEnabled         = true;
-    this.localVideoEnabled         = false;
-    this.remoteVideoEnabled        = false;
+    this.callState = CallState.STATE_IDLE;
+    this.recipient = null;
+    this.callId = null;
+    this.microphoneEnabled = true;
+    this.localVideoEnabled = false;
+    this.remoteVideoEnabled = false;
     this.pendingOutgoingIceUpdates = null;
     this.pendingIncomingIceUpdates = null;
     lockManager.updatePhoneState(LockManager.PhoneState.IDLE);
   }
 
-
-  private void sendMessage(@NonNull WebRtcViewModel.State state,
-                           @NonNull Recipient recipient,
-                           boolean localVideoEnabled, boolean remoteVideoEnabled,
-                           boolean bluetoothAvailable, boolean microphoneEnabled)
-  {
-    EventBus.getDefault().postSticky(new WebRtcViewModel(state, recipient, localVideoEnabled, remoteVideoEnabled, bluetoothAvailable, microphoneEnabled));
+  private void sendMessage(
+      @NonNull WebRtcViewModel.State state,
+      @NonNull Recipient recipient,
+      boolean localVideoEnabled,
+      boolean remoteVideoEnabled,
+      boolean bluetoothAvailable,
+      boolean microphoneEnabled) {
+    EventBus.getDefault()
+        .postSticky(
+            new WebRtcViewModel(
+                state,
+                recipient,
+                localVideoEnabled,
+                remoteVideoEnabled,
+                bluetoothAvailable,
+                microphoneEnabled));
   }
 
-  private void sendMessage(@NonNull WebRtcViewModel.State state,
-                           @NonNull Recipient recipient,
-                           @NonNull IdentityKey identityKey,
-                           boolean localVideoEnabled, boolean remoteVideoEnabled,
-                           boolean bluetoothAvailable, boolean microphoneEnabled)
-  {
-    EventBus.getDefault().postSticky(new WebRtcViewModel(state, recipient, identityKey, localVideoEnabled, remoteVideoEnabled, bluetoothAvailable, microphoneEnabled));
+  private void sendMessage(
+      @NonNull WebRtcViewModel.State state,
+      @NonNull Recipient recipient,
+      @NonNull IdentityKey identityKey,
+      boolean localVideoEnabled,
+      boolean remoteVideoEnabled,
+      boolean bluetoothAvailable,
+      boolean microphoneEnabled) {
+    EventBus.getDefault()
+        .postSticky(
+            new WebRtcViewModel(
+                state,
+                recipient,
+                identityKey,
+                localVideoEnabled,
+                remoteVideoEnabled,
+                bluetoothAvailable,
+                microphoneEnabled));
   }
 
-  private ListenableFutureTask<Boolean> sendMessage(@NonNull final Recipient recipient,
-                                                    @NonNull final SignalServiceCallMessage callMessage)
-  {
-    Callable<Boolean> callable = new Callable<Boolean>() {
-      @Override
-      public Boolean call() throws Exception {
-        messageSender.sendCallMessage(new SignalServiceAddress(recipient.getAddress().toPhoneString()), callMessage);
-        return true;
-      }
-    };
+  private ListenableFutureTask<Boolean> sendMessage(
+      @NonNull final Recipient recipient, @NonNull final SignalServiceCallMessage callMessage) {
+    Callable<Boolean> callable =
+        new Callable<Boolean>() {
+          @Override
+          public Boolean call() throws Exception {
+            messageSender.sendCallMessage(
+                new SignalServiceAddress(recipient.getAddress().toPhoneString()), callMessage);
+            return true;
+          }
+        };
 
-    ListenableFutureTask<Boolean> listenableFutureTask = new ListenableFutureTask<>(callable, null, serviceExecutor);
+    ListenableFutureTask<Boolean> listenableFutureTask =
+        new ListenableFutureTask<>(callable, null, serviceExecutor);
     networkExecutor.execute(listenableFutureTask);
 
     return listenableFutureTask;
@@ -983,7 +1246,6 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
     return intent.getLongExtra(EXTRA_CALL_ID, -1);
   }
 
-
   @Nullable
   @Override
   public IBinder onBind(Intent intent) {
@@ -1000,9 +1262,8 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
   public void onIceConnectionChange(PeerConnection.IceConnectionState newState) {
     Log.w(TAG, "onIceConnectionChange:" + newState);
 
-    if (newState == PeerConnection.IceConnectionState.CONNECTED ||
-        newState == PeerConnection.IceConnectionState.COMPLETED)
-    {
+    if (newState == PeerConnection.IceConnectionState.CONNECTED
+        || newState == PeerConnection.IceConnectionState.COMPLETED) {
       Intent intent = new Intent(this, WebRtcCallService.class);
       intent.setAction(ACTION_ICE_CONNECTED);
 
@@ -1024,7 +1285,6 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
   @Override
   public void onIceGatheringChange(PeerConnection.IceGatheringState newState) {
     Log.w(TAG, "onIceGatheringChange:" + newState);
-
   }
 
   @Override
@@ -1133,28 +1393,32 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
   }
 
   private ListenableFutureTask<List<PeerConnection.IceServer>> retrieveTurnServers() {
-    Callable<List<PeerConnection.IceServer>> callable = () -> {
-      LinkedList<PeerConnection.IceServer> results = new LinkedList<>();
+    Callable<List<PeerConnection.IceServer>> callable =
+        () -> {
+          LinkedList<PeerConnection.IceServer> results = new LinkedList<>();
 
-      try {
-        TurnServerInfo turnServerInfo = accountManager.getTurnServerInfo();
+          try {
+            TurnServerInfo turnServerInfo = accountManager.getTurnServerInfo();
 
-        for (String url : turnServerInfo.getUrls()) {
-          if (url.startsWith("turn")) {
-            results.add(new PeerConnection.IceServer(url, turnServerInfo.getUsername(), turnServerInfo.getPassword()));
-          } else {
-            results.add(new PeerConnection.IceServer(url));
+            for (String url : turnServerInfo.getUrls()) {
+              if (url.startsWith("turn")) {
+                results.add(
+                    new PeerConnection.IceServer(
+                        url, turnServerInfo.getUsername(), turnServerInfo.getPassword()));
+              } else {
+                results.add(new PeerConnection.IceServer(url));
+              }
+            }
+
+          } catch (IOException e) {
+            Log.w(TAG, e);
           }
-        }
 
-      } catch (IOException e) {
-        Log.w(TAG, e);
-      }
+          return results;
+        };
 
-      return results;
-    };
-
-    ListenableFutureTask<List<PeerConnection.IceServer>> futureTask = new ListenableFutureTask<>(callable, null, serviceExecutor);
+    ListenableFutureTask<List<PeerConnection.IceServer>> futureTask =
+        new ListenableFutureTask<>(callable, null, serviceExecutor);
     networkExecutor.execute(futureTask);
 
     return futureTask;
@@ -1164,12 +1428,18 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
 
   private WebRtcViewModel.State viewModelStateFor(CallState state) {
     switch (state) {
-      case STATE_CONNECTED:      return WebRtcViewModel.State.CALL_CONNECTED;
-      case STATE_DIALING:        return WebRtcViewModel.State.CALL_OUTGOING;
-      case STATE_REMOTE_RINGING: return WebRtcViewModel.State.CALL_RINGING;
-      case STATE_LOCAL_RINGING:  return WebRtcViewModel.State.CALL_INCOMING;
-      case STATE_ANSWERING:      return WebRtcViewModel.State.CALL_INCOMING;
-      case STATE_IDLE:           return WebRtcViewModel.State.CALL_DISCONNECTED;
+      case STATE_CONNECTED:
+        return WebRtcViewModel.State.CALL_CONNECTED;
+      case STATE_DIALING:
+        return WebRtcViewModel.State.CALL_OUTGOING;
+      case STATE_REMOTE_RINGING:
+        return WebRtcViewModel.State.CALL_RINGING;
+      case STATE_LOCAL_RINGING:
+        return WebRtcViewModel.State.CALL_INCOMING;
+      case STATE_ANSWERING:
+        return WebRtcViewModel.State.CALL_INCOMING;
+      case STATE_IDLE:
+        return WebRtcViewModel.State.CALL_DISCONNECTED;
     }
 
     return WebRtcViewModel.State.CALL_DISCONNECTED;
@@ -1233,13 +1503,12 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
   private abstract class StateAwareListener<V> implements FutureTaskListener<V> {
 
     private final CallState expectedState;
-    private final long      expectedCallId;
+    private final long expectedCallId;
 
     StateAwareListener(CallState expectedState, long expectedCallId) {
-      this.expectedState  = expectedState;
+      this.expectedState = expectedState;
       this.expectedCallId = expectedCallId;
     }
-
 
     @Override
     public void onSuccess(V result) {
@@ -1265,6 +1534,7 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
     }
 
     public abstract void onSuccessContinue(V result);
+
     public abstract void onFailureContinue(Throwable throwable);
   }
 
@@ -1301,12 +1571,13 @@ public class WebRtcCallService extends Service implements InjectableType, PeerCo
 
       final SettableFuture<Boolean> future = new SettableFuture<>();
 
-      ResultReceiver resultReceiver = new ResultReceiver(new Handler(handlerThread.getLooper())) {
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-          Log.w(TAG, "Got result...");
-          future.set(resultCode == 1);
-        }
-      };
+      ResultReceiver resultReceiver =
+          new ResultReceiver(new Handler(handlerThread.getLooper())) {
+            protected void onReceiveResult(int resultCode, Bundle resultData) {
+              Log.w(TAG, "Got result...");
+              future.set(resultCode == 1);
+            }
+          };
 
       Intent intent = new Intent(context, WebRtcCallService.class);
       intent.setAction(ACTION_IS_IN_CALL_QUERY);

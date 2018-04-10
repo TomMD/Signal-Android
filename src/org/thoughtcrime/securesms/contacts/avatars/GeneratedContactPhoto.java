@@ -4,14 +4,10 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.content.res.AppCompatResources;
-
 import com.amulyakhare.textdrawable.TextDrawable;
-
-import org.thoughtcrime.securesms.R;
-
 import java.util.regex.Pattern;
+import org.thoughtcrime.securesms.R;
 
 public class GeneratedContactPhoto implements FallbackContactPhoto {
 
@@ -20,7 +16,7 @@ public class GeneratedContactPhoto implements FallbackContactPhoto {
   private final String name;
 
   public GeneratedContactPhoto(@NonNull String name) {
-    this.name  = name;
+    this.name = name;
   }
 
   @Override
@@ -30,15 +26,16 @@ public class GeneratedContactPhoto implements FallbackContactPhoto {
 
   @Override
   public Drawable asDrawable(Context context, int color, boolean inverted) {
-    int targetSize = context.getResources().getDimensionPixelSize(R.dimen.contact_photo_target_size);
+    int targetSize =
+        context.getResources().getDimensionPixelSize(R.dimen.contact_photo_target_size);
 
     return TextDrawable.builder()
-                       .beginConfig()
-                       .width(targetSize)
-                       .height(targetSize)
-                       .textColor(inverted ? color : Color.WHITE)
-                       .endConfig()
-                       .buildRound(getCharacter(name), inverted ? Color.WHITE : color);
+        .beginConfig()
+        .width(targetSize)
+        .height(targetSize)
+        .textColor(inverted ? color : Color.WHITE)
+        .endConfig()
+        .buildRound(getCharacter(name), inverted ? Color.WHITE : color);
   }
 
   private String getCharacter(String name) {
@@ -54,6 +51,5 @@ public class GeneratedContactPhoto implements FallbackContactPhoto {
   @Override
   public Drawable asCallCard(Context context) {
     return AppCompatResources.getDrawable(context, R.drawable.ic_person_large);
-
   }
 }

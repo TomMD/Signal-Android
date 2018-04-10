@@ -34,7 +34,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
-
+import java.lang.ref.WeakReference;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
 import org.thoughtcrime.securesms.MessageDetailsRecipientAdapter.RecipientDeliveryStatus;
 import org.thoughtcrime.securesms.color.MaterialColor;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
@@ -56,45 +62,36 @@ import org.thoughtcrime.securesms.util.DynamicTheme;
 import org.thoughtcrime.securesms.util.ExpirationUtil;
 import org.thoughtcrime.securesms.util.Util;
 
-import java.lang.ref.WeakReference;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
+/** @author Jake McGinty */
+public class MessageDetailsActivity extends PassphraseRequiredActionBarActivity
+    implements LoaderCallbacks<Cursor>, RecipientModifiedListener {
+  private static final String TAG = MessageDetailsActivity.class.getSimpleName();
 
-/**
- * @author Jake McGinty
- */
-public class MessageDetailsActivity extends PassphraseRequiredActionBarActivity implements LoaderCallbacks<Cursor>, RecipientModifiedListener {
-  private final static String TAG = MessageDetailsActivity.class.getSimpleName();
+  public static final String MESSAGE_ID_EXTRA = "message_id";
+  public static final String THREAD_ID_EXTRA = "thread_id";
+  public static final String IS_PUSH_GROUP_EXTRA = "is_push_group";
+  public static final String TYPE_EXTRA = "type";
+  public static final String ADDRESS_EXTRA = "address";
 
-  public final static String MESSAGE_ID_EXTRA     = "message_id";
-  public final static String THREAD_ID_EXTRA      = "thread_id";
-  public final static String IS_PUSH_GROUP_EXTRA  = "is_push_group";
-  public final static String TYPE_EXTRA           = "type";
-  public final static String ADDRESS_EXTRA        = "address";
-
-  private GlideRequests    glideRequests;
-  private long             threadId;
-  private boolean          isPushGroup;
+  private GlideRequests glideRequests;
+  private long threadId;
+  private boolean isPushGroup;
   private ConversationItem conversationItem;
-  private ViewGroup        itemParent;
-  private View             metadataContainer;
-  private View             expiresContainer;
-  private TextView         errorText;
-  private TextView         sentDate;
-  private TextView         receivedDate;
-  private TextView         expiresInText;
-  private View             receivedContainer;
-  private TextView         transport;
-  private TextView         toFrom;
-  private ListView         recipientsList;
-  private LayoutInflater   inflater;
+  private ViewGroup itemParent;
+  private View metadataContainer;
+  private View expiresContainer;
+  private TextView errorText;
+  private TextView sentDate;
+  private TextView receivedDate;
+  private TextView expiresInText;
+  private View receivedContainer;
+  private TextView transport;
+  private TextView toFrom;
+  private ListView recipientsList;
+  private LayoutInflater inflater;
 
-  private DynamicTheme     dynamicTheme    = new DynamicTheme();
-  private DynamicLanguage  dynamicLanguage = new DynamicLanguage();
+  private DynamicTheme dynamicTheme = new DynamicTheme();
+  private DynamicLanguage dynamicLanguage = new DynamicLanguage();
 
   private boolean running;
 
@@ -163,23 +160,23 @@ public class MessageDetailsActivity extends PassphraseRequiredActionBarActivity 
   }
 
   private void initializeResources() {
-    inflater       = LayoutInflater.from(this);
+    inflater = LayoutInflater.from(this);
     View header = inflater.inflate(R.layout.message_details_header, recipientsList, false);
 
-    threadId          = getIntent().getLongExtra(THREAD_ID_EXTRA, -1);
-    isPushGroup       = getIntent().getBooleanExtra(IS_PUSH_GROUP_EXTRA, false);
-    glideRequests     = GlideApp.with(this);
-    itemParent        = header.findViewById(R.id.item_container);
-    recipientsList    = findViewById(R.id.recipients_list);
+    threadId = getIntent().getLongExtra(THREAD_ID_EXTRA, -1);
+    isPushGroup = getIntent().getBooleanExtra(IS_PUSH_GROUP_EXTRA, false);
+    glideRequests = GlideApp.with(this);
+    itemParent = header.findViewById(R.id.item_container);
+    recipientsList = findViewById(R.id.recipients_list);
     metadataContainer = header.findViewById(R.id.metadata_container);
-    errorText         = header.findViewById(R.id.error_text);
-    sentDate          = header.findViewById(R.id.sent_time);
+    errorText = header.findViewById(R.id.error_text);
+    sentDate = header.findViewById(R.id.sent_time);
     receivedContainer = header.findViewById(R.id.received_container);
-    receivedDate      = header.findViewById(R.id.received_time);
-    transport         = header.findViewById(R.id.transport);
-    toFrom            = header.findViewById(R.id.tofrom);
-    expiresContainer  = header.findViewById(R.id.expires_container);
-    expiresInText     = header.findViewById(R.id.expires_in);
+    receivedDate = header.findViewById(R.id.received_time);
+    transport = header.findViewById(R.id.transport);
+    toFrom = header.findViewById(R.id.tofrom);
+    expiresContainer = header.findViewById(R.id.expires_container);
+    expiresInText = header.findViewById(R.id.expires_in);
     recipientsList.setHeaderDividersEnabled(false);
     recipientsList.addHeaderView(header, null, false);
   }
@@ -206,11 +203,12 @@ public class MessageDetailsActivity extends PassphraseRequiredActionBarActivity 
       sentDate.setText("-");
       receivedContainer.setVisibility(View.GONE);
     } else {
-      Locale           dateLocale    = dynamicLanguage.getCurrentLocale();
+      Locale dateLocale = dynamicLanguage.getCurrentLocale();
       SimpleDateFormat dateFormatter = DateUtils.getDetailedDateFormatter(this, dateLocale);
       sentDate.setText(dateFormatter.format(new Date(messageRecord.getDateSent())));
 
-      if (messageRecord.getDateReceived() != messageRecord.getDateSent() && !messageRecord.isOutgoing()) {
+      if (messageRecord.getDateReceived() != messageRecord.getDateSent()
+          && !messageRecord.isOutgoing()) {
         receivedDate.setText(dateFormatter.format(new Date(messageRecord.getDateReceived())));
         receivedContainer.setVisibility(View.VISIBLE);
       } else {
@@ -226,23 +224,27 @@ public class MessageDetailsActivity extends PassphraseRequiredActionBarActivity 
     }
 
     expiresContainer.setVisibility(View.VISIBLE);
-    Util.runOnMain(new Runnable() {
-      @Override
-      public void run() {
-        long elapsed   = System.currentTimeMillis() - messageRecord.getExpireStarted();
-        long remaining = messageRecord.getExpiresIn() - elapsed;
+    Util.runOnMain(
+        new Runnable() {
+          @Override
+          public void run() {
+            long elapsed = System.currentTimeMillis() - messageRecord.getExpireStarted();
+            long remaining = messageRecord.getExpiresIn() - elapsed;
 
-        String duration = ExpirationUtil.getExpirationDisplayValue(MessageDetailsActivity.this, Math.max((int)(remaining / 1000), 1));
-        expiresInText.setText(duration);
+            String duration =
+                ExpirationUtil.getExpirationDisplayValue(
+                    MessageDetailsActivity.this, Math.max((int) (remaining / 1000), 1));
+            expiresInText.setText(duration);
 
-        if (running) {
-          Util.runOnMainDelayed(this, 500);
-        }
-      }
-    });
+            if (running) {
+              Util.runOnMainDelayed(this, 500);
+            }
+          }
+        });
   }
 
-  private void updateRecipients(MessageRecord messageRecord, Recipient recipient, List<RecipientDeliveryStatus> recipients) {
+  private void updateRecipients(
+      MessageRecord messageRecord, Recipient recipient, List<RecipientDeliveryStatus> recipients) {
     final int toFromRes;
     if (messageRecord.isMms() && !messageRecord.isPush() && !messageRecord.isOutgoing()) {
       toFromRes = R.string.message_details_header__with;
@@ -252,18 +254,30 @@ public class MessageDetailsActivity extends PassphraseRequiredActionBarActivity 
       toFromRes = R.string.message_details_header__from;
     }
     toFrom.setText(toFromRes);
-    conversationItem.bind(messageRecord, glideRequests, dynamicLanguage.getCurrentLocale(), new HashSet<>(), recipient);
-    recipientsList.setAdapter(new MessageDetailsRecipientAdapter(this, glideRequests, messageRecord, recipients, isPushGroup));
+    conversationItem.bind(
+        messageRecord,
+        glideRequests,
+        dynamicLanguage.getCurrentLocale(),
+        new HashSet<>(),
+        recipient);
+    recipientsList.setAdapter(
+        new MessageDetailsRecipientAdapter(
+            this, glideRequests, messageRecord, recipients, isPushGroup));
   }
 
   private void inflateMessageViewIfAbsent(MessageRecord messageRecord) {
     if (conversationItem == null) {
       if (messageRecord.isGroupAction()) {
-        conversationItem = (ConversationItem) inflater.inflate(R.layout.conversation_item_update, itemParent, false);
+        conversationItem =
+            (ConversationItem)
+                inflater.inflate(R.layout.conversation_item_update, itemParent, false);
       } else if (messageRecord.isOutgoing()) {
-        conversationItem = (ConversationItem) inflater.inflate(R.layout.conversation_item_sent, itemParent, false);
+        conversationItem =
+            (ConversationItem) inflater.inflate(R.layout.conversation_item_sent, itemParent, false);
       } else {
-        conversationItem = (ConversationItem) inflater.inflate(R.layout.conversation_item_received, itemParent, false);
+        conversationItem =
+            (ConversationItem)
+                inflater.inflate(R.layout.conversation_item_received, itemParent, false);
       }
       itemParent.addView(conversationItem);
     }
@@ -272,33 +286,36 @@ public class MessageDetailsActivity extends PassphraseRequiredActionBarActivity 
   private @Nullable MessageRecord getMessageRecord(Context context, Cursor cursor, String type) {
     switch (type) {
       case MmsSmsDatabase.SMS_TRANSPORT:
-        SmsDatabase        smsDatabase = DatabaseFactory.getSmsDatabase(context);
-        SmsDatabase.Reader reader      = smsDatabase.readerFor(cursor);
+        SmsDatabase smsDatabase = DatabaseFactory.getSmsDatabase(context);
+        SmsDatabase.Reader reader = smsDatabase.readerFor(cursor);
         return reader.getNext();
       case MmsSmsDatabase.MMS_TRANSPORT:
-        MmsDatabase        mmsDatabase = DatabaseFactory.getMmsDatabase(context);
-        MmsDatabase.Reader mmsReader   = mmsDatabase.readerFor(cursor);
+        MmsDatabase mmsDatabase = DatabaseFactory.getMmsDatabase(context);
+        MmsDatabase.Reader mmsReader = mmsDatabase.readerFor(cursor);
         return mmsReader.getNext();
       default:
         throw new AssertionError("no valid message type specified");
     }
   }
 
-
   @Override
   public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-    return new MessageDetailsLoader(this, getIntent().getStringExtra(TYPE_EXTRA),
-                                    getIntent().getLongExtra(MESSAGE_ID_EXTRA, -1));
+    return new MessageDetailsLoader(
+        this,
+        getIntent().getStringExtra(TYPE_EXTRA),
+        getIntent().getLongExtra(MESSAGE_ID_EXTRA, -1));
   }
 
   @Override
   public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-    MessageRecord messageRecord = getMessageRecord(this, cursor, getIntent().getStringExtra(TYPE_EXTRA));
+    MessageRecord messageRecord =
+        getMessageRecord(this, cursor, getIntent().getStringExtra(TYPE_EXTRA));
 
     if (messageRecord == null) {
       finish();
     } else {
-      new MessageRecipientAsyncTask(this, messageRecord).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+      new MessageRecipientAsyncTask(this, messageRecord)
+          .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
   }
 
@@ -312,20 +329,23 @@ public class MessageDetailsActivity extends PassphraseRequiredActionBarActivity 
     super.onOptionsItemSelected(item);
 
     switch (item.getItemId()) {
-      case android.R.id.home: finish(); return true;
+      case android.R.id.home:
+        finish();
+        return true;
     }
 
     return false;
   }
 
   @SuppressLint("StaticFieldLeak")
-  private class MessageRecipientAsyncTask extends AsyncTask<Void,Void,List<RecipientDeliveryStatus>> {
+  private class MessageRecipientAsyncTask
+      extends AsyncTask<Void, Void, List<RecipientDeliveryStatus>> {
 
     private final WeakReference<Context> weakContext;
-    private final MessageRecord          messageRecord;
+    private final MessageRecord messageRecord;
 
     MessageRecipientAsyncTask(@NonNull Context context, @NonNull MessageRecord messageRecord) {
-      this.weakContext   = new WeakReference<>(context);
+      this.weakContext = new WeakReference<>(context);
       this.messageRecord = messageRecord;
     }
 
@@ -345,21 +365,36 @@ public class MessageDetailsActivity extends PassphraseRequiredActionBarActivity 
       List<RecipientDeliveryStatus> recipients = new LinkedList<>();
 
       if (!messageRecord.getRecipient().isGroupRecipient()) {
-        recipients.add(new RecipientDeliveryStatus(messageRecord.getRecipient(), getStatusFor(messageRecord.getDeliveryReceiptCount(), messageRecord.getReadReceiptCount(), messageRecord.isPending()), -1));
+        recipients.add(
+            new RecipientDeliveryStatus(
+                messageRecord.getRecipient(),
+                getStatusFor(
+                    messageRecord.getDeliveryReceiptCount(),
+                    messageRecord.getReadReceiptCount(),
+                    messageRecord.isPending()),
+                -1));
       } else {
-        List<GroupReceiptInfo> receiptInfoList = DatabaseFactory.getGroupReceiptDatabase(context).getGroupReceiptInfo(messageRecord.getId());
+        List<GroupReceiptInfo> receiptInfoList =
+            DatabaseFactory.getGroupReceiptDatabase(context)
+                .getGroupReceiptInfo(messageRecord.getId());
 
         if (receiptInfoList.isEmpty()) {
-          List<Recipient> group = DatabaseFactory.getGroupDatabase(context).getGroupMembers(messageRecord.getRecipient().getAddress().toGroupString(), false);
+          List<Recipient> group =
+              DatabaseFactory.getGroupDatabase(context)
+                  .getGroupMembers(
+                      messageRecord.getRecipient().getAddress().toGroupString(), false);
 
           for (Recipient recipient : group) {
-            recipients.add(new RecipientDeliveryStatus(recipient, RecipientDeliveryStatus.Status.UNKNOWN, -1));
+            recipients.add(
+                new RecipientDeliveryStatus(recipient, RecipientDeliveryStatus.Status.UNKNOWN, -1));
           }
         } else {
           for (GroupReceiptInfo info : receiptInfoList) {
-            recipients.add(new RecipientDeliveryStatus(Recipient.from(context, info.getAddress(), true),
-                                                       getStatusFor(info.getStatus(), messageRecord.isPending()),
-                                                       info.getTimestamp()));
+            recipients.add(
+                new RecipientDeliveryStatus(
+                    Recipient.from(context, info.getAddress(), true),
+                    getStatusFor(info.getStatus(), messageRecord.isPending()),
+                    info.getTimestamp()));
           }
         }
       }
@@ -389,21 +424,26 @@ public class MessageDetailsActivity extends PassphraseRequiredActionBarActivity 
       }
     }
 
-    private RecipientDeliveryStatus.Status getStatusFor(int deliveryReceiptCount, int readReceiptCount, boolean pending) {
-      if      (readReceiptCount > 0)     return RecipientDeliveryStatus.Status.READ;
+    private RecipientDeliveryStatus.Status getStatusFor(
+        int deliveryReceiptCount, int readReceiptCount, boolean pending) {
+      if (readReceiptCount > 0) return RecipientDeliveryStatus.Status.READ;
       else if (deliveryReceiptCount > 0) return RecipientDeliveryStatus.Status.DELIVERED;
-      else if (!pending)                 return RecipientDeliveryStatus.Status.SENT;
-      else                               return RecipientDeliveryStatus.Status.PENDING;
+      else if (!pending) return RecipientDeliveryStatus.Status.SENT;
+      else return RecipientDeliveryStatus.Status.PENDING;
     }
 
     private RecipientDeliveryStatus.Status getStatusFor(int groupStatus, boolean pending) {
-      if      (groupStatus == GroupReceiptDatabase.STATUS_READ)                    return RecipientDeliveryStatus.Status.READ;
-      else if (groupStatus == GroupReceiptDatabase.STATUS_DELIVERED)               return RecipientDeliveryStatus.Status.DELIVERED;
-      else if (groupStatus == GroupReceiptDatabase.STATUS_UNDELIVERED && !pending) return RecipientDeliveryStatus.Status.SENT;
-      else if (groupStatus == GroupReceiptDatabase.STATUS_UNDELIVERED)             return RecipientDeliveryStatus.Status.PENDING;
-      else if (groupStatus == GroupReceiptDatabase.STATUS_UNKNOWN)                 return RecipientDeliveryStatus.Status.UNKNOWN;
+      if (groupStatus == GroupReceiptDatabase.STATUS_READ)
+        return RecipientDeliveryStatus.Status.READ;
+      else if (groupStatus == GroupReceiptDatabase.STATUS_DELIVERED)
+        return RecipientDeliveryStatus.Status.DELIVERED;
+      else if (groupStatus == GroupReceiptDatabase.STATUS_UNDELIVERED && !pending)
+        return RecipientDeliveryStatus.Status.SENT;
+      else if (groupStatus == GroupReceiptDatabase.STATUS_UNDELIVERED)
+        return RecipientDeliveryStatus.Status.PENDING;
+      else if (groupStatus == GroupReceiptDatabase.STATUS_UNKNOWN)
+        return RecipientDeliveryStatus.Status.UNKNOWN;
       throw new AssertionError();
     }
-
   }
 }

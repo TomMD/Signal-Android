@@ -1,19 +1,15 @@
 package org.thoughtcrime.securesms.components.subsampling;
 
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-
 import com.davemorrissey.labs.subscaleview.decoder.ImageDecoder;
 import com.davemorrissey.labs.subscaleview.decoder.SkiaImageDecoder;
-
+import java.io.InputStream;
 import org.thoughtcrime.securesms.mms.PartAuthority;
 
-import java.io.InputStream;
-
-public class AttachmentBitmapDecoder implements ImageDecoder{
+public class AttachmentBitmapDecoder implements ImageDecoder {
 
   public AttachmentBitmapDecoder() {}
 
@@ -32,7 +28,8 @@ public class AttachmentBitmapDecoder implements ImageDecoder{
       Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
 
       if (bitmap == null) {
-        throw new RuntimeException("Skia image region decoder returned null bitmap - image format may not be supported");
+        throw new RuntimeException(
+            "Skia image region decoder returned null bitmap - image format may not be supported");
       }
 
       return bitmap;
@@ -40,6 +37,4 @@ public class AttachmentBitmapDecoder implements ImageDecoder{
       if (inputStream != null) inputStream.close();
     }
   }
-
-
 }

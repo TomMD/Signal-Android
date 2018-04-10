@@ -2,15 +2,12 @@ package org.thoughtcrime.securesms.glide;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
-
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
-
-import org.thoughtcrime.securesms.contacts.avatars.ContactPhoto;
-
 import java.io.InputStream;
+import org.thoughtcrime.securesms.contacts.avatars.ContactPhoto;
 
 public class ContactPhotoLoader implements ModelLoader<ContactPhoto, InputStream> {
 
@@ -22,7 +19,8 @@ public class ContactPhotoLoader implements ModelLoader<ContactPhoto, InputStream
 
   @Nullable
   @Override
-  public LoadData<InputStream> buildLoadData(ContactPhoto contactPhoto, int width, int height, Options options) {
+  public LoadData<InputStream> buildLoadData(
+      ContactPhoto contactPhoto, int width, int height, Options options) {
     return new LoadData<>(contactPhoto, new ContactPhotoFetcher(context, contactPhoto));
   }
 

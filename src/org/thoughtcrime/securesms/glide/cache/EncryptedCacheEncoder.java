@@ -1,13 +1,10 @@
 package org.thoughtcrime.securesms.glide.cache;
 
-
 import android.support.annotation.NonNull;
 import android.util.Log;
-
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,11 +14,11 @@ public class EncryptedCacheEncoder extends EncryptedCoder implements Encoder<Inp
 
   private static final String TAG = EncryptedCacheEncoder.class.getSimpleName();
 
-  private final byte[]    secret;
+  private final byte[] secret;
   private final ArrayPool byteArrayPool;
 
   public EncryptedCacheEncoder(@NonNull byte[] secret, @NonNull ArrayPool byteArrayPool) {
-    this.secret        = secret;
+    this.secret = secret;
     this.byteArrayPool = byteArrayPool;
   }
 
@@ -47,6 +44,4 @@ public class EncryptedCacheEncoder extends EncryptedCoder implements Encoder<Inp
       byteArrayPool.put(buffer);
     }
   }
-
-
 }

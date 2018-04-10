@@ -10,7 +10,13 @@ import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Collection;
+import javax.inject.Inject;
 import org.thoughtcrime.securesms.contacts.ContactAccessor;
 import org.thoughtcrime.securesms.contacts.ContactAccessor.ContactData;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
@@ -39,15 +45,6 @@ import org.whispersystems.signalservice.api.messages.multidevice.VerifiedMessage
 import org.whispersystems.signalservice.api.push.exceptions.PushNetworkException;
 import org.whispersystems.signalservice.api.util.InvalidNumberException;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Collection;
-
-import javax.inject.Inject;
-
 public class MultiDeviceContactUpdateJob extends MasterSecretJob implements InjectableType {
 
   private static final long serialVersionUID = 2L;
@@ -63,56 +60,60 @@ public class MultiDeviceContactUpdateJob extends MasterSecretJob implements Inje
   }
 
   public MultiDeviceContactUpdateJob(@NonNull Context context, @Nullable Address address) {
-    super(context, JobParameters.newBuilder()
-                                .withRequirement(new NetworkRequirement(context))
-                                .withRequirement(new MasterSecretRequirement(context))
-                                .withGroupId(MultiDeviceContactUpdateJob.class.getSimpleName())
-                                .withPersistence()
-                                .create());
+    super(
+        context,
+        JobParameters.newBuilder()
+            .withRequirement(new NetworkRequirement(context))
+            .withRequirement(new MasterSecretRequirement(context))
+            .withGroupId(MultiDeviceContactUpdateJob.class.getSimpleName())
+            .withPersistence()
+            .create());
 
     if (address != null) this.address = address.serialize();
-    else                 this.address = null;
+    else this.address = null;
   }
 
   @Override
   public void onRun(MasterSecret masterSecret)
-      throws IOException, UntrustedIdentityException, NetworkException
-  {
+      throws IOException, UntrustedIdentityException, NetworkException {
     if (!TextSecurePreferences.isMultiDevice(context)) {
       Log.w(TAG, "Not multi device, aborting...");
       return;
     }
 
     if (address == null) generateFullContactUpdate();
-    else                 generateSingleContactUpdate(Address.fromSerialized(address));
+    else generateSingleContactUpdate(Address.fromSerialized(address));
   }
 
   private void generateSingleContactUpdate(@NonNull Address address)
-      throws IOException, UntrustedIdentityException, NetworkException
-  {
+      throws IOException, UntrustedIdentityException, NetworkException {
     File contactDataFile = createTempFile("multidevice-contact-update");
 
     try {
-      DeviceContactsOutputStream                out             = new DeviceContactsOutputStream(new FileOutputStream(contactDataFile));
-      Recipient                                 recipient       = Recipient.from(context, address, false);
-      Optional<IdentityDatabase.IdentityRecord> identityRecord  = DatabaseFactory.getIdentityDatabase(context).getIdentity(address);
-      Optional<VerifiedMessage>                 verifiedMessage = getVerifiedMessage(recipient, identityRecord);
+      DeviceContactsOutputStream out =
+          new DeviceContactsOutputStream(new FileOutputStream(contactDataFile));
+      Recipient recipient = Recipient.from(context, address, false);
+      Optional<IdentityDatabase.IdentityRecord> identityRecord =
+          DatabaseFactory.getIdentityDatabase(context).getIdentity(address);
+      Optional<VerifiedMessage> verifiedMessage = getVerifiedMessage(recipient, identityRecord);
 
-      out.write(new DeviceContact(address.toPhoneString(),
-                                  Optional.fromNullable(recipient.getName()),
-                                  getAvatar(recipient.getContactUri()),
-                                  Optional.fromNullable(recipient.getColor().serialize()),
-                                  verifiedMessage,
-                                  Optional.fromNullable(recipient.getProfileKey()),
-                                  recipient.isBlocked(),
-                                  recipient.getExpireMessages() > 0 ?
-                                      Optional.of(recipient.getExpireMessages()) :
-                                      Optional.absent()));
+      out.write(
+          new DeviceContact(
+              address.toPhoneString(),
+              Optional.fromNullable(recipient.getName()),
+              getAvatar(recipient.getContactUri()),
+              Optional.fromNullable(recipient.getColor().serialize()),
+              verifiedMessage,
+              Optional.fromNullable(recipient.getProfileKey()),
+              recipient.isBlocked(),
+              recipient.getExpireMessages() > 0
+                  ? Optional.of(recipient.getExpireMessages())
+                  : Optional.absent()));
 
       out.close();
       sendUpdate(messageSender, contactDataFile, false);
 
-    } catch(InvalidNumberException e) {
+    } catch (InvalidNumberException e) {
       Log.w(TAG, e);
     } finally {
       if (contactDataFile != null) contactDataFile.delete();
@@ -120,45 +121,66 @@ public class MultiDeviceContactUpdateJob extends MasterSecretJob implements Inje
   }
 
   private void generateFullContactUpdate()
-      throws IOException, UntrustedIdentityException, NetworkException
-  {
-    if (!Permissions.hasAny(context, Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS)) {
+      throws IOException, UntrustedIdentityException, NetworkException {
+    if (!Permissions.hasAny(
+        context, Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS)) {
       Log.w(TAG, "No contact permissions, skipping multi-device contact update...");
       return;
     }
-    
+
     File contactDataFile = createTempFile("multidevice-contact-update");
 
     try {
-      DeviceContactsOutputStream out      = new DeviceContactsOutputStream(new FileOutputStream(contactDataFile));
-      Collection<ContactData>    contacts = ContactAccessor.getInstance().getContactsWithPush(context);
+      DeviceContactsOutputStream out =
+          new DeviceContactsOutputStream(new FileOutputStream(contactDataFile));
+      Collection<ContactData> contacts = ContactAccessor.getInstance().getContactsWithPush(context);
 
       for (ContactData contactData : contacts) {
-        Uri                                       contactUri  = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, String.valueOf(contactData.id));
-        Address                                   address     = Address.fromExternal(context, contactData.numbers.get(0).number);
-        Recipient                                 recipient   = Recipient.from(context, address, false);
-        Optional<IdentityDatabase.IdentityRecord> identity    = DatabaseFactory.getIdentityDatabase(context).getIdentity(address);
-        Optional<VerifiedMessage>                 verified    = getVerifiedMessage(recipient, identity);
-        Optional<String>                          name        = Optional.fromNullable(contactData.name);
-        Optional<String>                          color       = Optional.of(recipient.getColor().serialize());
-        Optional<byte[]>                          profileKey  = Optional.fromNullable(recipient.getProfileKey());
-        boolean                                   blocked     = recipient.isBlocked();
-        Optional<Integer>                         expireTimer = recipient.getExpireMessages() > 0 ? Optional.of(recipient.getExpireMessages()) : Optional.absent();
+        Uri contactUri =
+            Uri.withAppendedPath(
+                ContactsContract.Contacts.CONTENT_URI, String.valueOf(contactData.id));
+        Address address = Address.fromExternal(context, contactData.numbers.get(0).number);
+        Recipient recipient = Recipient.from(context, address, false);
+        Optional<IdentityDatabase.IdentityRecord> identity =
+            DatabaseFactory.getIdentityDatabase(context).getIdentity(address);
+        Optional<VerifiedMessage> verified = getVerifiedMessage(recipient, identity);
+        Optional<String> name = Optional.fromNullable(contactData.name);
+        Optional<String> color = Optional.of(recipient.getColor().serialize());
+        Optional<byte[]> profileKey = Optional.fromNullable(recipient.getProfileKey());
+        boolean blocked = recipient.isBlocked();
+        Optional<Integer> expireTimer =
+            recipient.getExpireMessages() > 0
+                ? Optional.of(recipient.getExpireMessages())
+                : Optional.absent();
 
-        out.write(new DeviceContact(address.toPhoneString(), name, getAvatar(contactUri), color, verified, profileKey, blocked, expireTimer));
+        out.write(
+            new DeviceContact(
+                address.toPhoneString(),
+                name,
+                getAvatar(contactUri),
+                color,
+                verified,
+                profileKey,
+                blocked,
+                expireTimer));
       }
 
       if (ProfileKeyUtil.hasProfileKey(context)) {
-        out.write(new DeviceContact(TextSecurePreferences.getLocalNumber(context),
-                                    Optional.absent(), Optional.absent(),
-                                    Optional.absent(), Optional.absent(),
-                                    Optional.of(ProfileKeyUtil.getProfileKey(context)),
-                                    false, Optional.absent()));
+        out.write(
+            new DeviceContact(
+                TextSecurePreferences.getLocalNumber(context),
+                Optional.absent(),
+                Optional.absent(),
+                Optional.absent(),
+                Optional.absent(),
+                Optional.of(ProfileKeyUtil.getProfileKey(context)),
+                false,
+                Optional.absent()));
       }
 
       out.close();
       sendUpdate(messageSender, contactDataFile, true);
-    } catch(InvalidNumberException e) {
+    } catch (InvalidNumberException e) {
       Log.w(TAG, e);
     } finally {
       if (contactDataFile != null) contactDataFile.delete();
@@ -172,28 +194,26 @@ public class MultiDeviceContactUpdateJob extends MasterSecretJob implements Inje
   }
 
   @Override
-  public void onAdded() {
-
-  }
+  public void onAdded() {}
 
   @Override
-  public void onCanceled() {
+  public void onCanceled() {}
 
-  }
-
-  private void sendUpdate(SignalServiceMessageSender messageSender, File contactsFile, boolean complete)
-      throws IOException, UntrustedIdentityException, NetworkException
-  {
+  private void sendUpdate(
+      SignalServiceMessageSender messageSender, File contactsFile, boolean complete)
+      throws IOException, UntrustedIdentityException, NetworkException {
     if (contactsFile.length() > 0) {
-      FileInputStream               contactsFileStream = new FileInputStream(contactsFile);
-      SignalServiceAttachmentStream attachmentStream   = SignalServiceAttachment.newStreamBuilder()
-                                                                                .withStream(contactsFileStream)
-                                                                                .withContentType("application/octet-stream")
-                                                                                .withLength(contactsFile.length())
-                                                                                .build();
+      FileInputStream contactsFileStream = new FileInputStream(contactsFile);
+      SignalServiceAttachmentStream attachmentStream =
+          SignalServiceAttachment.newStreamBuilder()
+              .withStream(contactsFileStream)
+              .withContentType("application/octet-stream")
+              .withLength(contactsFile.length())
+              .build();
 
       try {
-        messageSender.sendMessage(SignalServiceSyncMessage.forContacts(new ContactsMessage(attachmentStream, complete)));
+        messageSender.sendMessage(
+            SignalServiceSyncMessage.forContacts(new ContactsMessage(attachmentStream, complete)));
       } catch (IOException ioe) {
         throw new NetworkException(ioe);
       }
@@ -204,17 +224,20 @@ public class MultiDeviceContactUpdateJob extends MasterSecretJob implements Inje
     if (uri == null) {
       return Optional.absent();
     }
-    
+
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
       try {
-        Uri                 displayPhotoUri = Uri.withAppendedPath(uri, ContactsContract.Contacts.Photo.DISPLAY_PHOTO);
-        AssetFileDescriptor fd              = context.getContentResolver().openAssetFileDescriptor(displayPhotoUri, "r");
+        Uri displayPhotoUri =
+            Uri.withAppendedPath(uri, ContactsContract.Contacts.Photo.DISPLAY_PHOTO);
+        AssetFileDescriptor fd =
+            context.getContentResolver().openAssetFileDescriptor(displayPhotoUri, "r");
 
-        return Optional.of(SignalServiceAttachment.newStreamBuilder()
-                                                  .withStream(fd.createInputStream())
-                                                  .withContentType("image/*")
-                                                  .withLength(fd.getLength())
-                                                  .build());
+        return Optional.of(
+            SignalServiceAttachment.newStreamBuilder()
+                .withStream(fd.createInputStream())
+                .withContentType("image/*")
+                .withLength(fd.getLength())
+                .build());
       } catch (IOException e) {
         Log.w(TAG, e);
       }
@@ -226,22 +249,30 @@ public class MultiDeviceContactUpdateJob extends MasterSecretJob implements Inje
       return Optional.absent();
     }
 
-    Cursor cursor = context.getContentResolver().query(photoUri,
-                                                       new String[] {
-                                                           ContactsContract.CommonDataKinds.Photo.PHOTO,
-                                                           ContactsContract.CommonDataKinds.Phone.MIMETYPE
-                                                       }, null, null, null);
+    Cursor cursor =
+        context
+            .getContentResolver()
+            .query(
+                photoUri,
+                new String[] {
+                  ContactsContract.CommonDataKinds.Photo.PHOTO,
+                  ContactsContract.CommonDataKinds.Phone.MIMETYPE
+                },
+                null,
+                null,
+                null);
 
     try {
       if (cursor != null && cursor.moveToNext()) {
         byte[] data = cursor.getBlob(0);
 
         if (data != null) {
-          return Optional.of(SignalServiceAttachment.newStreamBuilder()
-                                                    .withStream(new ByteArrayInputStream(data))
-                                                    .withContentType("image/*")
-                                                    .withLength(data.length)
-                                                    .build());
+          return Optional.of(
+              SignalServiceAttachment.newStreamBuilder()
+                  .withStream(new ByteArrayInputStream(data))
+                  .withContentType("image/*")
+                  .withLength(data.length)
+                  .build());
         }
       }
 
@@ -253,22 +284,32 @@ public class MultiDeviceContactUpdateJob extends MasterSecretJob implements Inje
     }
   }
 
-  private Optional<VerifiedMessage> getVerifiedMessage(Recipient recipient, Optional<IdentityDatabase.IdentityRecord> identity) throws InvalidNumberException {
+  private Optional<VerifiedMessage> getVerifiedMessage(
+      Recipient recipient, Optional<IdentityDatabase.IdentityRecord> identity)
+      throws InvalidNumberException {
     if (!identity.isPresent()) return Optional.absent();
 
-    String      destination = recipient.getAddress().toPhoneString();
+    String destination = recipient.getAddress().toPhoneString();
     IdentityKey identityKey = identity.get().getIdentityKey();
 
     VerifiedMessage.VerifiedState state;
 
     switch (identity.get().getVerifiedStatus()) {
-      case VERIFIED:   state = VerifiedMessage.VerifiedState.VERIFIED;   break;
-      case UNVERIFIED: state = VerifiedMessage.VerifiedState.UNVERIFIED; break;
-      case DEFAULT:    state = VerifiedMessage.VerifiedState.DEFAULT;    break;
-      default: throw new AssertionError("Unknown state: " + identity.get().getVerifiedStatus());
+      case VERIFIED:
+        state = VerifiedMessage.VerifiedState.VERIFIED;
+        break;
+      case UNVERIFIED:
+        state = VerifiedMessage.VerifiedState.UNVERIFIED;
+        break;
+      case DEFAULT:
+        state = VerifiedMessage.VerifiedState.DEFAULT;
+        break;
+      default:
+        throw new AssertionError("Unknown state: " + identity.get().getVerifiedStatus());
     }
 
-    return Optional.of(new VerifiedMessage(destination, identityKey, state, System.currentTimeMillis()));
+    return Optional.of(
+        new VerifiedMessage(destination, identityKey, state, System.currentTimeMillis()));
   }
 
   private File createTempFile(String prefix) throws IOException {
@@ -284,5 +325,4 @@ public class MultiDeviceContactUpdateJob extends MasterSecretJob implements Inje
       super(ioe);
     }
   }
-
 }

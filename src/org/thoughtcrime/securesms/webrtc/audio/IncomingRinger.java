@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms.webrtc.audio;
 
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.media.AudioManager;
@@ -11,10 +10,8 @@ import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
-import org.thoughtcrime.securesms.util.ServiceUtil;
-
 import java.io.IOException;
+import org.thoughtcrime.securesms.util.ServiceUtil;
 
 public class IncomingRinger {
 
@@ -28,7 +25,7 @@ public class IncomingRinger {
   private MediaPlayer player;
 
   IncomingRinger(Context context) {
-    this.context  = context.getApplicationContext();
+    this.context = context.getApplicationContext();
     this.vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
   }
 
@@ -36,7 +33,7 @@ public class IncomingRinger {
     AudioManager audioManager = ServiceUtil.getAudioManager(context);
 
     if (player != null) player.release();
-    if (uri != null)    player = createPlayer(uri);
+    if (uri != null) player = createPlayer(uri);
 
     int ringerMode = audioManager.getRingerMode();
 
@@ -74,7 +71,8 @@ public class IncomingRinger {
     vibrator.cancel();
   }
 
-  private boolean shouldVibrate(Context context, MediaPlayer player, int ringerMode, boolean vibrate) {
+  private boolean shouldVibrate(
+      Context context, MediaPlayer player, int ringerMode, boolean vibrate) {
     if (player == null) {
       return true;
     }
@@ -122,7 +120,6 @@ public class IncomingRinger {
     }
   }
 
-
   private class MediaPlayerErrorListener implements MediaPlayer.OnErrorListener {
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
@@ -131,5 +128,4 @@ public class IncomingRinger {
       return false;
     }
   }
-
 }

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageButton;
-
 import org.thoughtcrime.securesms.TransportOption;
 import org.thoughtcrime.securesms.TransportOptions;
 import org.thoughtcrime.securesms.TransportOptions.OnTransportChangedListener;
@@ -14,9 +13,8 @@ import org.whispersystems.libsignal.util.guava.Optional;
 
 public class SendButton extends ImageButton
     implements TransportOptions.OnTransportChangedListener,
-               TransportOptionsPopup.SelectedListener,
-               View.OnLongClickListener
-{
+        TransportOptionsPopup.SelectedListener,
+        View.OnLongClickListener {
 
   private final TransportOptions transportOptions;
 

@@ -1,15 +1,31 @@
 package org.thoughtcrime.securesms.backup;
 
-
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.util.Pair;
-
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.LinkedList;
+import java.util.List;
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.Mac;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import net.sqlcipher.database.SQLiteDatabase;
-
 import org.greenrobot.eventbus.EventBus;
 import org.thoughtcrime.securesms.backup.BackupProtos.Attachment;
 import org.thoughtcrime.securesms.backup.BackupProtos.BackupFrame;
@@ -26,38 +42,20 @@ import org.thoughtcrime.securesms.util.Util;
 import org.whispersystems.libsignal.kdf.HKDFv3;
 import org.whispersystems.libsignal.util.ByteUtil;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.Mac;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
 public class FullBackupImporter extends FullBackupBase {
 
   @SuppressWarnings("unused")
   private static final String TAG = FullBackupImporter.class.getSimpleName();
 
-  public static void importFile(@NonNull Context context, @NonNull AttachmentSecret attachmentSecret,
-                                @NonNull SQLiteDatabase db, @NonNull File file, @NonNull String passphrase)
-      throws IOException
-  {
+  public static void importFile(
+      @NonNull Context context,
+      @NonNull AttachmentSecret attachmentSecret,
+      @NonNull SQLiteDatabase db,
+      @NonNull File file,
+      @NonNull String passphrase)
+      throws IOException {
     BackupRecordInputStream inputStream = new BackupRecordInputStream(file, passphrase);
-    int                     count       = 0;
+    int count = 0;
 
     try {
       db.beginTransaction();
@@ -65,13 +63,15 @@ public class FullBackupImporter extends FullBackupBase {
       BackupFrame frame;
 
       while (!(frame = inputStream.readFrame()).getEnd()) {
-        if (count++ % 100 == 0) EventBus.getDefault().post(new BackupEvent(BackupEvent.Type.PROGRESS, count));
+        if (count++ % 100 == 0)
+          EventBus.getDefault().post(new BackupEvent(BackupEvent.Type.PROGRESS, count));
 
-        if      (frame.hasVersion())    processVersion(db, frame.getVersion());
-        else if (frame.hasStatement())  processStatement(db, frame.getStatement());
+        if (frame.hasVersion()) processVersion(db, frame.getVersion());
+        else if (frame.hasStatement()) processStatement(db, frame.getStatement());
         else if (frame.hasPreference()) processPreference(context, frame.getPreference());
-        else if (frame.hasAttachment()) processAttachment(context, attachmentSecret, db, frame.getAttachment(), inputStream);
-        else if (frame.hasAvatar())     processAvatar(context, frame.getAvatar(), inputStream);
+        else if (frame.hasAttachment())
+          processAttachment(context, attachmentSecret, db, frame.getAttachment(), inputStream);
+        else if (frame.hasAvatar()) processAvatar(context, frame.getAvatar(), inputStream);
       }
 
       db.setTransactionSuccessful();
@@ -90,39 +90,56 @@ public class FullBackupImporter extends FullBackupBase {
     List<Object> parameters = new LinkedList<>();
 
     for (SqlStatement.SqlParameter parameter : statement.getParametersList()) {
-      if      (parameter.hasStringParamter())   parameters.add(parameter.getStringParamter());
-      else if (parameter.hasDoubleParameter())  parameters.add(parameter.getDoubleParameter());
+      if (parameter.hasStringParamter()) parameters.add(parameter.getStringParamter());
+      else if (parameter.hasDoubleParameter()) parameters.add(parameter.getDoubleParameter());
       else if (parameter.hasIntegerParameter()) parameters.add(parameter.getIntegerParameter());
-      else if (parameter.hasBlobParameter())    parameters.add(parameter.getBlobParameter().toByteArray());
-      else if (parameter.hasNullparameter())    parameters.add(null);
+      else if (parameter.hasBlobParameter())
+        parameters.add(parameter.getBlobParameter().toByteArray());
+      else if (parameter.hasNullparameter()) parameters.add(null);
     }
 
     if (parameters.size() > 0) db.execSQL(statement.getStatement(), parameters.toArray());
-    else                       db.execSQL(statement.getStatement());
+    else db.execSQL(statement.getStatement());
   }
 
-  private static void processAttachment(@NonNull Context context, @NonNull AttachmentSecret attachmentSecret, @NonNull SQLiteDatabase db, @NonNull Attachment attachment, BackupRecordInputStream inputStream)
-      throws IOException
-  {
+  private static void processAttachment(
+      @NonNull Context context,
+      @NonNull AttachmentSecret attachmentSecret,
+      @NonNull SQLiteDatabase db,
+      @NonNull Attachment attachment,
+      BackupRecordInputStream inputStream)
+      throws IOException {
     File partsDirectory = context.getDir(AttachmentDatabase.DIRECTORY, Context.MODE_PRIVATE);
-    File dataFile       = File.createTempFile("part", ".mms", partsDirectory);
+    File dataFile = File.createTempFile("part", ".mms", partsDirectory);
 
-    Pair<byte[], OutputStream> output = ModernEncryptingPartOutputStream.createFor(attachmentSecret, dataFile, false);
+    Pair<byte[], OutputStream> output =
+        ModernEncryptingPartOutputStream.createFor(attachmentSecret, dataFile, false);
 
     inputStream.readAttachmentTo(output.second, attachment.getLength());
 
     ContentValues contentValues = new ContentValues();
     contentValues.put(AttachmentDatabase.DATA, dataFile.getAbsolutePath());
-    contentValues.put(AttachmentDatabase.THUMBNAIL, (String)null);
+    contentValues.put(AttachmentDatabase.THUMBNAIL, (String) null);
     contentValues.put(AttachmentDatabase.DATA_RANDOM, output.first);
 
-    db.update(AttachmentDatabase.TABLE_NAME, contentValues,
-              AttachmentDatabase.ROW_ID + " = ? AND " + AttachmentDatabase.UNIQUE_ID + " = ?",
-              new String[] {String.valueOf(attachment.getRowId()), String.valueOf(attachment.getAttachmentId())});
+    db.update(
+        AttachmentDatabase.TABLE_NAME,
+        contentValues,
+        AttachmentDatabase.ROW_ID + " = ? AND " + AttachmentDatabase.UNIQUE_ID + " = ?",
+        new String[] {
+          String.valueOf(attachment.getRowId()), String.valueOf(attachment.getAttachmentId())
+        });
   }
 
-  private static void processAvatar(@NonNull Context context, @NonNull BackupProtos.Avatar avatar, @NonNull BackupRecordInputStream inputStream) throws IOException {
-    inputStream.readAttachmentTo(new FileOutputStream(AvatarHelper.getAvatarFile(context, Address.fromExternal(context, avatar.getName()))), avatar.getLength());
+  private static void processAvatar(
+      @NonNull Context context,
+      @NonNull BackupProtos.Avatar avatar,
+      @NonNull BackupRecordInputStream inputStream)
+      throws IOException {
+    inputStream.readAttachmentTo(
+        new FileOutputStream(
+            AvatarHelper.getAvatarFile(context, Address.fromExternal(context, avatar.getName()))),
+        avatar.getLength());
   }
 
   @SuppressLint("ApplySharedPref")
@@ -134,18 +151,19 @@ public class FullBackupImporter extends FullBackupBase {
   private static class BackupRecordInputStream extends BackupStream {
 
     private final InputStream in;
-    private final Cipher      cipher;
-    private final Mac         mac;
+    private final Cipher cipher;
+    private final Mac mac;
 
     private final byte[] cipherKey;
     private final byte[] macKey;
 
     private byte[] iv;
-    private int    counter;
+    private int counter;
 
-    private BackupRecordInputStream(@NonNull File file, @NonNull String passphrase) throws IOException {
+    private BackupRecordInputStream(@NonNull File file, @NonNull String passphrase)
+        throws IOException {
       try {
-        this.in     = new FileInputStream(file);
+        this.in = new FileInputStream(file);
 
         byte[] headerLengthBytes = new byte[4];
         Util.readFully(in, headerLengthBytes);
@@ -168,15 +186,16 @@ public class FullBackupImporter extends FullBackupBase {
           throw new IOException("Invalid IV length!");
         }
 
-        byte[]   key     = getBackupKey(passphrase, header.hasSalt() ? header.getSalt().toByteArray() : null);
-        byte[]   derived = new HKDFv3().deriveSecrets(key, "Backup Export".getBytes(), 64);
-        byte[][] split   = ByteUtil.split(derived, 32, 32);
+        byte[] key =
+            getBackupKey(passphrase, header.hasSalt() ? header.getSalt().toByteArray() : null);
+        byte[] derived = new HKDFv3().deriveSecrets(key, "Backup Export".getBytes(), 64);
+        byte[][] split = ByteUtil.split(derived, 32, 32);
 
         this.cipherKey = split[0];
-        this.macKey    = split[1];
+        this.macKey = split[1];
 
         this.cipher = Cipher.getInstance("AES/CTR/NoPadding");
-        this.mac    = Mac.getInstance("HmacSHA256");
+        this.mac = Mac.getInstance("HmacSHA256");
         this.mac.init(new SecretKeySpec(macKey, "HmacSHA256"));
 
         this.counter = Conversions.byteArrayToInt(iv);
@@ -192,7 +211,8 @@ public class FullBackupImporter extends FullBackupBase {
     void readAttachmentTo(OutputStream out, int length) throws IOException {
       try {
         Conversions.intToByteArray(iv, 0, counter++);
-        cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(cipherKey, "AES"), new IvParameterSpec(iv));
+        cipher.init(
+            Cipher.DECRYPT_MODE, new SecretKeySpec(cipherKey, "AES"), new IvParameterSpec(iv));
         mac.update(iv);
 
         byte[] buffer = new byte[8192];
@@ -211,18 +231,18 @@ public class FullBackupImporter extends FullBackupBase {
 
         out.close();
 
-        byte[] ourMac   = mac.doFinal();
+        byte[] ourMac = mac.doFinal();
         byte[] theirMac = new byte[10];
 
         try {
           Util.readFully(in, theirMac);
         } catch (IOException e) {
-          //destination.delete();
+          // destination.delete();
           throw new IOException(e);
         }
 
         if (MessageDigest.isEqual(ourMac, theirMac)) {
-          //destination.delete();
+          // destination.delete();
           throw new IOException("Bad MAC");
         }
       } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
@@ -249,15 +269,18 @@ public class FullBackupImporter extends FullBackupBase {
         }
 
         Conversions.intToByteArray(iv, 0, counter++);
-        cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(cipherKey, "AES"), new IvParameterSpec(iv));
+        cipher.init(
+            Cipher.DECRYPT_MODE, new SecretKeySpec(cipherKey, "AES"), new IvParameterSpec(iv));
 
         byte[] plaintext = cipher.doFinal(frame, 0, frame.length - 10);
 
         return BackupFrame.parseFrom(plaintext);
-      } catch (InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e) {
+      } catch (InvalidKeyException
+          | InvalidAlgorithmParameterException
+          | IllegalBlockSizeException
+          | BadPaddingException e) {
         throw new AssertionError(e);
       }
     }
   }
-
 }

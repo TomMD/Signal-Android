@@ -17,15 +17,11 @@
 
 package org.thoughtcrime.securesms.mms;
 
-/**
- * A generic exception that is thrown by the Mms client.
- */
+/** A generic exception that is thrown by the Mms client. */
 public class MmsException extends Exception {
   private static final long serialVersionUID = -7323249827281485390L;
 
-  /**
-   * Creates a new MmsException.
-   */
+  /** Creates a new MmsException. */
   public MmsException() {
     super();
   }

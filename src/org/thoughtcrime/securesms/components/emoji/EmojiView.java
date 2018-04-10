@@ -7,15 +7,14 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.view.View;
-
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.util.ResUtil;
 
 public class EmojiView extends View implements Drawable.Callback {
-  private String   emoji;
+  private String emoji;
   private Drawable drawable;
 
-  private final Paint paint      = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+  private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
 
   public EmojiView(Context context) {
     this(context, null);
@@ -30,9 +29,8 @@ public class EmojiView extends View implements Drawable.Callback {
   }
 
   public void setEmoji(String emoji) {
-    this.emoji    = emoji;
-    this.drawable = EmojiProvider.getInstance(getContext())
-                                 .getEmojiDrawable(emoji);
+    this.emoji = emoji;
+    this.drawable = EmojiProvider.getInstance(getContext()).getEmojiDrawable(emoji);
     postInvalidate();
   }
 
@@ -40,12 +38,14 @@ public class EmojiView extends View implements Drawable.Callback {
     return emoji;
   }
 
-  @Override protected void onDraw(Canvas canvas) {
+  @Override
+  protected void onDraw(Canvas canvas) {
     if (drawable != null) {
-      drawable.setBounds(getPaddingLeft(),
-                         getPaddingTop(),
-                         getWidth() - getPaddingRight(),
-                         getHeight() - getPaddingBottom());
+      drawable.setBounds(
+          getPaddingLeft(),
+          getPaddingTop(),
+          getWidth() - getPaddingRight(),
+          getHeight() - getPaddingBottom());
       drawable.setCallback(this);
       drawable.draw(canvas);
     } else {
@@ -56,8 +56,8 @@ public class EmojiView extends View implements Drawable.Callback {
       int xPos = (canvas.getWidth() / 2);
       int yPos = (int) ((canvas.getHeight() / 2) - ((paint.descent() + paint.ascent()) / 2));
 
-      float overflow = paint.measureText(emoji) /
-          (getWidth() - getPaddingLeft() - getPaddingRight());
+      float overflow =
+          paint.measureText(emoji) / (getWidth() - getPaddingLeft() - getPaddingRight());
       if (overflow > 1f) {
         paint.setTextSize(targetFontSize / overflow);
         yPos = (int) ((canvas.getHeight() / 2) - ((paint.descent() + paint.ascent()) / 2));
@@ -66,12 +66,14 @@ public class EmojiView extends View implements Drawable.Callback {
     }
   }
 
-  @Override public void invalidateDrawable(@NonNull Drawable drawable) {
+  @Override
+  public void invalidateDrawable(@NonNull Drawable drawable) {
     super.invalidateDrawable(drawable);
     postInvalidate();
   }
 
-  @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+  @Override
+  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
   }
 }

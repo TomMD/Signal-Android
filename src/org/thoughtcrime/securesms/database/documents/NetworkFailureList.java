@@ -2,7 +2,6 @@ package org.thoughtcrime.securesms.database.documents;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,7 +21,7 @@ public class NetworkFailureList implements Document<NetworkFailure> {
   @Override
   public int size() {
     if (failures == null) return 0;
-    else                  return failures.size();
+    else return failures.size();
   }
 
   @Override

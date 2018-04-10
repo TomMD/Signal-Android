@@ -38,14 +38,18 @@ public class AccountAuthenticatorService extends Service {
     }
 
     @Override
-    public Bundle addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType,
-                             String[] requiredFeatures, Bundle options)
-        throws NetworkErrorException
-    {
+    public Bundle addAccount(
+        AccountAuthenticatorResponse response,
+        String accountType,
+        String authTokenType,
+        String[] requiredFeatures,
+        Bundle options)
+        throws NetworkErrorException {
       return null;
     }
 
-    public Bundle confirmCredentials(AccountAuthenticatorResponse response, Account account, Bundle options) {
+    public Bundle confirmCredentials(
+        AccountAuthenticatorResponse response, Account account, Bundle options) {
       return null;
     }
 
@@ -55,8 +59,12 @@ public class AccountAuthenticatorService extends Service {
     }
 
     @Override
-    public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String authTokenType,
-                               Bundle options) throws NetworkErrorException {
+    public Bundle getAuthToken(
+        AccountAuthenticatorResponse response,
+        Account account,
+        String authTokenType,
+        Bundle options)
+        throws NetworkErrorException {
       return null;
     }
 
@@ -66,14 +74,18 @@ public class AccountAuthenticatorService extends Service {
     }
 
     @Override
-    public Bundle hasFeatures(AccountAuthenticatorResponse response, Account account, String[] features)
+    public Bundle hasFeatures(
+        AccountAuthenticatorResponse response, Account account, String[] features)
         throws NetworkErrorException {
       return null;
     }
 
     @Override
-    public Bundle updateCredentials(AccountAuthenticatorResponse response, Account account, String authTokenType,
-                                    Bundle options) {
+    public Bundle updateCredentials(
+        AccountAuthenticatorResponse response,
+        Account account,
+        String authTokenType,
+        Bundle options) {
       return null;
     }
   }

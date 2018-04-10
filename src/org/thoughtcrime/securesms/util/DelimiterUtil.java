@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms.util;
 
-
 import java.util.regex.Pattern;
 
 public class DelimiterUtil {
@@ -17,5 +16,4 @@ public class DelimiterUtil {
     String regex = "(?<!\\\\)" + Pattern.quote(delimiter + "");
     return value.split(regex);
   }
-
 }

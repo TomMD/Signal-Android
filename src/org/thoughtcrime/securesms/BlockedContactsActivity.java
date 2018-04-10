@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-
 import org.thoughtcrime.securesms.database.Address;
 import org.thoughtcrime.securesms.database.loaders.BlockedContactsLoader;
 import org.thoughtcrime.securesms.mms.GlideApp;
@@ -28,7 +27,7 @@ import org.thoughtcrime.securesms.util.DynamicTheme;
 
 public class BlockedContactsActivity extends PassphraseRequiredActionBarActivity {
 
-  private final DynamicTheme    dynamicTheme    = new DynamicTheme();
+  private final DynamicTheme dynamicTheme = new DynamicTheme();
   private final DynamicLanguage dynamicLanguage = new DynamicLanguage();
 
   @Override
@@ -36,7 +35,6 @@ public class BlockedContactsActivity extends PassphraseRequiredActionBarActivity
     dynamicTheme.onCreate(this);
     dynamicLanguage.onCreate(this);
   }
-
 
   @Override
   public void onCreate(Bundle bundle, boolean ready) {
@@ -55,16 +53,16 @@ public class BlockedContactsActivity extends PassphraseRequiredActionBarActivity
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
-      case android.R.id.home: finish(); return true;
+      case android.R.id.home:
+        finish();
+        return true;
     }
 
     return false;
   }
 
-  public static class BlockedContactsFragment
-      extends ListFragment
-      implements LoaderManager.LoaderCallbacks<Cursor>, ListView.OnItemClickListener
-  {
+  public static class BlockedContactsFragment extends ListFragment
+      implements LoaderManager.LoaderCallbacks<Cursor>, ListView.OnItemClickListener {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
@@ -105,8 +103,8 @@ public class BlockedContactsActivity extends PassphraseRequiredActionBarActivity
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-      Recipient recipient = ((BlockedContactListItem)view).getRecipient();
-      Intent    intent    = new Intent(getActivity(), RecipientPreferenceActivity.class);
+      Recipient recipient = ((BlockedContactListItem) view).getRecipient();
+      Intent intent = new Intent(getActivity(), RecipientPreferenceActivity.class);
       intent.putExtra(RecipientPreferenceActivity.ADDRESS_EXTRA, recipient.getAddress());
 
       startActivity(intent);
@@ -116,7 +114,8 @@ public class BlockedContactsActivity extends PassphraseRequiredActionBarActivity
 
       private final GlideRequests glideRequests;
 
-      BlockedContactAdapter(@NonNull Context context, @NonNull GlideRequests glideRequests, @Nullable Cursor c) {
+      BlockedContactAdapter(
+          @NonNull Context context, @NonNull GlideRequests glideRequests, @Nullable Cursor c) {
         super(context, c);
         this.glideRequests = glideRequests;
       }
@@ -124,18 +123,16 @@ public class BlockedContactsActivity extends PassphraseRequiredActionBarActivity
       @Override
       public View newView(Context context, Cursor cursor, ViewGroup parent) {
         return LayoutInflater.from(context)
-                             .inflate(R.layout.blocked_contact_list_item, parent, false);
+            .inflate(R.layout.blocked_contact_list_item, parent, false);
       }
 
       @Override
       public void bindView(View view, Context context, Cursor cursor) {
-        String    address   = cursor.getString(1);
+        String address = cursor.getString(1);
         Recipient recipient = Recipient.from(context, Address.fromSerialized(address), true);
 
         ((BlockedContactListItem) view).set(glideRequests, recipient);
       }
     }
-
   }
-
 }

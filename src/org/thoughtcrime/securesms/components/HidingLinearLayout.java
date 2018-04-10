@@ -5,16 +5,11 @@ import android.content.Context;
 import android.os.Build;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.util.AttributeSet;
-import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
-import android.view.animation.AnimationUtils;
 import android.view.animation.ScaleAnimation;
-import android.view.animation.TranslateAnimation;
 import android.widget.LinearLayout;
-
-import org.thoughtcrime.securesms.R;
 
 public class HidingLinearLayout extends LinearLayout {
 
@@ -35,24 +30,25 @@ public class HidingLinearLayout extends LinearLayout {
     if (!isEnabled() || getVisibility() == GONE) return;
 
     AnimationSet animation = new AnimationSet(true);
-    animation.addAnimation(new ScaleAnimation(1, 0, 1, 1, Animation.RELATIVE_TO_SELF, 1f, Animation.RELATIVE_TO_SELF, 0.5f));
+    animation.addAnimation(
+        new ScaleAnimation(
+            1, 0, 1, 1, Animation.RELATIVE_TO_SELF, 1f, Animation.RELATIVE_TO_SELF, 0.5f));
     animation.addAnimation(new AlphaAnimation(1, 0));
     animation.setDuration(100);
 
-    animation.setAnimationListener(new Animation.AnimationListener() {
-      @Override
-      public void onAnimationStart(Animation animation) {
-      }
+    animation.setAnimationListener(
+        new Animation.AnimationListener() {
+          @Override
+          public void onAnimationStart(Animation animation) {}
 
-      @Override
-      public void onAnimationRepeat(Animation animation) {
-      }
+          @Override
+          public void onAnimationRepeat(Animation animation) {}
 
-      @Override
-      public void onAnimationEnd(Animation animation) {
-        setVisibility(GONE);
-      }
-    });
+          @Override
+          public void onAnimationEnd(Animation animation) {
+            setVisibility(GONE);
+          }
+        });
 
     animateWith(animation);
   }
@@ -63,7 +59,9 @@ public class HidingLinearLayout extends LinearLayout {
     setVisibility(VISIBLE);
 
     AnimationSet animation = new AnimationSet(true);
-    animation.addAnimation(new ScaleAnimation(0, 1, 1, 1, Animation.RELATIVE_TO_SELF, 1f, Animation.RELATIVE_TO_SELF, 0.5f));
+    animation.addAnimation(
+        new ScaleAnimation(
+            0, 1, 1, 1, Animation.RELATIVE_TO_SELF, 1f, Animation.RELATIVE_TO_SELF, 0.5f));
     animation.addAnimation(new AlphaAnimation(0, 1));
     animation.setDuration(100);
 

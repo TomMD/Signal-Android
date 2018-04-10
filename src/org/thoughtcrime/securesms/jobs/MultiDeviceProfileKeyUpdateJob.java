@@ -1,9 +1,11 @@
 package org.thoughtcrime.securesms.jobs;
 
-
 import android.content.Context;
 import android.util.Log;
-
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import javax.inject.Inject;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.crypto.ProfileKeyUtil;
 import org.thoughtcrime.securesms.dependencies.InjectableType;
@@ -21,12 +23,6 @@ import org.whispersystems.signalservice.api.messages.multidevice.DeviceContactsO
 import org.whispersystems.signalservice.api.messages.multidevice.SignalServiceSyncMessage;
 import org.whispersystems.signalservice.api.push.exceptions.PushNetworkException;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
-import javax.inject.Inject;
-
 public class MultiDeviceProfileKeyUpdateJob extends MasterSecretJob implements InjectableType {
 
   private static final long serialVersionUID = 1L;
@@ -35,11 +31,13 @@ public class MultiDeviceProfileKeyUpdateJob extends MasterSecretJob implements I
   @Inject transient SignalServiceMessageSender messageSender;
 
   public MultiDeviceProfileKeyUpdateJob(Context context) {
-    super(context, JobParameters.newBuilder()
-                                .withRequirement(new NetworkRequirement(context))
-                                .withPersistence()
-                                .withGroupId(MultiDeviceProfileKeyUpdateJob.class.getSimpleName())
-                                .create());
+    super(
+        context,
+        JobParameters.newBuilder()
+            .withRequirement(new NetworkRequirement(context))
+            .withPersistence()
+            .withGroupId(MultiDeviceProfileKeyUpdateJob.class.getSimpleName())
+            .create());
   }
 
   @Override
@@ -49,26 +47,32 @@ public class MultiDeviceProfileKeyUpdateJob extends MasterSecretJob implements I
       return;
     }
 
-    Optional<byte[]>           profileKey = Optional.of(ProfileKeyUtil.getProfileKey(getContext()));
-    ByteArrayOutputStream      baos       = new ByteArrayOutputStream();
-    DeviceContactsOutputStream out        = new DeviceContactsOutputStream(baos);
+    Optional<byte[]> profileKey = Optional.of(ProfileKeyUtil.getProfileKey(getContext()));
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    DeviceContactsOutputStream out = new DeviceContactsOutputStream(baos);
 
-    out.write(new DeviceContact(TextSecurePreferences.getLocalNumber(getContext()),
-                                Optional.absent(),
-                                Optional.absent(),
-                                Optional.absent(),
-                                Optional.absent(),
-                                profileKey, false, Optional.absent()));
+    out.write(
+        new DeviceContact(
+            TextSecurePreferences.getLocalNumber(getContext()),
+            Optional.absent(),
+            Optional.absent(),
+            Optional.absent(),
+            Optional.absent(),
+            profileKey,
+            false,
+            Optional.absent()));
 
     out.close();
 
-    SignalServiceAttachmentStream attachmentStream = SignalServiceAttachment.newStreamBuilder()
-                                                                            .withStream(new ByteArrayInputStream(baos.toByteArray()))
-                                                                            .withContentType("application/octet-stream")
-                                                                            .withLength(baos.toByteArray().length)
-                                                                            .build();
+    SignalServiceAttachmentStream attachmentStream =
+        SignalServiceAttachment.newStreamBuilder()
+            .withStream(new ByteArrayInputStream(baos.toByteArray()))
+            .withContentType("application/octet-stream")
+            .withLength(baos.toByteArray().length)
+            .build();
 
-    SignalServiceSyncMessage      syncMessage      = SignalServiceSyncMessage.forContacts(new ContactsMessage(attachmentStream, false));
+    SignalServiceSyncMessage syncMessage =
+        SignalServiceSyncMessage.forContacts(new ContactsMessage(attachmentStream, false));
 
     messageSender.sendMessage(syncMessage);
   }
@@ -80,9 +84,7 @@ public class MultiDeviceProfileKeyUpdateJob extends MasterSecretJob implements I
   }
 
   @Override
-  public void onAdded() {
-
-  }
+  public void onAdded() {}
 
   @Override
   public void onCanceled() {

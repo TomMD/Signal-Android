@@ -13,10 +13,15 @@ import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
-
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
-
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import org.thoughtcrime.securesms.ApplicationContext;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.contacts.ContactAccessor;
@@ -36,38 +41,30 @@ import org.whispersystems.libsignal.util.guava.Optional;
 import org.whispersystems.signalservice.api.SignalServiceAccountManager;
 import org.whispersystems.signalservice.api.push.ContactTokenDetails;
 
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
 public class DirectoryHelper {
 
   private static final String TAG = DirectoryHelper.class.getSimpleName();
 
   public static void refreshDirectory(@NonNull Context context, boolean notifyOfNewUsers)
-      throws IOException
-  {
+      throws IOException {
     if (TextUtils.isEmpty(TextSecurePreferences.getLocalNumber(context))) return;
     if (!Permissions.hasAll(context, Manifest.permission.WRITE_CONTACTS)) return;
 
-    List<Address> newlyActiveUsers = refreshDirectory(context, AccountManagerFactory.createManager(context));
+    List<Address> newlyActiveUsers =
+        refreshDirectory(context, AccountManagerFactory.createManager(context));
 
     if (TextSecurePreferences.isMultiDevice(context)) {
       ApplicationContext.getInstance(context)
-                        .getJobManager()
-                        .add(new MultiDeviceContactUpdateJob(context));
+          .getJobManager()
+          .add(new MultiDeviceContactUpdateJob(context));
     }
 
     if (notifyOfNewUsers) notifyNewUsers(context, newlyActiveUsers);
   }
 
-  private static @NonNull List<Address> refreshDirectory(@NonNull Context context, @NonNull SignalServiceAccountManager accountManager)
-      throws IOException
-  {
+  private static @NonNull List<Address> refreshDirectory(
+      @NonNull Context context, @NonNull SignalServiceAccountManager accountManager)
+      throws IOException {
     if (TextUtils.isEmpty(TextSecurePreferences.getLocalNumber(context))) {
       return new LinkedList<>();
     }
@@ -76,18 +73,25 @@ public class DirectoryHelper {
       return new LinkedList<>();
     }
 
-    RecipientDatabase recipientDatabase                       = DatabaseFactory.getRecipientDatabase(context);
-    Stream<String>    eligibleRecipientDatabaseContactNumbers = Stream.of(recipientDatabase.getAllAddresses()).filter(Address::isPhone).map(Address::toPhoneString);
-    Stream<String>    eligibleSystemDatabaseContactNumbers    = Stream.of(ContactAccessor.getInstance().getAllContactsWithNumbers(context)).map(Address::serialize);
-    Set<String>       eligibleContactNumbers                  = Stream.concat(eligibleRecipientDatabaseContactNumbers, eligibleSystemDatabaseContactNumbers).collect(Collectors.toSet());
+    RecipientDatabase recipientDatabase = DatabaseFactory.getRecipientDatabase(context);
+    Stream<String> eligibleRecipientDatabaseContactNumbers =
+        Stream.of(recipientDatabase.getAllAddresses())
+            .filter(Address::isPhone)
+            .map(Address::toPhoneString);
+    Stream<String> eligibleSystemDatabaseContactNumbers =
+        Stream.of(ContactAccessor.getInstance().getAllContactsWithNumbers(context))
+            .map(Address::serialize);
+    Set<String> eligibleContactNumbers =
+        Stream.concat(eligibleRecipientDatabaseContactNumbers, eligibleSystemDatabaseContactNumbers)
+            .collect(Collectors.toSet());
 
     List<ContactTokenDetails> activeTokens = accountManager.getContacts(eligibleContactNumbers);
 
     if (activeTokens != null) {
-      List<Address> activeAddresses   = new LinkedList<>();
+      List<Address> activeAddresses = new LinkedList<>();
       List<Address> inactiveAddresses = new LinkedList<>();
 
-      Set<String>  inactiveContactNumbers = new HashSet<>(eligibleContactNumbers);
+      Set<String> inactiveContactNumbers = new HashSet<>(eligibleContactNumbers);
 
       for (ContactTokenDetails activeToken : activeTokens) {
         activeAddresses.add(Address.fromSerialized(activeToken.getNumber()));
@@ -98,12 +102,13 @@ public class DirectoryHelper {
         inactiveAddresses.add(Address.fromSerialized(inactiveContactNumber));
       }
 
-      Set<Address>  currentActiveAddresses = new HashSet<>(recipientDatabase.getRegistered());
-      Set<Address>  contactAddresses       = new HashSet<>(recipientDatabase.getSystemContacts());
-      List<Address> newlyActiveAddresses   = Stream.of(activeAddresses)
-                                                   .filter(address -> !currentActiveAddresses.contains(address))
-                                                   .filter(contactAddresses::contains)
-                                                   .toList();
+      Set<Address> currentActiveAddresses = new HashSet<>(recipientDatabase.getRegistered());
+      Set<Address> contactAddresses = new HashSet<>(recipientDatabase.getSystemContacts());
+      List<Address> newlyActiveAddresses =
+          Stream.of(activeAddresses)
+              .filter(address -> !currentActiveAddresses.contains(address))
+              .filter(contactAddresses::contains)
+              .toList();
 
       recipientDatabase.setRegistered(activeAddresses, inactiveAddresses);
       updateContactsDatabase(context, activeAddresses, true);
@@ -119,16 +124,14 @@ public class DirectoryHelper {
     return new LinkedList<>();
   }
 
-  public static RegisteredState refreshDirectoryFor(@NonNull  Context context,
-                                                    @NonNull  Recipient recipient)
-      throws IOException
-  {
-    RecipientDatabase             recipientDatabase = DatabaseFactory.getRecipientDatabase(context);
-    SignalServiceAccountManager   accountManager    = AccountManagerFactory.createManager(context);
-    boolean                       activeUser        = recipient.resolve().getRegistered() == RegisteredState.REGISTERED;
-    boolean                       systemContact     = recipient.isSystemContact();
-    String                        number            = recipient.getAddress().serialize();
-    Optional<ContactTokenDetails> details           = accountManager.getContact(number);
+  public static RegisteredState refreshDirectoryFor(
+      @NonNull Context context, @NonNull Recipient recipient) throws IOException {
+    RecipientDatabase recipientDatabase = DatabaseFactory.getRecipientDatabase(context);
+    SignalServiceAccountManager accountManager = AccountManagerFactory.createManager(context);
+    boolean activeUser = recipient.resolve().getRegistered() == RegisteredState.REGISTERED;
+    boolean systemContact = recipient.isSystemContact();
+    String number = recipient.getAddress().serialize();
+    Optional<ContactTokenDetails> details = accountManager.getContact(number);
 
     if (details.isPresent()) {
       recipientDatabase.setRegistered(recipient, RegisteredState.REGISTERED);
@@ -138,7 +141,9 @@ public class DirectoryHelper {
       }
 
       if (!activeUser && TextSecurePreferences.isMultiDevice(context)) {
-        ApplicationContext.getInstance(context).getJobManager().add(new MultiDeviceContactUpdateJob(context));
+        ApplicationContext.getInstance(context)
+            .getJobManager()
+            .add(new MultiDeviceContactUpdateJob(context));
       }
 
       if (!activeUser && systemContact) {
@@ -152,29 +157,48 @@ public class DirectoryHelper {
     }
   }
 
-  private static void updateContactsDatabase(@NonNull Context context, @NonNull List<Address> activeAddresses, boolean removeMissing) {
+  private static void updateContactsDatabase(
+      @NonNull Context context, @NonNull List<Address> activeAddresses, boolean removeMissing) {
     Optional<AccountHolder> account = getOrCreateAccount(context);
 
     if (account.isPresent()) {
       try {
-        DatabaseFactory.getContactsDatabase(context).setRegisteredUsers(account.get().getAccount(), activeAddresses, removeMissing);
+        DatabaseFactory.getContactsDatabase(context)
+            .setRegisteredUsers(account.get().getAccount(), activeAddresses, removeMissing);
 
-        Cursor                                 cursor = ContactAccessor.getInstance().getAllSystemContacts(context);
-        RecipientDatabase.BulkOperationsHandle handle = DatabaseFactory.getRecipientDatabase(context).resetAllSystemContactInfo();
+        Cursor cursor = ContactAccessor.getInstance().getAllSystemContacts(context);
+        RecipientDatabase.BulkOperationsHandle handle =
+            DatabaseFactory.getRecipientDatabase(context).resetAllSystemContactInfo();
 
         try {
           while (cursor != null && cursor.moveToNext()) {
-            String number = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER));
+            String number =
+                cursor.getString(
+                    cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER));
 
             if (!TextUtils.isEmpty(number)) {
-              Address   address         = Address.fromExternal(context, number);
-              String    displayName     = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-              String    contactPhotoUri = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.PHOTO_URI));
-              String    contactLabel    = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.LABEL));
-              Uri       contactUri      = ContactsContract.Contacts.getLookupUri(cursor.getLong(cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone._ID)),
-                                                                                 cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.LOOKUP_KEY)));
+              Address address = Address.fromExternal(context, number);
+              String displayName =
+                  cursor.getString(
+                      cursor.getColumnIndexOrThrow(
+                          ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+              String contactPhotoUri =
+                  cursor.getString(
+                      cursor.getColumnIndexOrThrow(
+                          ContactsContract.CommonDataKinds.Phone.PHOTO_URI));
+              String contactLabel =
+                  cursor.getString(
+                      cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.LABEL));
+              Uri contactUri =
+                  ContactsContract.Contacts.getLookupUri(
+                      cursor.getLong(
+                          cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone._ID)),
+                      cursor.getString(
+                          cursor.getColumnIndexOrThrow(
+                              ContactsContract.CommonDataKinds.Phone.LOOKUP_KEY)));
 
-              handle.setSystemContactInfo(address, displayName, contactPhotoUri, contactLabel, contactUri.toString());
+              handle.setSystemContactInfo(
+                  address, displayName, contactPhotoUri, contactLabel, contactUri.toString());
             }
           }
         } finally {
@@ -187,15 +211,14 @@ public class DirectoryHelper {
     }
   }
 
-  private static void notifyNewUsers(@NonNull  Context context,
-                                     @NonNull  List<Address> newUsers)
-  {
+  private static void notifyNewUsers(@NonNull Context context, @NonNull List<Address> newUsers) {
     if (!TextSecurePreferences.isNewContactsNotificationEnabled(context)) return;
 
-    for (Address newUser: newUsers) {
+    for (Address newUser : newUsers) {
       if (!SessionUtil.hasSession(context, newUser) && !Util.isOwnNumber(context, newUser)) {
-        IncomingJoinedMessage  message      = new IncomingJoinedMessage(newUser);
-        Optional<InsertResult> insertResult = DatabaseFactory.getSmsDatabase(context).insertMessageInbox(message);
+        IncomingJoinedMessage message = new IncomingJoinedMessage(newUser);
+        Optional<InsertResult> insertResult =
+            DatabaseFactory.getSmsDatabase(context).insertMessageInbox(message);
 
         if (insertResult.isPresent()) {
           int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
@@ -211,15 +234,18 @@ public class DirectoryHelper {
 
   private static Optional<AccountHolder> getOrCreateAccount(Context context) {
     AccountManager accountManager = AccountManager.get(context);
-    Account[]      accounts       = accountManager.getAccountsByType("org.thoughtcrime.securesms");
+    Account[] accounts = accountManager.getAccountsByType("org.thoughtcrime.securesms");
 
     Optional<AccountHolder> account;
 
     if (accounts.length == 0) account = createAccount(context);
-    else                      account = Optional.of(new AccountHolder(accounts[0], false));
+    else account = Optional.of(new AccountHolder(accounts[0], false));
 
-    if (account.isPresent() && !ContentResolver.getSyncAutomatically(account.get().getAccount(), ContactsContract.AUTHORITY)) {
-      ContentResolver.setSyncAutomatically(account.get().getAccount(), ContactsContract.AUTHORITY, true);
+    if (account.isPresent()
+        && !ContentResolver.getSyncAutomatically(
+            account.get().getAccount(), ContactsContract.AUTHORITY)) {
+      ContentResolver.setSyncAutomatically(
+          account.get().getAccount(), ContactsContract.AUTHORITY, true);
     }
 
     return account;
@@ -227,7 +253,8 @@ public class DirectoryHelper {
 
   private static Optional<AccountHolder> createAccount(Context context) {
     AccountManager accountManager = AccountManager.get(context);
-    Account        account        = new Account(context.getString(R.string.app_name), "org.thoughtcrime.securesms");
+    Account account =
+        new Account(context.getString(R.string.app_name), "org.thoughtcrime.securesms");
 
     if (accountManager.addAccountExplicitly(account, null, null)) {
       Log.w(TAG, "Created new account...");
@@ -245,7 +272,7 @@ public class DirectoryHelper {
     private final Account account;
 
     private AccountHolder(Account account, boolean fresh) {
-      this.fresh   = fresh;
+      this.fresh = fresh;
       this.account = account;
     }
 
@@ -257,7 +284,5 @@ public class DirectoryHelper {
     public Account getAccount() {
       return account;
     }
-
   }
-
 }

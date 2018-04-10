@@ -1,8 +1,7 @@
 package org.thoughtcrime.securesms.util.concurrent;
 
-import org.thoughtcrime.securesms.util.concurrent.ListenableFuture.Listener;
-
 import java.util.concurrent.ExecutionException;
+import org.thoughtcrime.securesms.util.concurrent.ListenableFuture.Listener;
 
 public abstract class AssertedSuccessListener<T> implements Listener<T> {
   @Override

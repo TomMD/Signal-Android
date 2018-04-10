@@ -1,16 +1,13 @@
 package org.thoughtcrime.securesms.database.identity;
 
-
 import android.content.Context;
-
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.thoughtcrime.securesms.database.IdentityDatabase.IdentityRecord;
 import org.thoughtcrime.securesms.database.IdentityDatabase.VerifiedStatus;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.whispersystems.libsignal.util.guava.Optional;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class IdentityRecordList {
 
@@ -108,8 +105,8 @@ public class IdentityRecordList {
   }
 
   private boolean isUntrusted(IdentityRecord identityRecord) {
-    return !identityRecord.isApprovedNonBlocking() &&
-           System.currentTimeMillis() - identityRecord.getTimestamp() < TimeUnit.SECONDS.toMillis(5);
+    return !identityRecord.isApprovedNonBlocking()
+        && System.currentTimeMillis() - identityRecord.getTimestamp()
+            < TimeUnit.SECONDS.toMillis(5);
   }
-
 }

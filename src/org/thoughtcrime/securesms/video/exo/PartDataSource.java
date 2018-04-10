@@ -1,34 +1,31 @@
 package org.thoughtcrime.securesms.video.exo;
 
-
 import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.TransferListener;
-
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
 import org.thoughtcrime.securesms.attachments.Attachment;
 import org.thoughtcrime.securesms.database.AttachmentDatabase;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.mms.PartUriParser;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
-
 public class PartDataSource implements DataSource {
 
-  private final @NonNull  Context      context;
+  private final @NonNull Context context;
   private final @Nullable TransferListener<? super PartDataSource> listener;
 
-  private Uri         uri;
+  private Uri uri;
   private InputStream inputSteam;
 
-  PartDataSource(@NonNull Context context, @Nullable TransferListener<? super PartDataSource> listener) {
-    this.context  = context.getApplicationContext();
+  PartDataSource(
+      @NonNull Context context, @Nullable TransferListener<? super PartDataSource> listener) {
+    this.context = context.getApplicationContext();
     this.listener = listener;
   }
 
@@ -37,12 +34,13 @@ public class PartDataSource implements DataSource {
     this.uri = dataSpec.uri;
 
     AttachmentDatabase attachmentDatabase = DatabaseFactory.getAttachmentDatabase(context);
-    PartUriParser      partUri            = new PartUriParser(uri);
-    Attachment         attachment         = attachmentDatabase.getAttachment(partUri.getPartId());
+    PartUriParser partUri = new PartUriParser(uri);
+    Attachment attachment = attachmentDatabase.getAttachment(partUri.getPartId());
 
     if (attachment == null) throw new IOException("Attachment not found");
 
-    this.inputSteam = attachmentDatabase.getAttachmentStream(partUri.getPartId(), dataSpec.position);
+    this.inputSteam =
+        attachmentDatabase.getAttachmentStream(partUri.getPartId(), dataSpec.position);
 
     if (listener != null) {
       listener.onTransferStart(this, dataSpec);

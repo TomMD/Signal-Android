@@ -1,34 +1,32 @@
 package org.thoughtcrime.securesms.contacts.avatars;
 
-
 import android.content.Context;
 import android.support.annotation.NonNull;
-
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.MessageDigest;
 import org.thoughtcrime.securesms.database.Address;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.GroupDatabase;
 import org.thoughtcrime.securesms.util.Conversions;
 import org.whispersystems.libsignal.util.guava.Optional;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.MessageDigest;
-
 public class GroupRecordContactPhoto implements ContactPhoto {
 
   private final @NonNull Address address;
-  private final          long avatarId;
+  private final long avatarId;
 
   public GroupRecordContactPhoto(@NonNull Address address, long avatarId) {
-    this.address  = address;
+    this.address = address;
     this.avatarId = avatarId;
   }
 
   @Override
   public InputStream openInputStream(Context context) throws IOException {
-    GroupDatabase                       groupDatabase = DatabaseFactory.getGroupDatabase(context);
-    Optional<GroupDatabase.GroupRecord> groupRecord   = groupDatabase.getGroup(address.toGroupString());
+    GroupDatabase groupDatabase = DatabaseFactory.getGroupDatabase(context);
+    Optional<GroupDatabase.GroupRecord> groupRecord =
+        groupDatabase.getGroup(address.toGroupString());
 
     if (groupRecord.isPresent() && groupRecord.get().getAvatar() != null) {
       return new ByteArrayInputStream(groupRecord.get().getAvatar());
@@ -47,7 +45,7 @@ public class GroupRecordContactPhoto implements ContactPhoto {
   public boolean equals(Object other) {
     if (other == null || !(other instanceof GroupRecordContactPhoto)) return false;
 
-    GroupRecordContactPhoto that = (GroupRecordContactPhoto)other;
+    GroupRecordContactPhoto that = (GroupRecordContactPhoto) other;
     return this.address.equals(that.address) && this.avatarId == that.avatarId;
   }
 
@@ -55,5 +53,4 @@ public class GroupRecordContactPhoto implements ContactPhoto {
   public int hashCode() {
     return this.address.hashCode() ^ (int) avatarId;
   }
-
 }

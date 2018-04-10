@@ -21,7 +21,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
-
 /**
  * AspectRatioImageView maintains an aspect ratio by adjusting the width or height dimension. The
  * aspect ratio (width to height ratio) and adjustment dimension can be configured.
@@ -34,8 +33,8 @@ public class AspectRatioImageView extends ImageView {
   static final int ADJUST_DIMENSION_HEIGHT = 0;
   static final int ADJUST_DIMENSION_WIDTH = 1;
 
-  private double aspectRatio;         // width to height ratio
-  private int dimensionToAdjust;      // ADJUST_DIMENSION_HEIGHT or ADJUST_DIMENSION_WIDTH
+  private double aspectRatio; // width to height ratio
+  private int dimensionToAdjust; // ADJUST_DIMENSION_HEIGHT or ADJUST_DIMENSION_WIDTH
 
   public AspectRatioImageView(Context context) {
     this(context, null);
@@ -43,17 +42,17 @@ public class AspectRatioImageView extends ImageView {
 
   public AspectRatioImageView(Context context, AttributeSet attrs) {
     super(context, attrs);
-//    final TypedArray a = context.obtainStyledAttributes(attrs,
-//                                                        R.styleable.tw__AspectRatioImageView);
-//    try {
-//      aspectRatio = a.getFloat(R.styleable.tw__AspectRatioImageView_tw__image_aspect_ratio,
-//                               DEFAULT_ASPECT_RATIO);
-//      dimensionToAdjust
-//          = a.getInt(R.styleable.tw__AspectRatioImageView_tw__image_dimension_to_adjust,
-//                     DEFAULT_ADJUST_DIMENSION);
-//    } finally {
-//      a.recycle();
-//    }
+    //    final TypedArray a = context.obtainStyledAttributes(attrs,
+    //                                                        R.styleable.tw__AspectRatioImageView);
+    //    try {
+    //      aspectRatio = a.getFloat(R.styleable.tw__AspectRatioImageView_tw__image_aspect_ratio,
+    //                               DEFAULT_ASPECT_RATIO);
+    //      dimensionToAdjust
+    //          = a.getInt(R.styleable.tw__AspectRatioImageView_tw__image_dimension_to_adjust,
+    //                     DEFAULT_ADJUST_DIMENSION);
+    //    } finally {
+    //      a.recycle();
+    //    }
   }
 
   public double getAspectRatio() {
@@ -73,15 +72,14 @@ public class AspectRatioImageView extends ImageView {
     this.aspectRatio = aspectRatio;
   }
 
-  /**
-   * Resets the size to 0.
-   */
+  /** Resets the size to 0. */
   public void resetSize() {
     if (getMeasuredWidth() == 0 && getMeasuredHeight() == 0) {
       return;
     }
-    measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.EXACTLY),
-            MeasureSpec.makeMeasureSpec(0, MeasureSpec.EXACTLY));
+    measure(
+        MeasureSpec.makeMeasureSpec(0, MeasureSpec.EXACTLY),
+        MeasureSpec.makeMeasureSpec(0, MeasureSpec.EXACTLY));
     layout(0, 0, 0, 0);
   }
 
@@ -99,8 +97,8 @@ public class AspectRatioImageView extends ImageView {
   }
 
   /**
-   * Returns the height that will satisfy the width to height aspect ratio, keeping the given
-   * width fixed.
+   * Returns the height that will satisfy the width to height aspect ratio, keeping the given width
+   * fixed.
    */
   int calculateHeight(int width, double ratio) {
     if (ratio == 0) {
@@ -110,8 +108,8 @@ public class AspectRatioImageView extends ImageView {
   }
 
   /**
-   * Returns the width that will satisfy the width to height aspect ratio, keeping the given
-   * height fixed.
+   * Returns the width that will satisfy the width to height aspect ratio, keeping the given height
+   * fixed.
    */
   int calculateWidth(int height, double ratio) {
     return (int) Math.round(height * ratio);

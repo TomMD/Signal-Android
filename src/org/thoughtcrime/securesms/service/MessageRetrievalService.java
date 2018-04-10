@@ -7,7 +7,12 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import javax.inject.Inject;
 import org.thoughtcrime.securesms.ApplicationContext;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.dependencies.InjectableType;
@@ -21,35 +26,27 @@ import org.whispersystems.libsignal.InvalidVersionException;
 import org.whispersystems.signalservice.api.SignalServiceMessagePipe;
 import org.whispersystems.signalservice.api.SignalServiceMessageReceiver;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.inject.Inject;
-
-public class MessageRetrievalService extends Service implements InjectableType, RequirementListener {
+public class MessageRetrievalService extends Service
+    implements InjectableType, RequirementListener {
 
   private static final String TAG = MessageRetrievalService.class.getSimpleName();
 
-  public static final  String ACTION_ACTIVITY_STARTED  = "ACTIVITY_STARTED";
-  public static final  String ACTION_ACTIVITY_FINISHED = "ACTIVITY_FINISHED";
-  public static final  String ACTION_PUSH_RECEIVED     = "PUSH_RECEIVED";
-  public static final  String ACTION_INITIALIZE        = "INITIALIZE";
-  public static final  int    FOREGROUND_ID            = 313399;
+  public static final String ACTION_ACTIVITY_STARTED = "ACTIVITY_STARTED";
+  public static final String ACTION_ACTIVITY_FINISHED = "ACTIVITY_FINISHED";
+  public static final String ACTION_PUSH_RECEIVED = "PUSH_RECEIVED";
+  public static final String ACTION_INITIALIZE = "INITIALIZE";
+  public static final int FOREGROUND_ID = 313399;
 
-  private static final long   REQUEST_TIMEOUT_MINUTES  = 1;
+  private static final long REQUEST_TIMEOUT_MINUTES = 1;
 
-  private NetworkRequirement         networkRequirement;
+  private NetworkRequirement networkRequirement;
   private NetworkRequirementProvider networkRequirementProvider;
 
-  @Inject
-  public SignalServiceMessageReceiver receiver;
+  @Inject public SignalServiceMessageReceiver receiver;
 
-  private int                    activeActivities = 0;
-  private List<Intent>           pushPending      = new LinkedList<>();
-  private MessageRetrievalThread retrievalThread  = null;
+  private int activeActivities = 0;
+  private List<Intent> pushPending = new LinkedList<>();
+  private MessageRetrievalThread retrievalThread = null;
 
   public static SignalServiceMessagePipe pipe = null;
 
@@ -58,7 +55,7 @@ public class MessageRetrievalService extends Service implements InjectableType, 
     super.onCreate();
     ApplicationContext.getInstance(this).injectDependencies(this);
 
-    networkRequirement         = new NetworkRequirement(this);
+    networkRequirement = new NetworkRequirement(this);
     networkRequirementProvider = new NetworkRequirementProvider(this);
 
     networkRequirementProvider.setListener(this);
@@ -72,9 +69,9 @@ public class MessageRetrievalService extends Service implements InjectableType, 
   public int onStartCommand(Intent intent, int flags, int startId) {
     if (intent == null) return START_STICKY;
 
-    if      (ACTION_ACTIVITY_STARTED.equals(intent.getAction()))  incrementActive();
+    if (ACTION_ACTIVITY_STARTED.equals(intent.getAction())) incrementActive();
     else if (ACTION_ACTIVITY_FINISHED.equals(intent.getAction())) decrementActive();
-    else if (ACTION_PUSH_RECEIVED.equals(intent.getAction()))     incrementPushReceived(intent);
+    else if (ACTION_PUSH_RECEIVED.equals(intent.getAction())) incrementPushReceived(intent);
 
     return START_STICKY;
   }
@@ -106,7 +103,8 @@ public class MessageRetrievalService extends Service implements InjectableType, 
     if (TextSecurePreferences.isGcmDisabled(this)) {
       NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
       builder.setContentTitle(getString(R.string.MessageRetrievalService_signal));
-      builder.setContentText(getString(R.string.MessageRetrievalService_background_connection_enabled));
+      builder.setContentText(
+          getString(R.string.MessageRetrievalService_background_connection_enabled));
       builder.setPriority(NotificationCompat.PRIORITY_MIN);
       builder.setWhen(0);
       builder.setSmallIcon(R.drawable.ic_signal_grey_24dp);
@@ -142,13 +140,16 @@ public class MessageRetrievalService extends Service implements InjectableType, 
   private synchronized boolean isConnectionNecessary() {
     boolean isGcmDisabled = TextSecurePreferences.isGcmDisabled(this);
 
-    Log.w(TAG, String.format("Network requirement: %s, active activities: %s, push pending: %s, gcm disabled: %b",
-                             networkRequirement.isPresent(), activeActivities, pushPending.size(), isGcmDisabled));
+    Log.w(
+        TAG,
+        String.format(
+            "Network requirement: %s, active activities: %s, push pending: %s, gcm disabled: %b",
+            networkRequirement.isPresent(), activeActivities, pushPending.size(), isGcmDisabled));
 
-    return TextSecurePreferences.isPushRegistered(this)                       &&
-           TextSecurePreferences.isWebsocketRegistered(this)                  &&
-           (activeActivities > 0 || !pushPending.isEmpty() || isGcmDisabled)  &&
-           networkRequirement.isPresent();
+    return TextSecurePreferences.isPushRegistered(this)
+        && TextSecurePreferences.isWebsocketRegistered(this)
+        && (activeActivities > 0 || !pushPending.isEmpty() || isGcmDisabled)
+        && networkRequirement.isPresent();
   }
 
   private synchronized void waitForConnectionNecessary() {
@@ -207,15 +208,18 @@ public class MessageRetrievalService extends Service implements InjectableType, 
           while (isConnectionNecessary() && !stopThread.get()) {
             try {
               Log.w(TAG, "Reading message...");
-              localPipe.read(REQUEST_TIMEOUT_MINUTES, TimeUnit.MINUTES,
-                             envelope -> {
-                               Log.w(TAG, "Retrieved envelope! " + envelope.getSource());
+              localPipe.read(
+                  REQUEST_TIMEOUT_MINUTES,
+                  TimeUnit.MINUTES,
+                  envelope -> {
+                    Log.w(TAG, "Retrieved envelope! " + envelope.getSource());
 
-                               PushContentReceiveJob receiveJob = new PushContentReceiveJob(MessageRetrievalService.this);
-                               receiveJob.handle(envelope);
+                    PushContentReceiveJob receiveJob =
+                        new PushContentReceiveJob(MessageRetrievalService.this);
+                    receiveJob.handle(envelope);
 
-                               decrementPushReceived();
-                             });
+                    decrementPushReceived();
+                  });
             } catch (TimeoutException e) {
               Log.w(TAG, "Application level read timeout...");
             } catch (InvalidVersionException e) {

@@ -1,7 +1,6 @@
 package org.thoughtcrime.securesms.database.documents;
 
 import android.util.Log;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -12,13 +11,11 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
+import java.io.IOException;
 import org.thoughtcrime.securesms.database.Address;
 import org.thoughtcrime.securesms.util.Base64;
 import org.whispersystems.libsignal.IdentityKey;
 import org.whispersystems.libsignal.InvalidKeyException;
-
-import java.io.IOException;
 
 public class IdentityKeyMismatch {
 
@@ -35,7 +32,7 @@ public class IdentityKeyMismatch {
   public IdentityKeyMismatch() {}
 
   public IdentityKeyMismatch(Address address, IdentityKey identityKey) {
-    this.address     = address.serialize();
+    this.address = address.serialize();
     this.identityKey = identityKey;
   }
 
@@ -54,7 +51,7 @@ public class IdentityKeyMismatch {
       return false;
     }
 
-    IdentityKeyMismatch that = (IdentityKeyMismatch)other;
+    IdentityKeyMismatch that = (IdentityKeyMismatch) other;
     return that.address.equals(this.address) && that.identityKey.equals(this.identityKey);
   }
 
@@ -65,9 +62,9 @@ public class IdentityKeyMismatch {
 
   private static class IdentityKeySerializer extends JsonSerializer<IdentityKey> {
     @Override
-    public void serialize(IdentityKey value, JsonGenerator jsonGenerator, SerializerProvider serializers)
-        throws IOException
-    {
+    public void serialize(
+        IdentityKey value, JsonGenerator jsonGenerator, SerializerProvider serializers)
+        throws IOException {
       jsonGenerator.writeString(Base64.encodeBytes(value.serialize()));
     }
   }
@@ -75,8 +72,7 @@ public class IdentityKeyMismatch {
   private static class IdentityKeyDeserializer extends JsonDeserializer<IdentityKey> {
     @Override
     public IdentityKey deserialize(JsonParser jsonParser, DeserializationContext ctxt)
-        throws IOException
-    {
+        throws IOException {
       try {
         return new IdentityKey(Base64.decode(jsonParser.getValueAsString()), 0);
       } catch (InvalidKeyException e) {

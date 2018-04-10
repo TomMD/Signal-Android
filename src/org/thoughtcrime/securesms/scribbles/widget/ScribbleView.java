@@ -30,10 +30,9 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.Target;
-
+import java.util.concurrent.ExecutionException;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.mms.DecryptableStreamUriLoader.DecryptableUri;
 import org.thoughtcrime.securesms.mms.GlideRequests;
@@ -42,8 +41,6 @@ import org.thoughtcrime.securesms.scribbles.widget.entity.TextEntity;
 import org.thoughtcrime.securesms.util.Util;
 import org.thoughtcrime.securesms.util.concurrent.ListenableFuture;
 import org.thoughtcrime.securesms.util.concurrent.SettableFuture;
-
-import java.util.concurrent.ExecutionException;
 
 public class ScribbleView extends FrameLayout {
 
@@ -77,19 +74,20 @@ public class ScribbleView extends FrameLayout {
   }
 
   public void setImage(@NonNull GlideRequests glideRequests, @NonNull Uri uri) {
-    this.imageUri     = uri;
+    this.imageUri = uri;
 
-    glideRequests.load(new DecryptableUri(uri))
-                 .diskCacheStrategy(DiskCacheStrategy.NONE)
-                 .fitCenter()
-                 .into(imageView);
+    glideRequests
+        .load(new DecryptableUri(uri))
+        .diskCacheStrategy(DiskCacheStrategy.NONE)
+        .fitCenter()
+        .into(imageView);
   }
 
   @SuppressLint("StaticFieldLeak")
   public @NonNull ListenableFuture<Bitmap> getRenderedImage(@NonNull GlideRequests glideRequests) {
-    final SettableFuture<Bitmap> future      = new SettableFuture<>();
-    final Context                context     = getContext();
-    final boolean                isLowMemory = Util.isLowMemory(context);
+    final SettableFuture<Bitmap> future = new SettableFuture<>();
+    final Context context = getContext();
+    final boolean isLowMemory = Util.isLowMemory(context);
 
     if (imageUri == null) {
       future.set(null);
@@ -100,20 +98,21 @@ public class ScribbleView extends FrameLayout {
       @Override
       protected @Nullable Bitmap doInBackground(Void... params) {
         try {
-          int width  = Target.SIZE_ORIGINAL;
+          int width = Target.SIZE_ORIGINAL;
           int height = Target.SIZE_ORIGINAL;
 
           if (isLowMemory) {
-            width  = 768;
+            width = 768;
             height = 768;
           }
 
-          return glideRequests.asBitmap()
-                              .load(new DecryptableUri(imageUri))
-                              .diskCacheStrategy(DiskCacheStrategy.NONE)
-                              .skipMemoryCache(true)
-                              .into(width, height)
-                              .get();
+          return glideRequests
+              .asBitmap()
+              .load(new DecryptableUri(imageUri))
+              .diskCacheStrategy(DiskCacheStrategy.NONE)
+              .skipMemoryCache(true)
+              .into(width, height)
+              .get();
         } catch (InterruptedException | ExecutionException e) {
           Log.w(TAG, e);
           return null;
@@ -140,7 +139,7 @@ public class ScribbleView extends FrameLayout {
   private void initialize(@NonNull Context context) {
     inflate(context, R.layout.scribble_view, this);
 
-    this.imageView  = findViewById(R.id.image_view);
+    this.imageView = findViewById(R.id.image_view);
     this.motionView = findViewById(R.id.motion_view);
     this.canvasView = findViewById(R.id.canvas_view);
   }
@@ -189,11 +188,12 @@ public class ScribbleView extends FrameLayout {
 
     setMeasuredDimension(imageView.getMeasuredWidth(), imageView.getMeasuredHeight());
 
-    canvasView.measure(MeasureSpec.makeMeasureSpec(imageView.getMeasuredWidth(), MeasureSpec.EXACTLY),
-                       MeasureSpec.makeMeasureSpec(imageView.getMeasuredHeight(), MeasureSpec.EXACTLY));
+    canvasView.measure(
+        MeasureSpec.makeMeasureSpec(imageView.getMeasuredWidth(), MeasureSpec.EXACTLY),
+        MeasureSpec.makeMeasureSpec(imageView.getMeasuredHeight(), MeasureSpec.EXACTLY));
 
-    motionView.measure(MeasureSpec.makeMeasureSpec(imageView.getMeasuredWidth(), MeasureSpec.EXACTLY),
-                       MeasureSpec.makeMeasureSpec(imageView.getMeasuredHeight(), MeasureSpec.EXACTLY));
+    motionView.measure(
+        MeasureSpec.makeMeasureSpec(imageView.getMeasuredWidth(), MeasureSpec.EXACTLY),
+        MeasureSpec.makeMeasureSpec(imageView.getMeasuredHeight(), MeasureSpec.EXACTLY));
   }
-
 }

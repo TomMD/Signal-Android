@@ -10,7 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-
+import java.util.Locale;
 import org.thoughtcrime.securesms.crypto.MasterSecretUtil;
 import org.thoughtcrime.securesms.jobs.PushNotificationReceiveJob;
 import org.thoughtcrime.securesms.push.SignalServiceNetworkAccess;
@@ -18,23 +18,22 @@ import org.thoughtcrime.securesms.service.KeyCachingService;
 import org.thoughtcrime.securesms.service.MessageRetrievalService;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
 
-import java.util.Locale;
-
-public abstract class PassphraseRequiredActionBarActivity extends BaseActionBarActivity implements MasterSecretListener {
+public abstract class PassphraseRequiredActionBarActivity extends BaseActionBarActivity
+    implements MasterSecretListener {
   private static final String TAG = PassphraseRequiredActionBarActivity.class.getSimpleName();
 
   public static final String LOCALE_EXTRA = "locale_extra";
 
-  private static final int STATE_NORMAL                   = 0;
-  private static final int STATE_CREATE_PASSPHRASE        = 1;
-  private static final int STATE_PROMPT_PASSPHRASE        = 2;
-  private static final int STATE_UPGRADE_DATABASE         = 3;
+  private static final int STATE_NORMAL = 0;
+  private static final int STATE_CREATE_PASSPHRASE = 1;
+  private static final int STATE_PROMPT_PASSPHRASE = 2;
+  private static final int STATE_UPGRADE_DATABASE = 3;
   private static final int STATE_PROMPT_PUSH_REGISTRATION = 4;
-  private static final int STATE_EXPERIENCE_UPGRADE       = 5;
+  private static final int STATE_EXPERIENCE_UPGRADE = 5;
 
   private SignalServiceNetworkAccess networkAccess;
-  private BroadcastReceiver          clearKeyReceiver;
-  private boolean                    isVisible;
+  private BroadcastReceiver clearKeyReceiver;
+  private boolean isVisible;
 
   @Override
   protected final void onCreate(Bundle savedInstanceState) {
@@ -54,6 +53,7 @@ public abstract class PassphraseRequiredActionBarActivity extends BaseActionBarA
   }
 
   protected void onPreCreate() {}
+
   protected void onCreate(Bundle savedInstanceState, boolean ready) {}
 
   @Override
@@ -63,7 +63,10 @@ public abstract class PassphraseRequiredActionBarActivity extends BaseActionBarA
     KeyCachingService.registerPassphraseActivityStarted(this);
 
     if (!networkAccess.isCensored(this)) MessageRetrievalService.registerActivityStarted(this);
-    else                                 ApplicationContext.getInstance(this).getJobManager().add(new PushNotificationReceiveJob(this));
+    else
+      ApplicationContext.getInstance(this)
+          .getJobManager()
+          .add(new PushNotificationReceiveJob(this));
 
     isVisible = true;
   }
@@ -90,27 +93,20 @@ public abstract class PassphraseRequiredActionBarActivity extends BaseActionBarA
   public void onMasterSecretCleared() {
     Log.w(TAG, "onMasterSecretCleared()");
     if (isVisible) routeApplicationState(true);
-    else           finish();
+    else finish();
   }
 
-  protected <T extends Fragment> T initFragment(@IdRes int target,
-                                                @NonNull T fragment)
-  {
+  protected <T extends Fragment> T initFragment(@IdRes int target, @NonNull T fragment) {
     return initFragment(target, fragment, null);
   }
 
-  protected <T extends Fragment> T initFragment(@IdRes int target,
-                                                @NonNull T fragment,
-                                                @Nullable Locale locale)
-  {
+  protected <T extends Fragment> T initFragment(
+      @IdRes int target, @NonNull T fragment, @Nullable Locale locale) {
     return initFragment(target, fragment, locale, null);
   }
 
-  protected <T extends Fragment> T initFragment(@IdRes int target,
-                                                @NonNull T fragment,
-                                                @Nullable Locale locale,
-                                                @Nullable Bundle extras)
-  {
+  protected <T extends Fragment> T initFragment(
+      @IdRes int target, @NonNull T fragment, @Nullable Locale locale, @Nullable Bundle extras) {
     Bundle args = new Bundle();
     args.putSerializable(LOCALE_EXTRA, locale);
 
@@ -119,9 +115,10 @@ public abstract class PassphraseRequiredActionBarActivity extends BaseActionBarA
     }
 
     fragment.setArguments(args);
-    getSupportFragmentManager().beginTransaction()
-                               .replace(target, fragment)
-                               .commitAllowingStateLoss();
+    getSupportFragmentManager()
+        .beginTransaction()
+        .replace(target, fragment)
+        .commitAllowingStateLoss();
     return fragment;
   }
 
@@ -137,12 +134,18 @@ public abstract class PassphraseRequiredActionBarActivity extends BaseActionBarA
     Log.w(TAG, "routeApplicationState(), state: " + state);
 
     switch (state) {
-    case STATE_CREATE_PASSPHRASE:        return getCreatePassphraseIntent();
-    case STATE_PROMPT_PASSPHRASE:        return getPromptPassphraseIntent();
-    case STATE_UPGRADE_DATABASE:         return getUpgradeDatabaseIntent();
-    case STATE_PROMPT_PUSH_REGISTRATION: return getPushRegistrationIntent();
-    case STATE_EXPERIENCE_UPGRADE:       return getExperienceUpgradeIntent();
-    default:                             return null;
+      case STATE_CREATE_PASSPHRASE:
+        return getCreatePassphraseIntent();
+      case STATE_PROMPT_PASSPHRASE:
+        return getPromptPassphraseIntent();
+      case STATE_UPGRADE_DATABASE:
+        return getUpgradeDatabaseIntent();
+      case STATE_PROMPT_PUSH_REGISTRATION:
+        return getPushRegistrationIntent();
+      case STATE_EXPERIENCE_UPGRADE:
+        return getExperienceUpgradeIntent();
+      default:
+        return null;
     }
   }
 
@@ -171,10 +174,11 @@ public abstract class PassphraseRequiredActionBarActivity extends BaseActionBarA
   }
 
   private Intent getUpgradeDatabaseIntent() {
-    return getRoutedIntent(DatabaseUpgradeActivity.class,
-                           TextSecurePreferences.hasPromptedPushRegistration(this)
-                               ? getConversationListIntent()
-                               : getPushRegistrationIntent());
+    return getRoutedIntent(
+        DatabaseUpgradeActivity.class,
+        TextSecurePreferences.hasPromptedPushRegistration(this)
+            ? getConversationListIntent()
+            : getPushRegistrationIntent());
   }
 
   private Intent getExperienceUpgradeIntent() {
@@ -191,7 +195,7 @@ public abstract class PassphraseRequiredActionBarActivity extends BaseActionBarA
 
   private Intent getRoutedIntent(Class<?> destination, @Nullable Intent nextIntent) {
     final Intent intent = new Intent(this, destination);
-    if (nextIntent != null)   intent.putExtra("next_intent", nextIntent);
+    if (nextIntent != null) intent.putExtra("next_intent", nextIntent);
     return intent;
   }
 
@@ -201,13 +205,14 @@ public abstract class PassphraseRequiredActionBarActivity extends BaseActionBarA
 
   private void initializeClearKeyReceiver() {
     Log.w(TAG, "initializeClearKeyReceiver()");
-    this.clearKeyReceiver = new BroadcastReceiver() {
-      @Override
-      public void onReceive(Context context, Intent intent) {
-        Log.w(TAG, "onReceive() for clear key event");
-        onMasterSecretCleared();
-      }
-    };
+    this.clearKeyReceiver =
+        new BroadcastReceiver() {
+          @Override
+          public void onReceive(Context context, Intent intent) {
+            Log.w(TAG, "onReceive() for clear key event");
+            onMasterSecretCleared();
+          }
+        };
 
     IntentFilter filter = new IntentFilter(KeyCachingService.CLEAR_KEY_EVENT);
     registerReceiver(clearKeyReceiver, filter, KeyCachingService.KEY_PERMISSION, null);

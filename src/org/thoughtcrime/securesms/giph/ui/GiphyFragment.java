@@ -16,7 +16,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
+import java.util.LinkedList;
+import java.util.List;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.giph.model.GiphyImage;
 import org.thoughtcrime.securesms.giph.net.GiphyLoader;
@@ -24,17 +25,15 @@ import org.thoughtcrime.securesms.giph.util.InfiniteScrollListener;
 import org.thoughtcrime.securesms.mms.GlideApp;
 import org.thoughtcrime.securesms.util.ViewUtil;
 
-import java.util.LinkedList;
-import java.util.List;
-
-public abstract class GiphyFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<GiphyImage>>, GiphyAdapter.OnItemClickListener {
+public abstract class GiphyFragment extends Fragment
+    implements LoaderManager.LoaderCallbacks<List<GiphyImage>>, GiphyAdapter.OnItemClickListener {
 
   private static final String TAG = GiphyFragment.class.getSimpleName();
 
-  private GiphyAdapter                     giphyAdapter;
-  private RecyclerView                     recyclerView;
-  private ProgressBar                      loadingProgress;
-  private TextView                         noResultsView;
+  private GiphyAdapter giphyAdapter;
+  private RecyclerView recyclerView;
+  private ProgressBar loadingProgress;
+  private TextView noResultsView;
   private GiphyAdapter.OnItemClickListener listener;
 
   protected String searchString;
@@ -42,9 +41,9 @@ public abstract class GiphyFragment extends Fragment implements LoaderManager.Lo
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup, Bundle bundle) {
     ViewGroup container = ViewUtil.inflate(inflater, viewGroup, R.layout.giphy_fragment);
-    this.recyclerView    = ViewUtil.findById(container, R.id.giphy_list);
+    this.recyclerView = ViewUtil.findById(container, R.id.giphy_list);
     this.loadingProgress = ViewUtil.findById(container, R.id.loading_progress);
-    this.noResultsView   = ViewUtil.findById(container, R.id.no_results);
+    this.noResultsView = ViewUtil.findById(container, R.id.no_results);
 
     return container;
   }
@@ -69,7 +68,7 @@ public abstract class GiphyFragment extends Fragment implements LoaderManager.Lo
     this.loadingProgress.setVisibility(View.GONE);
 
     if (data.isEmpty()) noResultsView.setVisibility(View.VISIBLE);
-    else                noResultsView.setVisibility(View.GONE);
+    else noResultsView.setVisibility(View.GONE);
 
     this.giphyAdapter.setImages(data);
   }
@@ -82,7 +81,8 @@ public abstract class GiphyFragment extends Fragment implements LoaderManager.Lo
 
   public void setLayoutManager(int type) {
     if (type == GiphyActivityToolbar.OnLayoutChangedListener.LAYOUT_GRID) {
-      this.recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+      this.recyclerView.setLayoutManager(
+          new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
     } else {
       this.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
@@ -112,7 +112,7 @@ public abstract class GiphyFragment extends Fragment implements LoaderManager.Lo
       new AsyncTask<Void, Void, List<GiphyImage>>() {
         @Override
         protected List<GiphyImage> doInBackground(Void... params) {
-          return ((GiphyLoader)loader).loadPage(currentPage * GiphyLoader.PAGE_SIZE);
+          return ((GiphyLoader) loader).loadPage(currentPage * GiphyLoader.PAGE_SIZE);
         }
 
         protected void onPostExecute(List<GiphyImage> images) {

@@ -1,14 +1,14 @@
 package org.thoughtcrime.securesms.jobs;
 
-
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
-
+import java.io.IOException;
+import java.util.List;
+import javax.inject.Inject;
 import org.thoughtcrime.securesms.ApplicationContext;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
-import org.thoughtcrime.securesms.database.RecipientDatabase.RecipientSettings;
 import org.thoughtcrime.securesms.dependencies.InjectableType;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.service.MessageRetrievalService;
@@ -18,18 +18,12 @@ import org.thoughtcrime.securesms.util.Util;
 import org.whispersystems.jobqueue.JobParameters;
 import org.whispersystems.libsignal.IdentityKey;
 import org.whispersystems.libsignal.InvalidKeyException;
-import org.whispersystems.libsignal.util.guava.Optional;
 import org.whispersystems.signalservice.api.SignalServiceMessagePipe;
 import org.whispersystems.signalservice.api.SignalServiceMessageReceiver;
 import org.whispersystems.signalservice.api.crypto.ProfileCipher;
 import org.whispersystems.signalservice.api.profiles.SignalServiceProfile;
 import org.whispersystems.signalservice.api.push.SignalServiceAddress;
 import org.whispersystems.signalservice.api.util.InvalidNumberException;
-
-import java.io.IOException;
-import java.util.List;
-
-import javax.inject.Inject;
 
 public class RetrieveProfileJob extends ContextJob implements InjectableType {
 
@@ -40,9 +34,7 @@ public class RetrieveProfileJob extends ContextJob implements InjectableType {
   private final Recipient recipient;
 
   public RetrieveProfileJob(Context context, Recipient recipient) {
-    super(context, JobParameters.newBuilder()
-                                .withRetryCount(3)
-                                .create());
+    super(context, JobParameters.newBuilder().withRetryCount(3).create());
 
     this.recipient = recipient;
   }
@@ -54,7 +46,7 @@ public class RetrieveProfileJob extends ContextJob implements InjectableType {
   public void onRun() throws IOException, InvalidKeyException {
     try {
       if (recipient.isGroupRecipient()) handleGroupRecipient(recipient);
-      else                              handleIndividualRecipient(recipient);
+      else handleIndividualRecipient(recipient);
     } catch (InvalidNumberException e) {
       Log.w(TAG, e);
     }
@@ -69,9 +61,8 @@ public class RetrieveProfileJob extends ContextJob implements InjectableType {
   public void onCanceled() {}
 
   private void handleIndividualRecipient(Recipient recipient)
-      throws IOException, InvalidKeyException, InvalidNumberException
-  {
-    String               number  = recipient.getAddress().toPhoneString();
+      throws IOException, InvalidKeyException, InvalidNumberException {
+    String number = recipient.getAddress().toPhoneString();
     SignalServiceProfile profile = retrieveProfile(number);
 
     setIdentityKey(recipient, profile.getIdentityKey());
@@ -80,9 +71,10 @@ public class RetrieveProfileJob extends ContextJob implements InjectableType {
   }
 
   private void handleGroupRecipient(Recipient group)
-      throws IOException, InvalidKeyException, InvalidNumberException
-  {
-    List<Recipient> recipients = DatabaseFactory.getGroupDatabase(context).getGroupMembers(group.getAddress().toGroupString(), false);
+      throws IOException, InvalidKeyException, InvalidNumberException {
+    List<Recipient> recipients =
+        DatabaseFactory.getGroupDatabase(context)
+            .getGroupMembers(group.getAddress().toGroupString(), false);
 
     for (Recipient recipient : recipients) {
       handleIndividualRecipient(recipient);
@@ -113,9 +105,8 @@ public class RetrieveProfileJob extends ContextJob implements InjectableType {
       IdentityKey identityKey = new IdentityKey(Base64.decode(identityKeyValue), 0);
 
       if (!DatabaseFactory.getIdentityDatabase(context)
-                          .getIdentity(recipient.getAddress())
-                          .isPresent())
-      {
+          .getIdentity(recipient.getAddress())
+          .isPresent()) {
         Log.w(TAG, "Still first use...");
         return;
       }
@@ -139,7 +130,8 @@ public class RetrieveProfileJob extends ContextJob implements InjectableType {
       }
 
       if (!Util.equals(plaintextProfileName, recipient.getProfileName())) {
-        DatabaseFactory.getRecipientDatabase(context).setProfileName(recipient, plaintextProfileName);
+        DatabaseFactory.getRecipientDatabase(context)
+            .setProfileName(recipient, plaintextProfileName);
       }
     } catch (ProfileCipher.InvalidCiphertextException | IOException e) {
       Log.w(TAG, e);
@@ -151,8 +143,8 @@ public class RetrieveProfileJob extends ContextJob implements InjectableType {
 
     if (!Util.equals(profileAvatar, recipient.getProfileAvatar())) {
       ApplicationContext.getInstance(context)
-                        .getJobManager()
-                        .add(new RetrieveProfileAvatarJob(context, recipient, profileAvatar));
+          .getJobManager()
+          .add(new RetrieveProfileAvatarJob(context, recipient, profileAvatar));
     }
   }
 }

@@ -22,9 +22,11 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.support.multidex.MultiDexApplication;
 import android.util.Log;
-
 import com.google.android.gms.security.ProviderInstaller;
-
+import dagger.ObjectGraph;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.thoughtcrime.securesms.crypto.PRNGFixes;
 import org.thoughtcrime.securesms.dependencies.AxolotlStorageModule;
 import org.thoughtcrime.securesms.dependencies.InjectableType;
@@ -52,17 +54,11 @@ import org.whispersystems.jobqueue.requirements.NetworkRequirementProvider;
 import org.whispersystems.libsignal.logging.SignalProtocolLoggerProvider;
 import org.whispersystems.libsignal.util.AndroidSignalProtocolLogger;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import dagger.ObjectGraph;
-
 /**
  * Will be called once when the TextSecure process is created.
  *
- * We're using this as an insertion point to patch up the Android PRNG disaster,
- * to initialize the job manager, and to check for GCM registration freshness.
+ * <p>We're using this as an insertion point to patch up the Android PRNG disaster, to initialize
+ * the job manager, and to check for GCM registration freshness.
  *
  * @author Moxie Marlinspike
  */
@@ -71,11 +67,11 @@ public class ApplicationContext extends MultiDexApplication implements Dependenc
   private static final String TAG = ApplicationContext.class.getName();
 
   private ExpiringMessageManager expiringMessageManager;
-  private JobManager             jobManager;
-  private ObjectGraph            objectGraph;
+  private JobManager jobManager;
+  private ObjectGraph objectGraph;
 
   public static ApplicationContext getInstance(Context context) {
-    return (ApplicationContext)context.getApplicationContext();
+    return (ApplicationContext) context.getApplicationContext();
   }
 
   @Override
@@ -117,28 +113,34 @@ public class ApplicationContext extends MultiDexApplication implements Dependenc
   }
 
   private void initializeJobManager() {
-    this.jobManager = JobManager.newBuilder(this)
-                                .withName("TextSecureJobs")
-                                .withDependencyInjector(this)
-                                .withJobSerializer(new JavaJobSerializer())
-                                .withRequirementProviders(new MasterSecretRequirementProvider(this),
-                                                          new ServiceRequirementProvider(this),
-                                                          new NetworkRequirementProvider(this),
-                                                          new SqlCipherMigrationRequirementProvider())
-                                .withConsumerThreads(5)
-                                .build();
+    this.jobManager =
+        JobManager.newBuilder(this)
+            .withName("TextSecureJobs")
+            .withDependencyInjector(this)
+            .withJobSerializer(new JavaJobSerializer())
+            .withRequirementProviders(
+                new MasterSecretRequirementProvider(this),
+                new ServiceRequirementProvider(this),
+                new NetworkRequirementProvider(this),
+                new SqlCipherMigrationRequirementProvider())
+            .withConsumerThreads(5)
+            .build();
   }
 
   private void initializeDependencyInjection() {
-    this.objectGraph = ObjectGraph.create(new SignalCommunicationModule(this, new SignalServiceNetworkAccess(this)),
-                                          new AxolotlStorageModule(this));
+    this.objectGraph =
+        ObjectGraph.create(
+            new SignalCommunicationModule(this, new SignalServiceNetworkAccess(this)),
+            new AxolotlStorageModule(this));
   }
 
   private void initializeGcmCheck() {
     if (TextSecurePreferences.isPushRegistered(this)) {
-      long nextSetTime = TextSecurePreferences.getGcmRegistrationIdLastSetTime(this) + TimeUnit.HOURS.toMillis(6);
+      long nextSetTime =
+          TextSecurePreferences.getGcmRegistrationIdLastSetTime(this) + TimeUnit.HOURS.toMillis(6);
 
-      if (TextSecurePreferences.getGcmRegistrationId(this) == null || nextSetTime <= System.currentTimeMillis()) {
+      if (TextSecurePreferences.getGcmRegistrationId(this) == null
+          || nextSetTime <= System.currentTimeMillis()) {
         this.jobManager.add(new GcmRefreshJob(this));
       }
     }
@@ -166,16 +168,22 @@ public class ApplicationContext extends MultiDexApplication implements Dependenc
 
   private void initializeWebRtc() {
     try {
-      Set<String> HARDWARE_AEC_BLACKLIST = new HashSet<String>() {{
-        add("Pixel");
-        add("Pixel XL");
-        add("Moto G5");
-      }};
+      Set<String> HARDWARE_AEC_BLACKLIST =
+          new HashSet<String>() {
+            {
+              add("Pixel");
+              add("Pixel XL");
+              add("Moto G5");
+            }
+          };
 
-      Set<String> OPEN_SL_ES_WHITELIST = new HashSet<String>() {{
-        add("Pixel");
-        add("Pixel XL");
-      }};
+      Set<String> OPEN_SL_ES_WHITELIST =
+          new HashSet<String>() {
+            {
+              add("Pixel");
+              add("Pixel XL");
+            }
+          };
 
       if (HARDWARE_AEC_BLACKLIST.contains(Build.MODEL)) {
         WebRtcAudioUtils.setWebRtcBasedAcousticEchoCanceler(true);
@@ -185,9 +193,10 @@ public class ApplicationContext extends MultiDexApplication implements Dependenc
         WebRtcAudioManager.setBlacklistDeviceForOpenSLESUsage(true);
       }
 
-      PeerConnectionFactory.initialize(InitializationOptions.builder(this)
-                                                            .setEnableVideoHwAcceleration(true)
-                                                            .createInitializationOptions());
+      PeerConnectionFactory.initialize(
+          InitializationOptions.builder(this)
+              .setEnableVideoHwAcceleration(true)
+              .createInitializationOptions());
     } catch (UnsatisfiedLinkError e) {
       Log.w(TAG, e);
     }
@@ -195,21 +204,22 @@ public class ApplicationContext extends MultiDexApplication implements Dependenc
 
   @SuppressLint("StaticFieldLeak")
   private void initializeCircumvention() {
-    AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
-      @Override
-      protected Void doInBackground(Void... params) {
-        if (new SignalServiceNetworkAccess(ApplicationContext.this).isCensored(ApplicationContext.this)) {
-          try {
-            ProviderInstaller.installIfNeeded(ApplicationContext.this);
-          } catch (Throwable t) {
-            Log.w(TAG, t);
+    AsyncTask<Void, Void, Void> task =
+        new AsyncTask<Void, Void, Void>() {
+          @Override
+          protected Void doInBackground(Void... params) {
+            if (new SignalServiceNetworkAccess(ApplicationContext.this)
+                .isCensored(ApplicationContext.this)) {
+              try {
+                ProviderInstaller.installIfNeeded(ApplicationContext.this);
+              } catch (Throwable t) {
+                Log.w(TAG, t);
+              }
+            }
+            return null;
           }
-        }
-        return null;
-      }
-    };
+        };
 
     task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
   }
-
 }

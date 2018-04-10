@@ -1,18 +1,16 @@
 /**
  * Copyright (C) 2014 Open Whisper Systems
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * <p>This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * <p>You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  */
 package org.thoughtcrime.securesms.contacts;
 
@@ -31,21 +29,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
+import java.util.HashSet;
+import java.util.Set;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.components.RecyclerViewFastScroller.FastScrollAdapter;
 import org.thoughtcrime.securesms.contacts.ContactSelectionListAdapter.HeaderViewHolder;
 import org.thoughtcrime.securesms.contacts.ContactSelectionListAdapter.ViewHolder;
-import org.thoughtcrime.securesms.database.Address;
 import org.thoughtcrime.securesms.database.CursorRecyclerViewAdapter;
 import org.thoughtcrime.securesms.mms.GlideRequests;
 import org.thoughtcrime.securesms.util.StickyHeaderDecoration.StickyHeaderAdapter;
 import org.thoughtcrime.securesms.util.Util;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * List adapter to display all contacts and their related information
@@ -53,22 +46,20 @@ import java.util.Set;
  * @author Jake McGinty
  */
 public class ContactSelectionListAdapter extends CursorRecyclerViewAdapter<ViewHolder>
-                                         implements FastScrollAdapter,
-                                                    StickyHeaderAdapter<HeaderViewHolder>
-{
-  private final static String TAG = ContactSelectionListAdapter.class.getSimpleName();
+    implements FastScrollAdapter, StickyHeaderAdapter<HeaderViewHolder> {
+  private static final String TAG = ContactSelectionListAdapter.class.getSimpleName();
 
   private static final int VIEW_TYPE_CONTACT = 0;
   private static final int VIEW_TYPE_DIVIDER = 1;
 
-  private final static int STYLE_ATTRIBUTES[] = new int[]{R.attr.contact_selection_push_user,
-                                                          R.attr.contact_selection_lay_user};
+  private static final int STYLE_ATTRIBUTES[] =
+      new int[] {R.attr.contact_selection_push_user, R.attr.contact_selection_lay_user};
 
-  private final boolean           multiSelect;
-  private final LayoutInflater    li;
-  private final TypedArray        drawables;
+  private final boolean multiSelect;
+  private final LayoutInflater li;
+  private final TypedArray drawables;
   private final ItemClickListener clickListener;
-  private final GlideRequests     glideRequests;
+  private final GlideRequests glideRequests;
 
   private final Set<String> selectedContacts = new HashSet<>();
 
@@ -78,26 +69,42 @@ public class ContactSelectionListAdapter extends CursorRecyclerViewAdapter<ViewH
       super(itemView);
     }
 
-    public abstract void bind(@NonNull GlideRequests glideRequests, int type, String name, String number, String label, int color, boolean multiSelect);
+    public abstract void bind(
+        @NonNull GlideRequests glideRequests,
+        int type,
+        String name,
+        String number,
+        String label,
+        int color,
+        boolean multiSelect);
+
     public abstract void unbind(@NonNull GlideRequests glideRequests);
+
     public abstract void setChecked(boolean checked);
   }
 
   public static class ContactViewHolder extends ViewHolder {
-    ContactViewHolder(@NonNull  final View itemView,
-                      @Nullable final ItemClickListener clickListener)
-    {
+    ContactViewHolder(
+        @NonNull final View itemView, @Nullable final ItemClickListener clickListener) {
       super(itemView);
-      itemView.setOnClickListener(v -> {
-        if (clickListener != null) clickListener.onItemClick(getView());
-      });
+      itemView.setOnClickListener(
+          v -> {
+            if (clickListener != null) clickListener.onItemClick(getView());
+          });
     }
 
     public ContactSelectionListItem getView() {
       return (ContactSelectionListItem) itemView;
     }
 
-    public void bind(@NonNull GlideRequests glideRequests, int type, String name, String number, String label, int color, boolean multiSelect) {
+    public void bind(
+        @NonNull GlideRequests glideRequests,
+        int type,
+        String name,
+        String number,
+        String label,
+        int color,
+        boolean multiSelect) {
       getView().set(glideRequests, type, name, number, label, color, multiSelect);
     }
 
@@ -122,7 +129,14 @@ public class ContactSelectionListAdapter extends CursorRecyclerViewAdapter<ViewH
     }
 
     @Override
-    public void bind(@NonNull GlideRequests glideRequests, int type, String name, String number, String label, int color, boolean multiSelect) {
+    public void bind(
+        @NonNull GlideRequests glideRequests,
+        int type,
+        String name,
+        String number,
+        String label,
+        int color,
+        boolean multiSelect) {
       this.label.setText(name);
     }
 
@@ -139,17 +153,17 @@ public class ContactSelectionListAdapter extends CursorRecyclerViewAdapter<ViewH
     }
   }
 
-  public ContactSelectionListAdapter(@NonNull  Context context,
-                                     @NonNull  GlideRequests glideRequests,
-                                     @Nullable Cursor cursor,
-                                     @Nullable ItemClickListener clickListener,
-                                     boolean multiSelect)
-  {
+  public ContactSelectionListAdapter(
+      @NonNull Context context,
+      @NonNull GlideRequests glideRequests,
+      @Nullable Cursor cursor,
+      @Nullable ItemClickListener clickListener,
+      boolean multiSelect) {
     super(context, cursor);
-    this.li            = LayoutInflater.from(context);
+    this.li = LayoutInflater.from(context);
     this.glideRequests = glideRequests;
-    this.drawables     = context.obtainStyledAttributes(STYLE_ATTRIBUTES);
-    this.multiSelect   = multiSelect;
+    this.drawables = context.obtainStyledAttributes(STYLE_ATTRIBUTES);
+    this.multiSelect = multiSelect;
     this.clickListener = clickListener;
   }
 
@@ -166,24 +180,32 @@ public class ContactSelectionListAdapter extends CursorRecyclerViewAdapter<ViewH
   @Override
   public ViewHolder onCreateItemViewHolder(ViewGroup parent, int viewType) {
     if (viewType == VIEW_TYPE_CONTACT) {
-      return new ContactViewHolder(li.inflate(R.layout.contact_selection_list_item, parent, false), clickListener);
+      return new ContactViewHolder(
+          li.inflate(R.layout.contact_selection_list_item, parent, false), clickListener);
     } else {
-      return new DividerViewHolder(li.inflate(R.layout.contact_selection_list_divider, parent, false));
+      return new DividerViewHolder(
+          li.inflate(R.layout.contact_selection_list_divider, parent, false));
     }
   }
 
   @Override
   public void onBindItemViewHolder(ViewHolder viewHolder, @NonNull Cursor cursor) {
-    int    contactType = cursor.getInt(cursor.getColumnIndexOrThrow(ContactsDatabase.CONTACT_TYPE_COLUMN));
-    String name        = cursor.getString(cursor.getColumnIndexOrThrow(ContactsDatabase.NAME_COLUMN));
-    String number      = cursor.getString(cursor.getColumnIndexOrThrow(ContactsDatabase.NUMBER_COLUMN));
-    int    numberType  = cursor.getInt(cursor.getColumnIndexOrThrow(ContactsDatabase.NUMBER_TYPE_COLUMN));
-    String label       = cursor.getString(cursor.getColumnIndexOrThrow(ContactsDatabase.LABEL_COLUMN));
-    String labelText   = ContactsContract.CommonDataKinds.Phone.getTypeLabel(getContext().getResources(),
-                                                                             numberType, label).toString();
+    int contactType =
+        cursor.getInt(cursor.getColumnIndexOrThrow(ContactsDatabase.CONTACT_TYPE_COLUMN));
+    String name = cursor.getString(cursor.getColumnIndexOrThrow(ContactsDatabase.NAME_COLUMN));
+    String number = cursor.getString(cursor.getColumnIndexOrThrow(ContactsDatabase.NUMBER_COLUMN));
+    int numberType =
+        cursor.getInt(cursor.getColumnIndexOrThrow(ContactsDatabase.NUMBER_TYPE_COLUMN));
+    String label = cursor.getString(cursor.getColumnIndexOrThrow(ContactsDatabase.LABEL_COLUMN));
+    String labelText =
+        ContactsContract.CommonDataKinds.Phone.getTypeLabel(
+                getContext().getResources(), numberType, label)
+            .toString();
 
-    int color = (contactType == ContactsDatabase.PUSH_TYPE) ? drawables.getColor(0, 0xa0000000) :
-                drawables.getColor(1, 0xff000000);
+    int color =
+        (contactType == ContactsDatabase.PUSH_TYPE)
+            ? drawables.getColor(0, 0xa0000000)
+            : drawables.getColor(1, 0xff000000);
 
     viewHolder.unbind(glideRequests);
     viewHolder.bind(glideRequests, contactType, name, number, labelText, color, multiSelect);
@@ -192,22 +214,24 @@ public class ContactSelectionListAdapter extends CursorRecyclerViewAdapter<ViewH
 
   @Override
   public int getItemViewType(@NonNull Cursor cursor) {
-    if (cursor.getInt(cursor.getColumnIndexOrThrow(ContactsDatabase.CONTACT_TYPE_COLUMN)) == ContactsDatabase.DIVIDER_TYPE) {
+    if (cursor.getInt(cursor.getColumnIndexOrThrow(ContactsDatabase.CONTACT_TYPE_COLUMN))
+        == ContactsDatabase.DIVIDER_TYPE) {
       return VIEW_TYPE_DIVIDER;
     } else {
       return VIEW_TYPE_CONTACT;
     }
   }
 
-
   @Override
   public HeaderViewHolder onCreateHeaderViewHolder(ViewGroup parent) {
-    return new HeaderViewHolder(LayoutInflater.from(getContext()).inflate(R.layout.contact_selection_recyclerview_header, parent, false));
+    return new HeaderViewHolder(
+        LayoutInflater.from(getContext())
+            .inflate(R.layout.contact_selection_recyclerview_header, parent, false));
   }
 
   @Override
   public void onBindHeaderViewHolder(HeaderViewHolder viewHolder, int position) {
-    ((TextView)viewHolder.itemView).setText(getSpannedHeaderString(position));
+    ((TextView) viewHolder.itemView).setText(getSpannedHeaderString(position));
   }
 
   @Override
@@ -228,7 +252,11 @@ public class ContactSelectionListAdapter extends CursorRecyclerViewAdapter<ViewH
     final String headerString = getHeaderString(position);
     if (isPush(position)) {
       SpannableString spannable = new SpannableString(headerString);
-      spannable.setSpan(new ForegroundColorSpan(getContext().getResources().getColor(R.color.signal_primary)), 0, headerString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+      spannable.setSpan(
+          new ForegroundColorSpan(getContext().getResources().getColor(R.color.signal_primary)),
+          0,
+          headerString.length(),
+          Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
       return spannable;
     } else {
       return headerString;
@@ -238,7 +266,8 @@ public class ContactSelectionListAdapter extends CursorRecyclerViewAdapter<ViewH
   private @NonNull String getHeaderString(int position) {
     int contactType = getContactType(position);
 
-    if (contactType == ContactsDatabase.RECENT_TYPE || contactType == ContactsDatabase.DIVIDER_TYPE) {
+    if (contactType == ContactsDatabase.RECENT_TYPE
+        || contactType == ContactsDatabase.DIVIDER_TYPE) {
       return " ";
     }
 

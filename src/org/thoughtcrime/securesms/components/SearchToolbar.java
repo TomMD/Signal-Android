@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms.components;
 
-
 import android.animation.Animator;
 import android.content.Context;
 import android.graphics.PorterDuff;
@@ -16,7 +15,6 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.animation.AnimationCompleteListener;
 
@@ -47,47 +45,52 @@ public class SearchToolbar extends LinearLayout {
 
     Toolbar toolbar = findViewById(R.id.toolbar);
 
-    Drawable drawable = getContext().getResources().getDrawable(R.drawable.ic_arrow_back_white_24dp);
+    Drawable drawable =
+        getContext().getResources().getDrawable(R.drawable.ic_arrow_back_white_24dp);
     drawable.mutate();
-    drawable.setColorFilter(getContext().getResources().getColor(R.color.grey_700), PorterDuff.Mode.SRC_IN);
+    drawable.setColorFilter(
+        getContext().getResources().getColor(R.color.grey_700), PorterDuff.Mode.SRC_IN);
 
     toolbar.setNavigationIcon(drawable);
     toolbar.inflateMenu(R.menu.conversation_list_search);
 
     this.searchItem = toolbar.getMenu().findItem(R.id.action_filter_search);
     SearchView searchView = (SearchView) searchItem.getActionView();
-    EditText   searchText = searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
+    EditText searchText =
+        searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
 
     searchView.setSubmitButtonEnabled(false);
 
     if (searchText != null) searchText.setHint(R.string.SearchToolbar_search);
-    else                    searchView.setQueryHint(getResources().getString(R.string.SearchToolbar_search));
+    else searchView.setQueryHint(getResources().getString(R.string.SearchToolbar_search));
 
-    searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-      @Override
-      public boolean onQueryTextSubmit(String query) {
-        if (listener != null) listener.onSearchTextChange(query);
-        return true;
-      }
+    searchView.setOnQueryTextListener(
+        new SearchView.OnQueryTextListener() {
+          @Override
+          public boolean onQueryTextSubmit(String query) {
+            if (listener != null) listener.onSearchTextChange(query);
+            return true;
+          }
 
-      @Override
-      public boolean onQueryTextChange(String newText) {
-        return onQueryTextSubmit(newText);
-      }
-    });
+          @Override
+          public boolean onQueryTextChange(String newText) {
+            return onQueryTextSubmit(newText);
+          }
+        });
 
-    searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
-      @Override
-      public boolean onMenuItemActionExpand(MenuItem item) {
-        return true;
-      }
+    searchItem.setOnActionExpandListener(
+        new MenuItem.OnActionExpandListener() {
+          @Override
+          public boolean onMenuItemActionExpand(MenuItem item) {
+            return true;
+          }
 
-      @Override
-      public boolean onMenuItemActionCollapse(MenuItem item) {
-        hide();
-        return true;
-      }
-    });
+          @Override
+          public boolean onMenuItemActionCollapse(MenuItem item) {
+            hide();
+            return true;
+          }
+        });
 
     toolbar.setNavigationOnClickListener(v -> hide());
   }
@@ -101,7 +104,8 @@ public class SearchToolbar extends LinearLayout {
       searchItem.expandActionView();
 
       if (Build.VERSION.SDK_INT >= 21) {
-        Animator animator = ViewAnimationUtils.createCircularReveal(this, (int)x, (int)y, 0, getWidth());
+        Animator animator =
+            ViewAnimationUtils.createCircularReveal(this, (int) x, (int) y, 0, getWidth());
         animator.setDuration(400);
 
         setVisibility(View.VISIBLE);
@@ -123,14 +127,16 @@ public class SearchToolbar extends LinearLayout {
       if (listener != null) listener.onSearchReset();
 
       if (Build.VERSION.SDK_INT >= 21) {
-        Animator animator = ViewAnimationUtils.createCircularReveal(this, (int)x, (int)y, getWidth(), 0);
+        Animator animator =
+            ViewAnimationUtils.createCircularReveal(this, (int) x, (int) y, getWidth(), 0);
         animator.setDuration(400);
-        animator.addListener(new AnimationCompleteListener() {
-          @Override
-          public void onAnimationEnd(Animator animation) {
-            setVisibility(View.INVISIBLE);
-          }
-        });
+        animator.addListener(
+            new AnimationCompleteListener() {
+              @Override
+              public void onAnimationEnd(Animator animation) {
+                setVisibility(View.INVISIBLE);
+              }
+            });
         animator.start();
       } else {
         setVisibility(View.INVISIBLE);
@@ -149,7 +155,7 @@ public class SearchToolbar extends LinearLayout {
 
   public interface SearchListener {
     void onSearchTextChange(String text);
+
     void onSearchReset();
   }
-
 }

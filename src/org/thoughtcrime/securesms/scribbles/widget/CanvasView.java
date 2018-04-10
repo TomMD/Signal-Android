@@ -1,12 +1,9 @@
 /**
  * CanvasView.java
  *
- * Copyright (c) 2014 Tomohiro IKEDA (Korilakkuma)
- * Released under the MIT license
+ * <p>Copyright (c) 2014 Tomohiro IKEDA (Korilakkuma) Released under the MIT license
  */
-
 package org.thoughtcrime.securesms.scribbles.widget;
-
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -20,19 +17,14 @@ import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
-import android.graphics.Typeface;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * This class defines fields and methods for drawing.
- */
+/** This class defines fields and methods for drawing. */
 public class CanvasView extends View {
 
   private static final String TAG = CanvasView.class.getSimpleName();
@@ -55,37 +47,37 @@ public class CanvasView extends View {
     QUBIC_BEZIER;
   }
 
-  private int    canvasWidth  = 1;
-  private int    canvasHeight = 1;
-  private Bitmap bitmap       = null;
+  private int canvasWidth = 1;
+  private int canvasHeight = 1;
+  private Bitmap bitmap = null;
 
-  private List<Path> pathLists  = new ArrayList<Path>();
+  private List<Path> pathLists = new ArrayList<Path>();
   private List<Paint> paintLists = new ArrayList<Paint>();
 
   // for Eraser
-//  private int baseColor = Color.WHITE;
+  //  private int baseColor = Color.WHITE;
   private int baseColor = Color.TRANSPARENT;
 
   // for Undo, Redo
   private int historyPointer = 0;
 
   // Flags
-  private Mode mode      = Mode.DRAW;
-  private Drawer drawer  = Drawer.PEN;
+  private Mode mode = Mode.DRAW;
+  private Drawer drawer = Drawer.PEN;
   private boolean isDown = false;
 
   // for Paint
   private Paint.Style paintStyle = Paint.Style.STROKE;
-  private int paintStrokeColor   = Color.BLACK;
-  private int paintFillColor     = Color.BLACK;
+  private int paintStrokeColor = Color.BLACK;
+  private int paintFillColor = Color.BLACK;
   private float paintStrokeWidth = 15F;
-  private int opacity            = 255;
-  private float blur             = 0F;
-  private Paint.Cap lineCap      = Paint.Cap.ROUND;
+  private int opacity = 255;
+  private float blur = 0F;
+  private Paint.Cap lineCap = Paint.Cap.ROUND;
 
   // for Drawer
-  private float startX   = 0F;
-  private float startY   = 0F;
+  private float startX = 0F;
+  private float startY = 0F;
   private float controlX = 0F;
   private float controlY = 0F;
 
@@ -123,7 +115,6 @@ public class CanvasView extends View {
     super(context);
   }
 
-
   private void setup() {
     this.pathLists.add(new Path());
     this.paintLists.add(this.createPaint());
@@ -131,8 +122,7 @@ public class CanvasView extends View {
   }
 
   /**
-   * This method creates the instance of Paint.
-   * In addition, this method sets styles for Paint.
+   * This method creates the instance of Paint. In addition, this method sets styles for Paint.
    *
    * @return paint This is returned as the instance of Paint
    */
@@ -143,7 +133,7 @@ public class CanvasView extends View {
     paint.setStyle(this.paintStyle);
     paint.setStrokeWidth(this.paintStrokeWidth);
     paint.setStrokeCap(this.lineCap);
-    paint.setStrokeJoin(Paint.Join.MITER);  // fixed
+    paint.setStrokeJoin(Paint.Join.MITER); // fixed
 
     if (this.mode == Mode.ERASER) {
       // Eraser
@@ -163,9 +153,8 @@ public class CanvasView extends View {
   }
 
   /**
-   * This method initialize Path.
-   * Namely, this method creates the instance of Path,
-   * and moves current position.
+   * This method initialize Path. Namely, this method creates the instance of Path, and moves
+   * current position.
    *
    * @param event This is argument of onTouchEvent method
    * @return path This is returned as the instance of Path
@@ -183,8 +172,8 @@ public class CanvasView extends View {
   }
 
   /**
-   * This method updates the lists for the instance of Path and Paint.
-   * "Undo" and "Redo" are enabled by this method.
+   * This method updates the lists for the instance of Path and Paint. "Undo" and "Redo" are enabled
+   * by this method.
    *
    * @param path the instance of Path
    */
@@ -222,8 +211,8 @@ public class CanvasView extends View {
    */
   private void onActionDown(MotionEvent event) {
     switch (this.mode) {
-      case DRAW   :
-      case ERASER :
+      case DRAW:
+      case ERASER:
         if ((this.drawer != Drawer.QUADRATIC_BEZIER) && (this.drawer != Drawer.QUBIC_BEZIER)) {
           // Oherwise
           this.updateHistory(this.createPath(event));
@@ -243,12 +232,12 @@ public class CanvasView extends View {
         }
 
         break;
-      case TEXT   :
+      case TEXT:
         this.startX = event.getX();
         this.startY = event.getY();
 
         break;
-      default :
+      default:
         break;
     }
   }
@@ -263,9 +252,8 @@ public class CanvasView extends View {
     float y = event.getY();
 
     switch (this.mode) {
-      case DRAW   :
-      case ERASER :
-
+      case DRAW:
+      case ERASER:
         if ((this.drawer != Drawer.QUADRATIC_BEZIER) && (this.drawer != Drawer.QUBIC_BEZIER)) {
           if (!isDown) {
             return;
@@ -274,33 +262,33 @@ public class CanvasView extends View {
           Path path = this.getCurrentPath();
 
           switch (this.drawer) {
-            case PEN :
+            case PEN:
               path.lineTo(x, y);
               break;
-            case LINE :
+            case LINE:
               path.reset();
               path.moveTo(this.startX, this.startY);
               path.lineTo(x, y);
               break;
-            case RECTANGLE :
+            case RECTANGLE:
               path.reset();
               path.addRect(this.startX, this.startY, x, y, Path.Direction.CCW);
               break;
-            case CIRCLE :
-              double distanceX = Math.abs((double)(this.startX - x));
-              double distanceY = Math.abs((double)(this.startX - y));
-              double radius    = Math.sqrt(Math.pow(distanceX, 2.0) + Math.pow(distanceY, 2.0));
+            case CIRCLE:
+              double distanceX = Math.abs((double) (this.startX - x));
+              double distanceY = Math.abs((double) (this.startX - y));
+              double radius = Math.sqrt(Math.pow(distanceX, 2.0) + Math.pow(distanceY, 2.0));
 
               path.reset();
-              path.addCircle(this.startX, this.startY, (float)radius, Path.Direction.CCW);
+              path.addCircle(this.startX, this.startY, (float) radius, Path.Direction.CCW);
               break;
-            case ELLIPSE :
+            case ELLIPSE:
               RectF rect = new RectF(this.startX, this.startY, x, y);
 
               path.reset();
               path.addOval(rect, Path.Direction.CCW);
               break;
-            default :
+            default:
               break;
           }
         } else {
@@ -316,12 +304,12 @@ public class CanvasView extends View {
         }
 
         break;
-      case TEXT :
+      case TEXT:
         this.startX = x;
         this.startY = y;
 
         break;
-      default :
+      default:
         break;
     }
   }
@@ -360,7 +348,7 @@ public class CanvasView extends View {
     }
 
     for (int i = 0; i < this.historyPointer; i++) {
-      Path path   = this.pathLists.get(i);
+      Path path = this.pathLists.get(i);
       Paint paint = this.paintLists.get(i);
 
       canvas.drawPath(path, paint);
@@ -382,7 +370,7 @@ public class CanvasView extends View {
     matrix.setScale(scaleX, scaleY);
 
     for (int i = 0; i < this.historyPointer; i++) {
-      Path path   = this.pathLists.get(i);
+      Path path = this.pathLists.get(i);
       Paint paint = this.paintLists.get(i);
 
       Path scaledPath = new Path();
@@ -409,13 +397,13 @@ public class CanvasView extends View {
       case MotionEvent.ACTION_DOWN:
         this.onActionDown(event);
         break;
-      case MotionEvent.ACTION_MOVE :
+      case MotionEvent.ACTION_MOVE:
         this.onActionMove(event);
         break;
-      case MotionEvent.ACTION_UP :
+      case MotionEvent.ACTION_UP:
         this.onActionUp(event);
         break;
-      default :
+      default:
         break;
     }
 
@@ -583,8 +571,7 @@ public class CanvasView extends View {
   }
 
   /**
-   * This method is getter for fill color.
-   * But, current Android API cannot set fill color (?).
+   * This method is getter for fill color. But, current Android API cannot set fill color (?).
    *
    * @return
    */
@@ -593,8 +580,7 @@ public class CanvasView extends View {
   };
 
   /**
-   * This method is setter for fill color.
-   * But, current Android API cannot set fill color (?).
+   * This method is setter for fill color. But, current Android API cannot set fill color (?).
    *
    * @param color
    */
@@ -634,8 +620,7 @@ public class CanvasView extends View {
   }
 
   /**
-   * This method is setter for alpha.
-   * The 1st argument must be between 0 and 255.
+   * This method is setter for alpha. The 1st argument must be between 0 and 255.
    *
    * @param opacity
    */
@@ -643,7 +628,7 @@ public class CanvasView extends View {
     if ((opacity >= 0) && (opacity <= 255)) {
       this.opacity = opacity;
     } else {
-      this.opacity= 255;
+      this.opacity = 255;
     }
   }
 
@@ -657,8 +642,7 @@ public class CanvasView extends View {
   }
 
   /**
-   * This method is setter for amount of blur.
-   * The 1st argument is greater than or equal to 0.0.
+   * This method is setter for amount of blur. The 1st argument is greater than or equal to 0.0.
    *
    * @param blur
    */
@@ -761,13 +745,11 @@ public class CanvasView extends View {
   }
 
   /**
-   * This method gets the bitmap as byte array.
-   * Bitmap format is PNG, and quality is 100.
+   * This method gets the bitmap as byte array. Bitmap format is PNG, and quality is 100.
    *
    * @return This is returned as byte array of bitmap.
    */
   public byte[] getBitmapAsByteArray() {
     return this.getBitmapAsByteArray(CompressFormat.PNG, 100);
   }
-
 }

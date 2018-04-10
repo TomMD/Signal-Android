@@ -1,26 +1,21 @@
 package org.thoughtcrime.securesms.giph.net;
 
-
 import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
-
-
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.thoughtcrime.securesms.giph.model.GiphyImage;
 import org.thoughtcrime.securesms.giph.model.GiphyResponse;
 import org.thoughtcrime.securesms.util.AsyncLoader;
 import org.thoughtcrime.securesms.util.JsonUtils;
-
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 public abstract class GiphyLoader extends AsyncLoader<List<GiphyImage>> {
 
@@ -35,7 +30,7 @@ public abstract class GiphyLoader extends AsyncLoader<List<GiphyImage>> {
   protected GiphyLoader(@NonNull Context context, @Nullable String searchString) {
     super(context);
     this.searchString = searchString;
-    this.client       = new OkHttpClient.Builder().proxySelector(new GiphyProxySelector()).build();
+    this.client = new OkHttpClient.Builder().proxySelector(new GiphyProxySelector()).build();
   }
 
   @Override
@@ -48,20 +43,21 @@ public abstract class GiphyLoader extends AsyncLoader<List<GiphyImage>> {
       String url;
 
       if (TextUtils.isEmpty(searchString)) url = String.format(getTrendingUrl(), offset);
-      else                                 url = String.format(getSearchUrl(), offset, Uri.encode(searchString));
+      else url = String.format(getSearchUrl(), offset, Uri.encode(searchString));
 
-      Request  request  = new Request.Builder().url(url).build();
+      Request request = new Request.Builder().url(url).build();
       Response response = client.newCall(request).execute();
 
       if (!response.isSuccessful()) {
         throw new IOException("Unexpected code " + response);
       }
 
-      GiphyResponse    giphyResponse = JsonUtils.fromJson(response.body().byteStream(), GiphyResponse.class);
-      List<GiphyImage> results       = giphyResponse.getData();
+      GiphyResponse giphyResponse =
+          JsonUtils.fromJson(response.body().byteStream(), GiphyResponse.class);
+      List<GiphyImage> results = giphyResponse.getData();
 
       if (results == null) return new LinkedList<>();
-      else                 return results;
+      else return results;
 
     } catch (IOException e) {
       Log.w(TAG, e);
@@ -70,5 +66,6 @@ public abstract class GiphyLoader extends AsyncLoader<List<GiphyImage>> {
   }
 
   protected abstract String getTrendingUrl();
+
   protected abstract String getSearchUrl();
 }

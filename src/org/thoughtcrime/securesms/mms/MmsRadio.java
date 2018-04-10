@@ -8,11 +8,9 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.PowerManager;
 import android.util.Log;
-
-import org.thoughtcrime.securesms.util.Util;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import org.thoughtcrime.securesms.util.Util;
 
 public class MmsRadio {
 
@@ -21,8 +19,7 @@ public class MmsRadio {
   private static MmsRadio instance;
 
   public static synchronized MmsRadio getInstance(Context context) {
-    if (instance == null)
-      instance = new MmsRadio(context.getApplicationContext());
+    if (instance == null) instance = new MmsRadio(context.getApplicationContext());
 
     return instance;
   }
@@ -30,21 +27,22 @@ public class MmsRadio {
   ///
 
   private static final String FEATURE_ENABLE_MMS = "enableMMS";
-  private static final int APN_ALREADY_ACTIVE    = 0;
-  public  static final int TYPE_MOBILE_MMS       = 2;
+  private static final int APN_ALREADY_ACTIVE = 0;
+  public static final int TYPE_MOBILE_MMS = 2;
 
   private final Context context;
 
-  private ConnectivityManager   connectivityManager;
-  private ConnectivityListener  connectivityListener;
+  private ConnectivityManager connectivityManager;
+  private ConnectivityListener connectivityListener;
   private PowerManager.WakeLock wakeLock;
   private int connectedCounter = 0;
 
   private MmsRadio(Context context) {
     PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-    this.context             = context;
-    this.connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-    this.wakeLock            = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MMS Connection");
+    this.context = context;
+    this.connectivityManager =
+        (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    this.wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MMS Connection");
     this.wakeLock.setReferenceCounted(true);
   }
 
@@ -58,8 +56,12 @@ public class MmsRadio {
     if (connectedCounter == 0) {
       Log.w("MmsRadio", "Turning off MMS radio...");
       try {
-        final Method stopUsingNetworkFeatureMethod = connectivityManager.getClass().getMethod("stopUsingNetworkFeature", Integer.TYPE, String.class);
-        stopUsingNetworkFeatureMethod.invoke(connectivityManager, ConnectivityManager.TYPE_MOBILE, FEATURE_ENABLE_MMS);
+        final Method stopUsingNetworkFeatureMethod =
+            connectivityManager
+                .getClass()
+                .getMethod("stopUsingNetworkFeature", Integer.TYPE, String.class);
+        stopUsingNetworkFeatureMethod.invoke(
+            connectivityManager, ConnectivityManager.TYPE_MOBILE, FEATURE_ENABLE_MMS);
       } catch (NoSuchMethodException nsme) {
         Log.w(TAG, nsme);
       } catch (IllegalAccessException iae) {
@@ -67,7 +69,7 @@ public class MmsRadio {
       } catch (InvocationTargetException ite) {
         Log.w(TAG, ite);
       }
-      
+
       if (connectivityListener != null) {
         Log.w("MmsRadio", "Unregistering receiver...");
         context.unregisterReceiver(connectivityListener);
@@ -80,8 +82,14 @@ public class MmsRadio {
     int status;
 
     try {
-      final Method startUsingNetworkFeatureMethod = connectivityManager.getClass().getMethod("startUsingNetworkFeature", Integer.TYPE, String.class);
-      status = (int)startUsingNetworkFeatureMethod.invoke(connectivityManager, ConnectivityManager.TYPE_MOBILE, FEATURE_ENABLE_MMS);
+      final Method startUsingNetworkFeatureMethod =
+          connectivityManager
+              .getClass()
+              .getMethod("startUsingNetworkFeature", Integer.TYPE, String.class);
+      status =
+          (int)
+              startUsingNetworkFeatureMethod.invoke(
+                  connectivityManager, ConnectivityManager.TYPE_MOBILE, FEATURE_ENABLE_MMS);
     } catch (NoSuchMethodException nsme) {
       throw new MmsRadioException(nsme);
     } catch (IllegalAccessException iae) {
@@ -101,7 +109,7 @@ public class MmsRadio {
       connectedCounter++;
 
       if (connectivityListener == null) {
-        IntentFilter filter  = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         connectivityListener = new ConnectivityListener();
         context.registerReceiver(connectivityListener, filter);
       }
@@ -121,8 +129,7 @@ public class MmsRadio {
 
     Log.w("MmsRadio", "Connected: " + info);
 
-    if ((info == null) || (info.getType() != TYPE_MOBILE_MMS) || !info.isConnected())
-      return false;
+    if ((info == null) || (info.getType() != TYPE_MOBILE_MMS) || !info.isConnected()) return false;
 
     return true;
   }
@@ -130,13 +137,14 @@ public class MmsRadio {
   private boolean isConnectivityPossible() {
     NetworkInfo networkInfo = connectivityManager.getNetworkInfo(TYPE_MOBILE_MMS);
 
-    return networkInfo != null  && networkInfo.isAvailable();
+    return networkInfo != null && networkInfo.isAvailable();
   }
 
   private boolean isConnectivityFailure() {
     NetworkInfo networkInfo = connectivityManager.getNetworkInfo(TYPE_MOBILE_MMS);
 
-    return networkInfo == null || networkInfo.getDetailedState() == NetworkInfo.DetailedState.FAILED;
+    return networkInfo == null
+        || networkInfo.getDetailedState() == NetworkInfo.DetailedState.FAILED;
   }
 
   private synchronized void issueConnectivityChange() {
@@ -160,6 +168,4 @@ public class MmsRadio {
       issueConnectivityChange();
     }
   }
-
-
 }

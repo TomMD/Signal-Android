@@ -4,37 +4,30 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.maps.model.LatLng;
-
-import org.thoughtcrime.securesms.util.JsonUtils;
-
 import java.io.IOException;
+import org.thoughtcrime.securesms.util.JsonUtils;
 
 public class SignalPlace {
 
   private static final String URL = "https://maps.google.com/maps?q=%s,%s";
   private static final String TAG = SignalPlace.class.getSimpleName();
 
-  @JsonProperty
-  private CharSequence name;
+  @JsonProperty private CharSequence name;
 
-  @JsonProperty
-  private CharSequence address;
+  @JsonProperty private CharSequence address;
 
-  @JsonProperty
-  private double latitude;
+  @JsonProperty private double latitude;
 
-  @JsonProperty
-  private double longitude;
+  @JsonProperty private double longitude;
 
   public SignalPlace(Place place) {
-    this.name      = place.getName();
-    this.address   = place.getAddress();
-    this.latitude  = place.getLatLng().latitude;
+    this.name = place.getName();
+    this.address = place.getAddress();
+    this.latitude = place.getLatLng().latitude;
     this.longitude = place.getLatLng().longitude;
   }
 
@@ -71,7 +64,7 @@ public class SignalPlace {
     }
   }
 
-  public static SignalPlace deserialize(@NonNull  String serialized) throws IOException {
+  public static SignalPlace deserialize(@NonNull String serialized) throws IOException {
     return JsonUtils.fromJson(serialized, SignalPlace.class);
   }
 }

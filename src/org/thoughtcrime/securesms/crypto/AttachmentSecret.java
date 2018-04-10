@@ -1,9 +1,7 @@
 package org.thoughtcrime.securesms.crypto;
 
-
 import android.support.annotation.NonNull;
 import android.util.Base64;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -14,16 +12,14 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
-import org.thoughtcrime.securesms.util.JsonUtils;
-
 import java.io.IOException;
+import org.thoughtcrime.securesms.util.JsonUtils;
 
 /**
  * Encapsulates the key material used to encrypt attachments on disk.
  *
- * There are two logical pieces of material, a deprecated set of keys used to encrypt
- * legacy attachments, and a key that is used to encrypt attachments going forward.
+ * <p>There are two logical pieces of material, a deprecated set of keys used to encrypt legacy
+ * attachments, and a key that is used to encrypt attachments going forward.
  */
 public class AttachmentSecret {
 
@@ -42,17 +38,14 @@ public class AttachmentSecret {
   @JsonDeserialize(using = ByteArrayDeserializer.class)
   private byte[] modernKey;
 
-  public AttachmentSecret(byte[] classicCipherKey, byte[] classicMacKey, byte[] modernKey)
-  {
+  public AttachmentSecret(byte[] classicCipherKey, byte[] classicMacKey, byte[] modernKey) {
     this.classicCipherKey = classicCipherKey;
-    this.classicMacKey    = classicMacKey;
-    this.modernKey        = modernKey;
+    this.classicMacKey = classicMacKey;
+    this.modernKey = modernKey;
   }
 
   @SuppressWarnings("unused")
-  public AttachmentSecret() {
-
-  }
+  public AttachmentSecret() {}
 
   @JsonIgnore
   byte[] getClassicCipherKey() {
@@ -97,7 +90,8 @@ public class AttachmentSecret {
 
   private static class ByteArraySerializer extends JsonSerializer<byte[]> {
     @Override
-    public void serialize(byte[] value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(byte[] value, JsonGenerator gen, SerializerProvider serializers)
+        throws IOException {
       gen.writeString(Base64.encodeToString(value, Base64.NO_WRAP | Base64.NO_PADDING));
     }
   }
@@ -109,7 +103,4 @@ public class AttachmentSecret {
       return Base64.decode(p.getValueAsString(), Base64.NO_WRAP | Base64.NO_PADDING);
     }
   }
-
-
-
 }

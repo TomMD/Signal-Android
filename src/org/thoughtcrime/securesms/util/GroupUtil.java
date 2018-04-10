@@ -1,29 +1,28 @@
 package org.thoughtcrime.securesms.util;
 
+import static org.whispersystems.signalservice.internal.push.SignalServiceProtos.GroupContext;
+
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.database.Address;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.recipients.RecipientModifiedListener;
 
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-
-import static org.whispersystems.signalservice.internal.push.SignalServiceProtos.GroupContext;
-
 public class GroupUtil {
 
   private static final String ENCODED_SIGNAL_GROUP_PREFIX = "__textsecure_group__!";
-  private static final String ENCODED_MMS_GROUP_PREFIX    = "__signal_mms_group__!";
-  private static final String TAG                  = GroupUtil.class.getSimpleName();
+  private static final String ENCODED_MMS_GROUP_PREFIX = "__signal_mms_group__!";
+  private static final String TAG = GroupUtil.class.getSimpleName();
 
   public static String getEncodedId(byte[] groupId, boolean mms) {
-    return (mms ? ENCODED_MMS_GROUP_PREFIX  : ENCODED_SIGNAL_GROUP_PREFIX) + Hex.toStringCondensed(groupId);
+    return (mms ? ENCODED_MMS_GROUP_PREFIX : ENCODED_SIGNAL_GROUP_PREFIX)
+        + Hex.toStringCondensed(groupId);
   }
 
   public static byte[] getDecodedId(String groupId) throws IOException {
@@ -35,20 +34,22 @@ public class GroupUtil {
   }
 
   public static boolean isEncodedGroup(@NonNull String groupId) {
-    return groupId.startsWith(ENCODED_SIGNAL_GROUP_PREFIX) || groupId.startsWith(ENCODED_MMS_GROUP_PREFIX);
+    return groupId.startsWith(ENCODED_SIGNAL_GROUP_PREFIX)
+        || groupId.startsWith(ENCODED_MMS_GROUP_PREFIX);
   }
 
   public static boolean isMmsGroup(@NonNull String groupId) {
     return groupId.startsWith(ENCODED_MMS_GROUP_PREFIX);
   }
 
-  public static @NonNull GroupDescription getDescription(@NonNull Context context, @Nullable String encodedGroup) {
+  public static @NonNull GroupDescription getDescription(
+      @NonNull Context context, @Nullable String encodedGroup) {
     if (encodedGroup == null) {
       return new GroupDescription(context, null);
     }
 
     try {
-      GroupContext  groupContext = GroupContext.parseFrom(Base64.decode(encodedGroup));
+      GroupContext groupContext = GroupContext.parseFrom(Base64.decode(encodedGroup));
       return new GroupDescription(context, groupContext);
     } catch (IOException e) {
       Log.w(TAG, e);
@@ -58,12 +59,12 @@ public class GroupUtil {
 
   public static class GroupDescription {
 
-    @NonNull  private final Context         context;
-    @Nullable private final GroupContext    groupContext;
+    @NonNull private final Context context;
+    @Nullable private final GroupContext groupContext;
     @Nullable private final List<Recipient> members;
 
     public GroupDescription(@NonNull Context context, @Nullable GroupContext groupContext) {
-      this.context      = context.getApplicationContext();
+      this.context = context.getApplicationContext();
       this.groupContext = groupContext;
 
       if (groupContext == null || groupContext.getMembersList().isEmpty()) {
@@ -79,7 +80,8 @@ public class GroupUtil {
 
     public String toString(Recipient sender) {
       StringBuilder description = new StringBuilder();
-      description.append(context.getString(R.string.MessageRecord_s_updated_group, sender.toShortString()));
+      description.append(
+          context.getString(R.string.MessageRecord_s_updated_group, sender.toShortString()));
 
       if (groupContext == null) {
         return description.toString();
@@ -89,13 +91,16 @@ public class GroupUtil {
 
       if (members != null) {
         description.append("\n");
-        description.append(context.getResources().getQuantityString(R.plurals.GroupUtil_joined_the_group,
-                                                                    members.size(), toString(members)));
+        description.append(
+            context
+                .getResources()
+                .getQuantityString(
+                    R.plurals.GroupUtil_joined_the_group, members.size(), toString(members)));
       }
 
       if (title != null && !title.trim().isEmpty()) {
         if (members != null) description.append(" ");
-        else                 description.append("\n");
+        else description.append("\n");
         description.append(context.getString(R.string.GroupUtil_group_name_is_now, title));
       }
 
@@ -113,14 +118,13 @@ public class GroupUtil {
     private String toString(List<Recipient> recipients) {
       String result = "";
 
-      for (int i=0;i<recipients.size();i++) {
+      for (int i = 0; i < recipients.size(); i++) {
         result += recipients.get(i).toShortString();
 
-      if (i != recipients.size() -1 )
-        result += ", ";
-    }
+        if (i != recipients.size() - 1) result += ", ";
+      }
 
-    return result;
+      return result;
     }
   }
 }

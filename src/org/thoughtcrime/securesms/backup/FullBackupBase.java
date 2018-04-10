@@ -1,14 +1,11 @@
 package org.thoughtcrime.securesms.backup;
 
-
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
-import org.greenrobot.eventbus.EventBus;
-import org.whispersystems.libsignal.util.ByteUtil;
-
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import org.greenrobot.eventbus.EventBus;
+import org.whispersystems.libsignal.util.ByteUtil;
 
 public abstract class FullBackupBase {
 
@@ -21,13 +18,14 @@ public abstract class FullBackupBase {
         EventBus.getDefault().post(new BackupEvent(BackupEvent.Type.PROGRESS, 0));
 
         MessageDigest digest = MessageDigest.getInstance("SHA-512");
-        byte[]        input  = passphrase.replace(" ", "").getBytes();
-        byte[]        hash   = input;
+        byte[] input = passphrase.replace(" ", "").getBytes();
+        byte[] hash = input;
 
         if (salt != null) digest.update(salt);
 
-        for (int i=0;i<250000;i++) {
-          if (i % 1000 == 0) EventBus.getDefault().post(new BackupEvent(BackupEvent.Type.PROGRESS, 0));
+        for (int i = 0; i < 250000; i++) {
+          if (i % 1000 == 0)
+            EventBus.getDefault().post(new BackupEvent(BackupEvent.Type.PROGRESS, 0));
           digest.update(hash);
           hash = digest.digest(input);
         }
@@ -49,7 +47,7 @@ public abstract class FullBackupBase {
     private final int count;
 
     BackupEvent(Type type, int count) {
-      this.type  = type;
+      this.type = type;
       this.count = count;
     }
 
@@ -61,5 +59,4 @@ public abstract class FullBackupBase {
       return count;
     }
   }
-
 }

@@ -7,7 +7,8 @@ public class TextSecureTestCase extends InstrumentationTestCase {
 
   @Override
   public void setUp() {
-    System.setProperty("dexmaker.dexcache", getInstrumentation().getTargetContext().getCacheDir().getPath());
+    System.setProperty(
+        "dexmaker.dexcache", getInstrumentation().getTargetContext().getCacheDir().getPath());
   }
 
   protected Context getContext() {

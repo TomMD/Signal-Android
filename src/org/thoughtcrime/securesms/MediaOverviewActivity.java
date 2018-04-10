@@ -46,9 +46,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.TextView;
-
 import com.codewaves.stickyheadergrid.StickyHeaderGridLayoutManager;
-
+import java.util.Collection;
+import java.util.Locale;
 import org.thoughtcrime.securesms.database.Address;
 import org.thoughtcrime.securesms.database.CursorRecyclerViewAdapter;
 import org.thoughtcrime.securesms.database.MediaDatabase;
@@ -65,26 +65,21 @@ import org.thoughtcrime.securesms.util.StickyHeaderDecoration;
 import org.thoughtcrime.securesms.util.ViewUtil;
 import org.thoughtcrime.securesms.util.task.ProgressDialogAsyncTask;
 
-import java.util.Collection;
-import java.util.Locale;
-
-/**
- * Activity for displaying media attachments in-app
- */
-public class MediaOverviewActivity extends PassphraseRequiredActionBarActivity  {
+/** Activity for displaying media attachments in-app */
+public class MediaOverviewActivity extends PassphraseRequiredActionBarActivity {
 
   @SuppressWarnings("unused")
-  private final static String TAG = MediaOverviewActivity.class.getSimpleName();
+  private static final String TAG = MediaOverviewActivity.class.getSimpleName();
 
-  public static final String ADDRESS_EXTRA   = "address";
+  public static final String ADDRESS_EXTRA = "address";
 
-  private final DynamicTheme    dynamicTheme    = new DynamicNoActionBarTheme();
+  private final DynamicTheme dynamicTheme = new DynamicNoActionBarTheme();
   private final DynamicLanguage dynamicLanguage = new DynamicLanguage();
 
-  private Toolbar      toolbar;
-  private TabLayout    tabLayout;
-  private ViewPager    viewPager;
-  private Recipient    recipient;
+  private Toolbar toolbar;
+  private TabLayout tabLayout;
+  private ViewPager viewPager;
+  private Recipient recipient;
 
   @Override
   protected void onPreCreate() {
@@ -115,7 +110,9 @@ public class MediaOverviewActivity extends PassphraseRequiredActionBarActivity  
     super.onOptionsItemSelected(item);
 
     switch (item.getItemId()) {
-      case android.R.id.home: finish(); return true;
+      case android.R.id.home:
+        finish();
+        return true;
     }
 
     return false;
@@ -125,7 +122,7 @@ public class MediaOverviewActivity extends PassphraseRequiredActionBarActivity  
     Address address = getIntent().getParcelableExtra(ADDRESS_EXTRA);
 
     this.viewPager = ViewUtil.findById(this, R.id.pager);
-    this.toolbar   = ViewUtil.findById(this, R.id.toolbar);
+    this.toolbar = ViewUtil.findById(this, R.id.toolbar);
     this.tabLayout = ViewUtil.findById(this, R.id.tab_layout);
     this.recipient = Recipient.from(this, address, true);
   }
@@ -134,7 +131,8 @@ public class MediaOverviewActivity extends PassphraseRequiredActionBarActivity  
     setSupportActionBar(this.toolbar);
     getSupportActionBar().setTitle(recipient.toShortString());
     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    this.recipient.addListener(recipient -> getSupportActionBar().setTitle(recipient.toShortString()));
+    this.recipient.addListener(
+        recipient -> getSupportActionBar().setTitle(recipient.toShortString()));
   }
 
   private class MediaOverviewPagerAdapter extends FragmentStatePagerAdapter {
@@ -147,13 +145,15 @@ public class MediaOverviewActivity extends PassphraseRequiredActionBarActivity  
     public Fragment getItem(int position) {
       Fragment fragment;
 
-      if      (position == 0) fragment = new MediaOverviewGalleryFragment();
+      if (position == 0) fragment = new MediaOverviewGalleryFragment();
       else if (position == 1) fragment = new MediaOverviewDocumentsFragment();
-      else                    throw new AssertionError();
+      else throw new AssertionError();
 
       Bundle args = new Bundle();
-      args.putString(MediaOverviewGalleryFragment.ADDRESS_EXTRA, recipient.getAddress().serialize());
-      args.putSerializable(MediaOverviewGalleryFragment.LOCALE_EXTRA, dynamicLanguage.getCurrentLocale());
+      args.putString(
+          MediaOverviewGalleryFragment.ADDRESS_EXTRA, recipient.getAddress().serialize());
+      args.putSerializable(
+          MediaOverviewGalleryFragment.LOCALE_EXTRA, dynamicLanguage.getCurrentLocale());
 
       fragment.setArguments(args);
 
@@ -167,34 +167,35 @@ public class MediaOverviewActivity extends PassphraseRequiredActionBarActivity  
 
     @Override
     public CharSequence getPageTitle(int position) {
-      if      (position == 0) return getString(R.string.MediaOverviewActivity_Media);
+      if (position == 0) return getString(R.string.MediaOverviewActivity_Media);
       else if (position == 1) return getString(R.string.MediaOverviewActivity_Documents);
-      else                    throw new AssertionError();
+      else throw new AssertionError();
     }
   }
 
-  public static abstract class MediaOverviewFragment<T> extends Fragment implements LoaderManager.LoaderCallbacks<T> {
+  public abstract static class MediaOverviewFragment<T> extends Fragment
+      implements LoaderManager.LoaderCallbacks<T> {
 
     public static final String ADDRESS_EXTRA = "address";
-    public static final String LOCALE_EXTRA  = "locale_extra";
+    public static final String LOCALE_EXTRA = "locale_extra";
 
-    protected TextView     noMedia;
-    protected Recipient    recipient;
+    protected TextView noMedia;
+    protected Recipient recipient;
     protected RecyclerView recyclerView;
-    protected Locale       locale;
+    protected Locale locale;
 
     @Override
     public void onCreate(Bundle bundle) {
       super.onCreate(bundle);
 
-      String       address      = getArguments().getString(ADDRESS_EXTRA);
-      Locale       locale       = (Locale)getArguments().getSerializable(LOCALE_EXTRA);
+      String address = getArguments().getString(ADDRESS_EXTRA);
+      Locale locale = (Locale) getArguments().getSerializable(LOCALE_EXTRA);
 
-      if (address == null)      throw new AssertionError();
-      if (locale == null)       throw new AssertionError();
+      if (address == null) throw new AssertionError();
+      if (locale == null) throw new AssertionError();
 
-      this.recipient    = Recipient.from(getContext(), Address.fromSerialized(address), true);
-      this.locale       = locale;
+      this.recipient = Recipient.from(getContext(), Address.fromSerialized(address), true);
+      this.locale = locale;
 
       getLoaderManager().initLoader(0, null, this);
     }
@@ -202,26 +203,30 @@ public class MediaOverviewActivity extends PassphraseRequiredActionBarActivity  
 
   public static class MediaOverviewGalleryFragment
       extends MediaOverviewFragment<BucketedThreadMedia>
-      implements MediaGalleryAdapter.ItemClickListener
-  {
+      implements MediaGalleryAdapter.ItemClickListener {
 
     private StickyHeaderGridLayoutManager gridManager;
-    private ActionMode                    actionMode;
-    private ActionModeCallback            actionModeCallback = new ActionModeCallback();
+    private ActionMode actionMode;
+    private ActionModeCallback actionModeCallback = new ActionModeCallback();
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(
+        @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
       View view = inflater.inflate(R.layout.media_overview_gallery_fragment, container, false);
 
       this.recyclerView = ViewUtil.findById(view, R.id.media_grid);
-      this.noMedia      = ViewUtil.findById(view, R.id.no_images);
-      this.gridManager  = new StickyHeaderGridLayoutManager(getResources().getInteger(R.integer.media_overview_cols));
+      this.noMedia = ViewUtil.findById(view, R.id.no_images);
+      this.gridManager =
+          new StickyHeaderGridLayoutManager(
+              getResources().getInteger(R.integer.media_overview_cols));
 
-      this.recyclerView.setAdapter(new MediaGalleryAdapter(getContext(),
-                                                           GlideApp.with(this),
-                                                           new BucketedThreadMedia(getContext()),
-                                                           locale,
-                                                           this));
+      this.recyclerView.setAdapter(
+          new MediaGalleryAdapter(
+              getContext(),
+              GlideApp.with(this),
+              new BucketedThreadMedia(getContext()),
+              locale,
+              this));
       this.recyclerView.setLayoutManager(gridManager);
       this.recyclerView.setHasFixedSize(true);
 
@@ -232,7 +237,9 @@ public class MediaOverviewActivity extends PassphraseRequiredActionBarActivity  
     public void onConfigurationChanged(Configuration newConfig) {
       super.onConfigurationChanged(newConfig);
       if (gridManager != null) {
-        this.gridManager = new StickyHeaderGridLayoutManager(getResources().getInteger(R.integer.media_overview_cols));
+        this.gridManager =
+            new StickyHeaderGridLayoutManager(
+                getResources().getInteger(R.integer.media_overview_cols));
         this.recyclerView.setLayoutManager(gridManager);
       }
     }
@@ -243,17 +250,20 @@ public class MediaOverviewActivity extends PassphraseRequiredActionBarActivity  
     }
 
     @Override
-    public void onLoadFinished(Loader<BucketedThreadMedia> loader, BucketedThreadMedia bucketedThreadMedia) {
+    public void onLoadFinished(
+        Loader<BucketedThreadMedia> loader, BucketedThreadMedia bucketedThreadMedia) {
       ((MediaGalleryAdapter) recyclerView.getAdapter()).setMedia(bucketedThreadMedia);
       ((MediaGalleryAdapter) recyclerView.getAdapter()).notifyAllSectionsDataSetChanged();
 
-      noMedia.setVisibility(recyclerView.getAdapter().getItemCount() > 0 ? View.GONE : View.VISIBLE);
+      noMedia.setVisibility(
+          recyclerView.getAdapter().getItemCount() > 0 ? View.GONE : View.VISIBLE);
       getActivity().invalidateOptionsMenu();
     }
 
     @Override
     public void onLoaderReset(Loader<BucketedThreadMedia> cursorLoader) {
-      ((MediaGalleryAdapter) recyclerView.getAdapter()).setMedia(new BucketedThreadMedia(getContext()));
+      ((MediaGalleryAdapter) recyclerView.getAdapter())
+          .setMedia(new BucketedThreadMedia(getContext()));
     }
 
     @Override
@@ -314,14 +324,16 @@ public class MediaOverviewActivity extends PassphraseRequiredActionBarActivity  
 
     @SuppressLint("StaticFieldLeak")
     private void handleDeleteMedia(@NonNull Collection<MediaDatabase.MediaRecord> mediaRecords) {
-      int recordCount       = mediaRecords.size();
-      Resources res         = getContext().getResources();
-      String confirmTitle   = res.getQuantityString(R.plurals.MediaOverviewActivity_Media_delete_confirm_title,
-                                                    recordCount,
-                                                    recordCount);
-      String confirmMessage = res.getQuantityString(R.plurals.MediaOverviewActivity_Media_delete_confirm_message,
-                                                    recordCount,
-                                                    recordCount);
+      int recordCount = mediaRecords.size();
+      Resources res = getContext().getResources();
+      String confirmTitle =
+          res.getQuantityString(
+              R.plurals.MediaOverviewActivity_Media_delete_confirm_title, recordCount, recordCount);
+      String confirmMessage =
+          res.getQuantityString(
+              R.plurals.MediaOverviewActivity_Media_delete_confirm_message,
+              recordCount,
+              recordCount);
 
       AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
       builder.setIconAttribute(R.attr.dialog_alert_icon);
@@ -329,25 +341,26 @@ public class MediaOverviewActivity extends PassphraseRequiredActionBarActivity  
       builder.setMessage(confirmMessage);
       builder.setCancelable(true);
 
-      builder.setPositiveButton(R.string.delete, (dialogInterface, i) -> {
-        new ProgressDialogAsyncTask<MediaDatabase.MediaRecord, Void, Void>(getContext(),
-                                                                           R.string.MediaOverviewActivity_Media_delete_progress_title,
-                                                                           R.string.MediaOverviewActivity_Media_delete_progress_message)
-        {
-          @Override
-          protected Void doInBackground(MediaDatabase.MediaRecord... records) {
-            if (records == null || records.length == 0) {
-              return null;
-            }
+      builder.setPositiveButton(
+          R.string.delete,
+          (dialogInterface, i) -> {
+            new ProgressDialogAsyncTask<MediaDatabase.MediaRecord, Void, Void>(
+                getContext(),
+                R.string.MediaOverviewActivity_Media_delete_progress_title,
+                R.string.MediaOverviewActivity_Media_delete_progress_message) {
+              @Override
+              protected Void doInBackground(MediaDatabase.MediaRecord... records) {
+                if (records == null || records.length == 0) {
+                  return null;
+                }
 
-            for (MediaDatabase.MediaRecord record : records) {
-              AttachmentUtil.deleteAttachment(getContext(), record.getAttachment());
-            }
-            return null;
-          }
-
-        }.execute(mediaRecords.toArray(new MediaDatabase.MediaRecord[mediaRecords.size()]));
-      });
+                for (MediaDatabase.MediaRecord record : records) {
+                  AttachmentUtil.deleteAttachment(getContext(), record.getAttachment());
+                }
+                return null;
+              }
+            }.execute(mediaRecords.toArray(new MediaDatabase.MediaRecord[mediaRecords.size()]));
+          });
       builder.setNegativeButton(android.R.string.cancel, null);
       builder.show();
     }
@@ -404,17 +417,20 @@ public class MediaOverviewActivity extends PassphraseRequiredActionBarActivity  
   public static class MediaOverviewDocumentsFragment extends MediaOverviewFragment<Cursor> {
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-      View                  view    = inflater.inflate(R.layout.media_overview_documents_fragment, container, false);
+    public View onCreateView(
+        @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+      View view = inflater.inflate(R.layout.media_overview_documents_fragment, container, false);
       MediaDocumentsAdapter adapter = new MediaDocumentsAdapter(getContext(), null, locale);
 
-      this.recyclerView  = ViewUtil.findById(view, R.id.recycler_view);
-      this.noMedia       = ViewUtil.findById(view, R.id.no_documents);
+      this.recyclerView = ViewUtil.findById(view, R.id.recycler_view);
+      this.noMedia = ViewUtil.findById(view, R.id.no_documents);
 
       this.recyclerView.setAdapter(adapter);
-      this.recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
+      this.recyclerView.setLayoutManager(
+          new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
       this.recyclerView.addItemDecoration(new StickyHeaderDecoration(adapter, false, true));
-      this.recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+      this.recyclerView.addItemDecoration(
+          new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
 
       return view;
     }
@@ -426,7 +442,7 @@ public class MediaOverviewActivity extends PassphraseRequiredActionBarActivity  
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-      ((CursorRecyclerViewAdapter)this.recyclerView.getAdapter()).changeCursor(data);
+      ((CursorRecyclerViewAdapter) this.recyclerView.getAdapter()).changeCursor(data);
       getActivity().invalidateOptionsMenu();
 
       this.noMedia.setVisibility(data.getCount() > 0 ? View.GONE : View.VISIBLE);
@@ -434,7 +450,7 @@ public class MediaOverviewActivity extends PassphraseRequiredActionBarActivity  
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-      ((CursorRecyclerViewAdapter)this.recyclerView.getAdapter()).changeCursor(null);
+      ((CursorRecyclerViewAdapter) this.recyclerView.getAdapter()).changeCursor(null);
       getActivity().invalidateOptionsMenu();
     }
   }

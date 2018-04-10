@@ -23,5 +23,4 @@ public class IncomingPreKeyBundleMessage extends IncomingTextMessage {
   public boolean isContentPreKeyBundle() {
     return !legacy;
   }
-
 }

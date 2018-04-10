@@ -17,13 +17,16 @@ public class SquareLinearLayout extends LinearLayout {
     super(context, attrs);
   }
 
-  @TargetApi(VERSION_CODES.HONEYCOMB) @SuppressWarnings("unused")
+  @TargetApi(VERSION_CODES.HONEYCOMB)
+  @SuppressWarnings("unused")
   public SquareLinearLayout(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
   }
 
-  @TargetApi(VERSION_CODES.LOLLIPOP) @SuppressWarnings("unused")
-  public SquareLinearLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+  @TargetApi(VERSION_CODES.LOLLIPOP)
+  @SuppressWarnings("unused")
+  public SquareLinearLayout(
+      Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
     super(context, attrs, defStyleAttr, defStyleRes);
   }
 

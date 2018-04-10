@@ -9,31 +9,28 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
-
-import org.thoughtcrime.securesms.R;
-import org.thoughtcrime.securesms.recipients.Recipient;
-import org.whispersystems.libsignal.util.guava.Optional;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import org.thoughtcrime.securesms.R;
+import org.thoughtcrime.securesms.recipients.Recipient;
+import org.whispersystems.libsignal.util.guava.Optional;
 
 public class SelectedRecipientsAdapter extends BaseAdapter {
-  @NonNull  private Context                    context;
+  @NonNull private Context context;
   @Nullable private OnRecipientDeletedListener onRecipientDeletedListener;
-  @NonNull  private List<RecipientWrapper>     recipients;
+  @NonNull private List<RecipientWrapper> recipients;
 
   public SelectedRecipientsAdapter(@NonNull Context context) {
     this(context, Collections.<Recipient>emptyList());
   }
 
-  public SelectedRecipientsAdapter(@NonNull Context context,
-                                   @NonNull Collection<Recipient> existingRecipients)
-  {
-    this.context    = context;
+  public SelectedRecipientsAdapter(
+      @NonNull Context context, @NonNull Collection<Recipient> existingRecipients) {
+    this.context = context;
     this.recipients = wrapExistingMembers(existingRecipients);
   }
 
@@ -94,28 +91,32 @@ public class SelectedRecipientsAdapter extends BaseAdapter {
   @Override
   public View getView(final int position, View v, final ViewGroup parent) {
     if (v == null) {
-      v = LayoutInflater.from(context).inflate(R.layout.selected_recipient_list_item, parent, false);
+      v =
+          LayoutInflater.from(context)
+              .inflate(R.layout.selected_recipient_list_item, parent, false);
     }
 
-    final RecipientWrapper rw         = (RecipientWrapper)getItem(position);
-    final Recipient        p          = rw.getRecipient();
-    final boolean          modifiable = rw.isModifiable();
+    final RecipientWrapper rw = (RecipientWrapper) getItem(position);
+    final Recipient p = rw.getRecipient();
+    final boolean modifiable = rw.isModifiable();
 
-    TextView    name   = (TextView)    v.findViewById(R.id.name);
-    TextView    phone  = (TextView)    v.findViewById(R.id.phone);
+    TextView name = (TextView) v.findViewById(R.id.name);
+    TextView phone = (TextView) v.findViewById(R.id.phone);
     ImageButton delete = (ImageButton) v.findViewById(R.id.delete);
 
     name.setText(p.getName());
     phone.setText(p.getAddress().serialize());
     delete.setVisibility(modifiable ? View.VISIBLE : View.GONE);
-    delete.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        if (onRecipientDeletedListener != null) {
-          onRecipientDeletedListener.onRecipientDeleted(recipients.get(position).getRecipient());
-        }
-      }
-    });
+    delete.setOnClickListener(
+        new View.OnClickListener() {
+          @Override
+          public void onClick(View view) {
+            if (onRecipientDeletedListener != null) {
+              onRecipientDeletedListener.onRecipientDeleted(
+                  recipients.get(position).getRecipient());
+            }
+          }
+        });
 
     return v;
   }
@@ -138,16 +139,14 @@ public class SelectedRecipientsAdapter extends BaseAdapter {
 
   public static class RecipientWrapper {
     private final Recipient recipient;
-    private final boolean   modifiable;
-    private final boolean   push;
+    private final boolean modifiable;
+    private final boolean push;
 
-    public RecipientWrapper(final @NonNull Recipient recipient,
-                            final boolean modifiable,
-                            final boolean push)
-    {
-      this.recipient  = recipient;
+    public RecipientWrapper(
+        final @NonNull Recipient recipient, final boolean modifiable, final boolean push) {
+      this.recipient = recipient;
       this.modifiable = modifiable;
-      this.push       = push;
+      this.push = push;
     }
 
     public @NonNull Recipient getRecipient() {

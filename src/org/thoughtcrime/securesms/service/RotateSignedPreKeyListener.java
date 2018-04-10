@@ -1,14 +1,11 @@
 package org.thoughtcrime.securesms.service;
 
-
 import android.content.Context;
 import android.content.Intent;
-
+import java.util.concurrent.TimeUnit;
 import org.thoughtcrime.securesms.ApplicationContext;
 import org.thoughtcrime.securesms.jobs.RotateSignedPreKeyJob;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
-
-import java.util.concurrent.TimeUnit;
 
 public class RotateSignedPreKeyListener extends PersistentAlarmManagerListener {
 
@@ -23,8 +20,8 @@ public class RotateSignedPreKeyListener extends PersistentAlarmManagerListener {
   protected long onAlarm(Context context, long scheduledTime) {
     if (scheduledTime != 0 && TextSecurePreferences.isPushRegistered(context)) {
       ApplicationContext.getInstance(context)
-                        .getJobManager()
-                        .add(new RotateSignedPreKeyJob(context));
+          .getJobManager()
+          .add(new RotateSignedPreKeyJob(context));
     }
 
     long nextTime = System.currentTimeMillis() + INTERVAL;

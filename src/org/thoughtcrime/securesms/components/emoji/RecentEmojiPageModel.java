@@ -6,35 +6,32 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
-
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-
-import org.thoughtcrime.securesms.R;
-import org.thoughtcrime.securesms.util.JsonUtils;
-
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import org.thoughtcrime.securesms.R;
+import org.thoughtcrime.securesms.util.JsonUtils;
 
 public class RecentEmojiPageModel implements EmojiPageModel {
-  private static final String TAG                  = RecentEmojiPageModel.class.getSimpleName();
+  private static final String TAG = RecentEmojiPageModel.class.getSimpleName();
   private static final String EMOJI_LRU_PREFERENCE = "pref_recent_emoji2";
-  private static final int    EMOJI_LRU_SIZE       = 50;
+  private static final int EMOJI_LRU_SIZE = 50;
 
-  private final SharedPreferences     prefs;
+  private final SharedPreferences prefs;
   private final LinkedHashSet<String> recentlyUsed;
 
   public RecentEmojiPageModel(Context context) {
-    this.prefs        = PreferenceManager.getDefaultSharedPreferences(context);
+    this.prefs = PreferenceManager.getDefaultSharedPreferences(context);
     this.recentlyUsed = getPersistedCache();
   }
 
   private LinkedHashSet<String> getPersistedCache() {
     String serialized = prefs.getString(EMOJI_LRU_PREFERENCE, "[]");
     try {
-      CollectionType collectionType = TypeFactory.defaultInstance()
-                                                 .constructCollectionType(LinkedHashSet.class, String.class);
+      CollectionType collectionType =
+          TypeFactory.defaultInstance().constructCollectionType(LinkedHashSet.class, String.class);
       return JsonUtils.getMapper().readValue(serialized, collectionType);
     } catch (IOException e) {
       Log.w(TAG, e);
@@ -42,23 +39,28 @@ public class RecentEmojiPageModel implements EmojiPageModel {
     }
   }
 
-  @Override public int getIconAttr() {
+  @Override
+  public int getIconAttr() {
     return R.attr.emoji_category_recent;
   }
 
-  @Override public String[] getEmoji() {
+  @Override
+  public String[] getEmoji() {
     return toReversePrimitiveArray(recentlyUsed);
   }
 
-  @Override public boolean hasSpriteMap() {
+  @Override
+  public boolean hasSpriteMap() {
     return false;
   }
 
-  @Override public String getSprite() {
+  @Override
+  public String getSprite() {
     return null;
   }
 
-  @Override public boolean isDynamic() {
+  @Override
+  public boolean isDynamic() {
     return true;
   }
 
@@ -80,9 +82,7 @@ public class RecentEmojiPageModel implements EmojiPageModel {
       protected Void doInBackground(Void... params) {
         try {
           String serialized = JsonUtils.toJson(latestRecentlyUsed);
-          prefs.edit()
-               .putString(EMOJI_LRU_PREFERENCE, serialized)
-               .apply();
+          prefs.edit().putString(EMOJI_LRU_PREFERENCE, serialized).apply();
         } catch (IOException e) {
           Log.w(TAG, e);
         }

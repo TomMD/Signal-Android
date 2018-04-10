@@ -1,12 +1,10 @@
 package org.thoughtcrime.securesms.components.emoji;
 
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageButton;
-
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.components.emoji.EmojiDrawer.EmojiDrawerListener;
 
@@ -39,12 +37,12 @@ public class EmojiToggle extends ImageButton implements EmojiDrawerListener {
   }
 
   private void initialize() {
-    int attributes[] = new int[] {R.attr.conversation_emoji_toggle,
-        R.attr.conversation_keyboard_toggle};
+    int attributes[] =
+        new int[] {R.attr.conversation_emoji_toggle, R.attr.conversation_keyboard_toggle};
 
     TypedArray drawables = getContext().obtainStyledAttributes(attributes);
-    this.emojiToggle     = drawables.getDrawable(0);
-    this.imeToggle       = drawables.getDrawable(1);
+    this.emojiToggle = drawables.getDrawable(0);
+    this.imeToggle = drawables.getDrawable(1);
 
     drawables.recycle();
     setToEmoji();
@@ -54,11 +52,13 @@ public class EmojiToggle extends ImageButton implements EmojiDrawerListener {
     drawer.setDrawerListener(this);
   }
 
-  @Override public void onShown() {
+  @Override
+  public void onShown() {
     setToIme();
   }
 
-  @Override public void onHidden() {
+  @Override
+  public void onHidden() {
     setToEmoji();
   }
 }

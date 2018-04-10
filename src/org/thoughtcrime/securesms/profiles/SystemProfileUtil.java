@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms.profiles;
 
-
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.annotation.SuppressLint;
@@ -14,7 +13,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
-
 import org.thoughtcrime.securesms.mms.MediaConstraints;
 import org.thoughtcrime.securesms.util.BitmapDecodingException;
 import org.thoughtcrime.securesms.util.BitmapUtil;
@@ -26,20 +24,27 @@ public class SystemProfileUtil {
   private static final String TAG = SystemProfileUtil.class.getSimpleName();
 
   @SuppressLint("StaticFieldLeak")
-  public  static ListenableFuture<byte[]> getSystemProfileAvatar(final @NonNull Context context, MediaConstraints mediaConstraints) {
+  public static ListenableFuture<byte[]> getSystemProfileAvatar(
+      final @NonNull Context context, MediaConstraints mediaConstraints) {
     SettableFuture<byte[]> future = new SettableFuture<>();
 
     new AsyncTask<Void, Void, byte[]>() {
       @Override
       protected @Nullable byte[] doInBackground(Void... params) {
         if (Build.VERSION.SDK_INT >= 14) {
-          try (Cursor cursor = context.getContentResolver().query(ContactsContract.Profile.CONTENT_URI, null, null, null, null)) {
+          try (Cursor cursor =
+              context
+                  .getContentResolver()
+                  .query(ContactsContract.Profile.CONTENT_URI, null, null, null, null)) {
             while (cursor != null && cursor.moveToNext()) {
-              String photoUri = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.Profile.PHOTO_URI));
+              String photoUri =
+                  cursor.getString(
+                      cursor.getColumnIndexOrThrow(ContactsContract.Profile.PHOTO_URI));
 
               if (!TextUtils.isEmpty(photoUri)) {
                 try {
-                  BitmapUtil.ScaleResult result = BitmapUtil.createScaledBytes(context, Uri.parse(photoUri), mediaConstraints);
+                  BitmapUtil.ScaleResult result =
+                      BitmapUtil.createScaledBytes(context, Uri.parse(photoUri), mediaConstraints);
                   return result.getBitmap();
                 } catch (BitmapDecodingException e) {
                   Log.w(TAG, e);
@@ -58,7 +63,6 @@ public class SystemProfileUtil {
       protected void onPostExecute(@Nullable byte[] result) {
         future.set(result);
       }
-
     }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
     return future;
@@ -74,9 +78,14 @@ public class SystemProfileUtil {
         String name = null;
 
         if (Build.VERSION.SDK_INT >= 14) {
-          try (Cursor cursor =  context.getContentResolver().query(ContactsContract.Profile.CONTENT_URI, null, null, null, null)) {
+          try (Cursor cursor =
+              context
+                  .getContentResolver()
+                  .query(ContactsContract.Profile.CONTENT_URI, null, null, null, null)) {
             if (cursor != null && cursor.moveToNext()) {
-              name = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.Profile.DISPLAY_NAME));
+              name =
+                  cursor.getString(
+                      cursor.getColumnIndexOrThrow(ContactsContract.Profile.DISPLAY_NAME));
             }
           } catch (SecurityException se) {
             Log.w(TAG, se);
@@ -85,7 +94,7 @@ public class SystemProfileUtil {
 
         if (name == null) {
           AccountManager accountManager = AccountManager.get(context);
-          Account[]      accounts       = accountManager.getAccountsByType("com.google");
+          Account[] accounts = accountManager.getAccountsByType("com.google");
 
           for (Account account : accounts) {
             if (!TextUtils.isEmpty(account.name)) {
@@ -111,6 +120,4 @@ public class SystemProfileUtil {
 
     return future;
   }
-
-
 }

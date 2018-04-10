@@ -2,7 +2,9 @@ package org.thoughtcrime.securesms.jobs;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import org.thoughtcrime.securesms.BuildConfig;
 import org.thoughtcrime.securesms.TextSecureExpiredException;
 import org.thoughtcrime.securesms.attachments.Attachment;
@@ -17,14 +19,10 @@ import org.thoughtcrime.securesms.util.MediaUtil;
 import org.thoughtcrime.securesms.util.Util;
 import org.whispersystems.jobqueue.JobParameters;
 
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-
 public abstract class SendJob extends MasterSecretJob {
 
   @SuppressWarnings("unused")
-  private final static String TAG = SendJob.class.getSimpleName();
+  private static final String TAG = SendJob.class.getSimpleName();
 
   public SendJob(Context context, JobParameters parameters) {
     super(context, parameters);
@@ -33,9 +31,10 @@ public abstract class SendJob extends MasterSecretJob {
   @Override
   public final void onRun(MasterSecret masterSecret) throws Exception {
     if (Util.getDaysTillBuildExpiry() <= 0) {
-      throw new TextSecureExpiredException(String.format("TextSecure expired (build %d, now %d)",
-                                                         BuildConfig.BUILD_TIMESTAMP,
-                                                         System.currentTimeMillis()));
+      throw new TextSecureExpiredException(
+          String.format(
+              "TextSecure expired (build %d, now %d)",
+              BuildConfig.BUILD_TIMESTAMP, System.currentTimeMillis()));
     }
 
     onSend(masterSecret);
@@ -51,12 +50,11 @@ public abstract class SendJob extends MasterSecretJob {
     }
   }
 
-  protected List<Attachment> scaleAndStripExifFromAttachments(@NonNull MediaConstraints constraints,
-                                                              @NonNull List<Attachment> attachments)
-      throws UndeliverableMessageException
-  {
+  protected List<Attachment> scaleAndStripExifFromAttachments(
+      @NonNull MediaConstraints constraints, @NonNull List<Attachment> attachments)
+      throws UndeliverableMessageException {
     AttachmentDatabase attachmentDatabase = DatabaseFactory.getAttachmentDatabase(context);
-    List<Attachment>   results            = new LinkedList<>();
+    List<Attachment> results = new LinkedList<>();
 
     for (Attachment attachment : attachments) {
       try {

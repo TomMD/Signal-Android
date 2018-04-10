@@ -4,7 +4,6 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
-
 import com.android.mms.dom.smil.parser.SmilXmlSerializer;
 import com.google.android.mms.ContentType;
 import com.google.android.mms.InvalidHeaderValueException;
@@ -18,7 +17,10 @@ import com.google.android.mms.pdu_alt.SendConf;
 import com.google.android.mms.pdu_alt.SendReq;
 import com.google.android.mms.smil.SmilHelper;
 import com.klinker.android.send_message.Utils;
-
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import org.thoughtcrime.securesms.attachments.Attachment;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.database.Address;
@@ -44,11 +46,6 @@ import org.thoughtcrime.securesms.util.Util;
 import org.whispersystems.jobqueue.JobParameters;
 import org.whispersystems.jobqueue.requirements.NetworkRequirement;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-
 public class MmsSendJob extends SendJob {
 
   private static final long serialVersionUID = 0L;
@@ -58,34 +55,36 @@ public class MmsSendJob extends SendJob {
   private final long messageId;
 
   public MmsSendJob(Context context, long messageId) {
-    super(context, JobParameters.newBuilder()
-                                .withGroupId("mms-operation")
-                                .withRequirement(new NetworkRequirement(context))
-                                .withRequirement(new MasterSecretRequirement(context))
-                                .withPersistence()
-                                .create());
+    super(
+        context,
+        JobParameters.newBuilder()
+            .withGroupId("mms-operation")
+            .withRequirement(new NetworkRequirement(context))
+            .withRequirement(new MasterSecretRequirement(context))
+            .withPersistence()
+            .create());
 
     this.messageId = messageId;
   }
 
   @Override
-  public void onAdded() {
-
-  }
+  public void onAdded() {}
 
   @Override
-  public void onSend(MasterSecret masterSecret) throws MmsException, NoSuchMessageException, IOException {
-    MmsDatabase          database = DatabaseFactory.getMmsDatabase(context);
-    OutgoingMediaMessage message  = database.getOutgoingMessage(messageId);
+  public void onSend(MasterSecret masterSecret)
+      throws MmsException, NoSuchMessageException, IOException {
+    MmsDatabase database = DatabaseFactory.getMmsDatabase(context);
+    OutgoingMediaMessage message = database.getOutgoingMessage(messageId);
 
     try {
       SendReq pdu = constructSendPdu(message);
 
       validateDestinations(message, pdu);
 
-      final byte[]        pduBytes = getPduBytes(pdu);
-      final SendConf      sendConf = new CompatMmsConnection(context).send(pduBytes, message.getSubscriptionId());
-      final MmsSendResult result   = getSendResult(sendConf, pdu);
+      final byte[] pduBytes = getPduBytes(pdu);
+      final SendConf sendConf =
+          new CompatMmsConnection(context).send(pduBytes, message.getSubscriptionId());
+      final MmsSendResult result = getSendResult(sendConf, pdu);
 
       database.markAsSent(messageId, false);
       markAttachmentsUploaded(messageId, message.getAttachments());
@@ -112,8 +111,7 @@ public class MmsSendJob extends SendJob {
   }
 
   private byte[] getPduBytes(SendReq message)
-      throws IOException, UndeliverableMessageException, InsecureFallbackApprovalException
-  {
+      throws IOException, UndeliverableMessageException, InsecureFallbackApprovalException {
     byte[] pduBytes = new PduComposer(context, message).make();
 
     if (pduBytes == null) {
@@ -124,8 +122,7 @@ public class MmsSendJob extends SendJob {
   }
 
   private MmsSendResult getSendResult(SendConf conf, SendReq message)
-      throws UndeliverableMessageException
-  {
+      throws UndeliverableMessageException {
     if (conf == null) {
       throw new UndeliverableMessageException("No M-Send.conf received in response to send.");
     } else if (conf.getResponseStatus() != PduHeaders.RESPONSE_STATUS_OK) {
@@ -143,18 +140,20 @@ public class MmsSendJob extends SendJob {
     return !Arrays.equals(message.getTransactionId(), response.getTransactionId());
   }
 
-  private void validateDestinations(EncodedStringValue[] destinations) throws UndeliverableMessageException {
+  private void validateDestinations(EncodedStringValue[] destinations)
+      throws UndeliverableMessageException {
     if (destinations == null) return;
 
     for (EncodedStringValue destination : destinations) {
       if (destination == null || !NumberUtil.isValidSmsOrEmail(destination.getString())) {
-        throw new UndeliverableMessageException("Invalid destination: " +
-                                                (destination == null ? null : destination.getString()));
+        throw new UndeliverableMessageException(
+            "Invalid destination: " + (destination == null ? null : destination.getString()));
       }
     }
   }
 
-  private void validateDestinations(OutgoingMediaMessage media, SendReq message) throws UndeliverableMessageException {
+  private void validateDestinations(OutgoingMediaMessage media, SendReq message)
+      throws UndeliverableMessageException {
     validateDestinations(message.getTo());
     validateDestinations(message.getCc());
     validateDestinations(message.getBcc());
@@ -169,13 +168,14 @@ public class MmsSendJob extends SendJob {
   }
 
   private SendReq constructSendPdu(OutgoingMediaMessage message)
-      throws UndeliverableMessageException
-  {
-    SendReq          req               = new SendReq();
-    String           lineNumber        = getMyNumber(context);
-    Address          destination       = message.getRecipient().getAddress();
-    MediaConstraints mediaConstraints  = MediaConstraints.getMmsMediaConstraints(message.getSubscriptionId());
-    List<Attachment> scaledAttachments = scaleAndStripExifFromAttachments(mediaConstraints, message.getAttachments());
+      throws UndeliverableMessageException {
+    SendReq req = new SendReq();
+    String lineNumber = getMyNumber(context);
+    Address destination = message.getRecipient().getAddress();
+    MediaConstraints mediaConstraints =
+        MediaConstraints.getMmsMediaConstraints(message.getSubscriptionId());
+    List<Attachment> scaledAttachments =
+        scaleAndStripExifFromAttachments(mediaConstraints, message.getAttachments());
 
     if (!TextUtils.isEmpty(lineNumber)) {
       req.setFrom(new EncodedStringValue(lineNumber));
@@ -184,7 +184,9 @@ public class MmsSendJob extends SendJob {
     }
 
     if (destination.isMmsGroup()) {
-      List<Recipient> members = DatabaseFactory.getGroupDatabase(context).getGroupMembers(destination.toGroupString(), false);
+      List<Recipient> members =
+          DatabaseFactory.getGroupDatabase(context)
+              .getGroupMembers(destination.toGroupString(), false);
 
       for (Recipient member : members) {
         if (message.getDistributionType() == ThreadDatabase.DistributionTypes.BROADCAST) {
@@ -200,7 +202,7 @@ public class MmsSendJob extends SendJob {
     req.setDate(System.currentTimeMillis() / 1000);
 
     PduBody body = new PduBody();
-    int     size = 0;
+    int size = 0;
 
     if (!TextUtils.isEmpty(message.getBody())) {
       PduPart part = new PduPart();
@@ -218,14 +220,16 @@ public class MmsSendJob extends SendJob {
 
     for (Attachment attachment : scaledAttachments) {
       try {
-        if (attachment.getDataUri() == null) throw new IOException("Assertion failed, attachment for outgoing MMS has no data!");
+        if (attachment.getDataUri() == null)
+          throw new IOException("Assertion failed, attachment for outgoing MMS has no data!");
 
-        String  fileName = attachment.getFileName();
-        PduPart part     = new PduPart();
+        String fileName = attachment.getFileName();
+        PduPart part = new PduPart();
 
         if (fileName == null) {
-          fileName      = String.valueOf(Math.abs(Util.getSecureRandom().nextLong()));
-          String fileExtension = MimeTypeMap.getSingleton().getExtensionFromMimeType(attachment.getContentType());
+          fileName = String.valueOf(Math.abs(Util.getSecureRandom().nextLong()));
+          String fileExtension =
+              MimeTypeMap.getSingleton().getExtensionFromMimeType(attachment.getContentType());
 
           if (fileExtension != null) fileName = fileName + "." + fileExtension;
         }
@@ -241,7 +245,8 @@ public class MmsSendJob extends SendJob {
         int index = fileName.lastIndexOf(".");
         String contentId = (index == -1) ? fileName : fileName.substring(0, index);
         part.setContentId(contentId.getBytes());
-        part.setData(Util.readFully(PartAuthority.getAttachmentStream(context, attachment.getDataUri())));
+        part.setData(
+            Util.readFully(PartAuthority.getAttachmentStream(context, attachment.getDataUri())));
 
         body.addPart(part);
         size += getPartSize(part);
@@ -268,20 +273,24 @@ public class MmsSendJob extends SendJob {
       req.setPriority(PduHeaders.PRIORITY_NORMAL);
       req.setDeliveryReport(PduHeaders.VALUE_NO);
       req.setReadReport(PduHeaders.VALUE_NO);
-    } catch (InvalidHeaderValueException e) {}
+    } catch (InvalidHeaderValueException e) {
+    }
 
     return req;
   }
 
   private long getPartSize(PduPart part) {
-    return part.getName().length + part.getContentLocation().length +
-        part.getContentType().length + part.getData().length +
-        part.getContentId().length;
+    return part.getName().length
+        + part.getContentLocation().length
+        + part.getContentType().length
+        + part.getData().length
+        + part.getContentId().length;
   }
 
   private void notifyMediaMessageDeliveryFailed(Context context, long messageId) {
-    long      threadId  = DatabaseFactory.getMmsDatabase(context).getThreadIdForMessage(messageId);
-    Recipient recipient = DatabaseFactory.getThreadDatabase(context).getRecipientForThreadId(threadId);
+    long threadId = DatabaseFactory.getMmsDatabase(context).getThreadIdForMessage(messageId);
+    Recipient recipient =
+        DatabaseFactory.getThreadDatabase(context).getRecipientForThreadId(threadId);
 
     if (recipient != null) {
       MessageNotifier.notifyMessageDeliveryFailed(context, recipient, threadId);

@@ -7,11 +7,9 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.InputFilter;
 import android.util.AttributeSet;
-
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.components.emoji.EmojiProvider.EmojiDrawable;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
-
 
 public class EmojiEditText extends AppCompatEditText {
   private static final String TAG = EmojiEditText.class.getSimpleName();
@@ -32,8 +30,8 @@ public class EmojiEditText extends AppCompatEditText {
   }
 
   public void insertEmoji(String emoji) {
-    final int          start = getSelectionStart();
-    final int          end   = getSelectionEnd();
+    final int start = getSelectionStart();
+    final int end = getSelectionEnd();
 
     getText().replace(Math.min(start, end), Math.max(start, end), emoji);
     setSelection(start + emoji.length());
@@ -42,7 +40,7 @@ public class EmojiEditText extends AppCompatEditText {
   @Override
   public void invalidateDrawable(@NonNull Drawable drawable) {
     if (drawable instanceof EmojiDrawable) invalidate();
-    else                                   super.invalidateDrawable(drawable);
+    else super.invalidateDrawable(drawable);
   }
 
   private InputFilter[] appendEmojiFilter(@Nullable InputFilter[] originalFilters) {

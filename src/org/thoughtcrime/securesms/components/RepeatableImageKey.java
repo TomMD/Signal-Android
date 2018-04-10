@@ -6,11 +6,9 @@ import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.util.AttributeSet;
 import android.view.HapticFeedbackConstants;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.widget.EditText;
 import android.widget.ImageButton;
 
 public class RepeatableImageKey extends ImageButton {
@@ -33,9 +31,8 @@ public class RepeatableImageKey extends ImageButton {
   }
 
   @TargetApi(VERSION_CODES.LOLLIPOP)
-  public RepeatableImageKey(Context context, AttributeSet attrs, int defStyleAttr,
-                            int defStyleRes)
-  {
+  public RepeatableImageKey(
+      Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
     super(context, attrs, defStyleAttr, defStyleRes);
     init();
   }
@@ -54,7 +51,8 @@ public class RepeatableImageKey extends ImageButton {
   }
 
   private class RepeaterClickListener implements OnClickListener {
-    @Override public void onClick(View v) {
+    @Override
+    public void onClick(View v) {
       notifyListener();
     }
   }
@@ -64,9 +62,11 @@ public class RepeatableImageKey extends ImageButton {
     @Override
     public void run() {
       notifyListener();
-      postDelayed(this, VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB_MR1
-                        ? ViewConfiguration.getKeyRepeatDelay()
-                        : 50);
+      postDelayed(
+          this,
+          VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB_MR1
+              ? ViewConfiguration.getKeyRepeatDelay()
+              : 50);
     }
   }
 
@@ -81,18 +81,20 @@ public class RepeatableImageKey extends ImageButton {
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
       switch (motionEvent.getAction()) {
-      case MotionEvent.ACTION_DOWN:
-        view.postDelayed(repeater, VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB_MR1
-                                   ? ViewConfiguration.getKeyRepeatTimeout()
-                                   : ViewConfiguration.getLongPressTimeout());
-        performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
-        return false;
-      case MotionEvent.ACTION_CANCEL:
-      case MotionEvent.ACTION_UP:
-        view.removeCallbacks(repeater);
-        return false;
-      default:
-        return false;
+        case MotionEvent.ACTION_DOWN:
+          view.postDelayed(
+              repeater,
+              VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB_MR1
+                  ? ViewConfiguration.getKeyRepeatTimeout()
+                  : ViewConfiguration.getLongPressTimeout());
+          performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+          return false;
+        case MotionEvent.ACTION_CANCEL:
+        case MotionEvent.ACTION_UP:
+          view.removeCallbacks(repeater);
+          return false;
+        default:
+          return false;
       }
     }
   }

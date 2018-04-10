@@ -1,18 +1,16 @@
 /**
  * Copyright (C) 2011 Whisper Systems
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * <p>This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * <p>You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  */
 package org.thoughtcrime.securesms.components;
 
@@ -25,7 +23,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.RelativeLayout;
-
+import java.util.LinkedList;
+import java.util.List;
+import java.util.StringTokenizer;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.contacts.RecipientsAdapter;
 import org.thoughtcrime.securesms.contacts.RecipientsEditor;
@@ -33,22 +33,17 @@ import org.thoughtcrime.securesms.database.Address;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.recipients.RecipientModifiedListener;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.StringTokenizer;
-
 /**
- * Panel component combining both an editable field with a button for
- * a list-based contact selector.
+ * Panel component combining both an editable field with a button for a list-based contact selector.
  *
  * @author Moxie Marlinspike
  */
 public class PushRecipientsPanel extends RelativeLayout implements RecipientModifiedListener {
-  private final String                         TAG = PushRecipientsPanel.class.getSimpleName();
-  private       RecipientsPanelChangedListener panelChangeListener;
+  private final String TAG = PushRecipientsPanel.class.getSimpleName();
+  private RecipientsPanelChangedListener panelChangeListener;
 
   private RecipientsEditor recipientsText;
-  private View             panel;
+  private View panel;
 
   private static final int RECIPIENTS_MAX_LENGTH = 312;
 
@@ -82,7 +77,8 @@ public class PushRecipientsPanel extends RelativeLayout implements RecipientModi
   }
 
   private void initialize() {
-    LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    LayoutInflater inflater =
+        (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     inflater.inflate(R.layout.push_recipients_panel, this, true);
 
     View imageButton = findViewById(R.id.contacts_button);
@@ -96,7 +92,7 @@ public class PushRecipientsPanel extends RelativeLayout implements RecipientModi
 
   private void initRecipientsEditor() {
 
-    this.recipientsText = (RecipientsEditor)findViewById(R.id.recipients_text);
+    this.recipientsText = (RecipientsEditor) findViewById(R.id.recipients_text);
 
     List<Recipient> recipients = getRecipients();
 
@@ -108,27 +104,36 @@ public class PushRecipientsPanel extends RelativeLayout implements RecipientModi
     recipientsText.populate(recipients);
 
     recipientsText.setOnFocusChangeListener(new FocusChangedListener());
-    recipientsText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-      @Override
-      public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        if (panelChangeListener != null) {
-          panelChangeListener.onRecipientsPanelUpdate(getRecipients());
-        }
-        recipientsText.setText("");
-      }
-    });
+    recipientsText.setOnItemClickListener(
+        new AdapterView.OnItemClickListener() {
+          @Override
+          public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            if (panelChangeListener != null) {
+              panelChangeListener.onRecipientsPanelUpdate(getRecipients());
+            }
+            recipientsText.setText("");
+          }
+        });
   }
 
-  private @NonNull List<Recipient> getRecipientsFromString(Context context, @NonNull String rawText, boolean asynchronous) {
-    StringTokenizer tokenizer  = new StringTokenizer(rawText, ",");
+  private @NonNull List<Recipient> getRecipientsFromString(
+      Context context, @NonNull String rawText, boolean asynchronous) {
+    StringTokenizer tokenizer = new StringTokenizer(rawText, ",");
     List<Recipient> recipients = new LinkedList<>();
 
     while (tokenizer.hasMoreTokens()) {
       String token = tokenizer.nextToken().trim();
 
       if (!TextUtils.isEmpty(token)) {
-        if (hasBracketedNumber(token)) recipients.add(Recipient.from(context, Address.fromExternal(context, parseBracketedNumber(token)), asynchronous));
-        else                           recipients.add(Recipient.from(context, Address.fromExternal(context, token), asynchronous));
+        if (hasBracketedNumber(token))
+          recipients.add(
+              Recipient.from(
+                  context,
+                  Address.fromExternal(context, parseBracketedNumber(token)),
+                  asynchronous));
+        else
+          recipients.add(
+              Recipient.from(context, Address.fromExternal(context, token), asynchronous));
       }
     }
 
@@ -138,13 +143,12 @@ public class PushRecipientsPanel extends RelativeLayout implements RecipientModi
   private boolean hasBracketedNumber(String recipient) {
     int openBracketIndex = recipient.indexOf('<');
 
-    return (openBracketIndex != -1) &&
-           (recipient.indexOf('>', openBracketIndex) != -1);
+    return (openBracketIndex != -1) && (recipient.indexOf('>', openBracketIndex) != -1);
   }
 
-  private  String parseBracketedNumber(String recipient) {
-    int begin    = recipient.indexOf('<');
-    int end      = recipient.indexOf('>', begin);
+  private String parseBracketedNumber(String recipient) {
+    int begin = recipient.indexOf('<');
+    int end = recipient.indexOf('>', begin);
     String value = recipient.substring(begin + 1, end);
 
     return value;
@@ -166,5 +170,4 @@ public class PushRecipientsPanel extends RelativeLayout implements RecipientModi
   public interface RecipientsPanelChangedListener {
     public void onRecipientsPanelUpdate(List<Recipient> recipients);
   }
-
 }

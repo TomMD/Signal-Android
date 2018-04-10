@@ -15,13 +15,14 @@ public abstract class AbstractCursorLoader extends AsyncTaskLoader<Cursor> {
   private static final String TAG = AbstractCursorLoader.class.getSimpleName();
 
   @SuppressLint("StaticFieldLeak")
-  protected final Context                  context;
-  private   final ForceLoadContentObserver observer;
-  protected       Cursor                   cursor;
+  protected final Context context;
+
+  private final ForceLoadContentObserver observer;
+  protected Cursor cursor;
 
   public AbstractCursorLoader(Context context) {
     super(context);
-    this.context  = context.getApplicationContext();
+    this.context = context.getApplicationContext();
     this.observer = new ForceLoadContentObserver();
   }
 
@@ -90,5 +91,4 @@ public abstract class AbstractCursorLoader extends AsyncTaskLoader<Cursor> {
     }
     cursor = null;
   }
-
 }

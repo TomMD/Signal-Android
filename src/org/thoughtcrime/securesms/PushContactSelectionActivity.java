@@ -18,7 +18,6 @@ package org.thoughtcrime.securesms;
 
 import android.content.Intent;
 import android.os.Bundle;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,12 +25,11 @@ import java.util.List;
  * Activity container for selecting a list of contacts.
  *
  * @author Moxie Marlinspike
- *
  */
 public class PushContactSelectionActivity extends ContactSelectionActivity {
 
   @SuppressWarnings("unused")
-  private final static String TAG = PushContactSelectionActivity.class.getSimpleName();
+  private static final String TAG = PushContactSelectionActivity.class.getSimpleName();
 
   @Override
   protected void onCreate(Bundle icicle, boolean ready) {
@@ -39,16 +37,18 @@ public class PushContactSelectionActivity extends ContactSelectionActivity {
     super.onCreate(icicle, ready);
 
     getToolbar().setNavigationIcon(R.drawable.ic_check_white_24dp);
-    getToolbar().setNavigationOnClickListener(v -> {
-      Intent resultIntent = getIntent();
-      List<String> selectedContacts = contactsFragment.getSelectedContacts();
+    getToolbar()
+        .setNavigationOnClickListener(
+            v -> {
+              Intent resultIntent = getIntent();
+              List<String> selectedContacts = contactsFragment.getSelectedContacts();
 
-      if (selectedContacts != null) {
-        resultIntent.putStringArrayListExtra("contacts", new ArrayList<>(selectedContacts));
-      }
+              if (selectedContacts != null) {
+                resultIntent.putStringArrayListExtra("contacts", new ArrayList<>(selectedContacts));
+              }
 
-      setResult(RESULT_OK, resultIntent);
-      finish();
-    });
+              setResult(RESULT_OK, resultIntent);
+              finish();
+            });
   }
 }

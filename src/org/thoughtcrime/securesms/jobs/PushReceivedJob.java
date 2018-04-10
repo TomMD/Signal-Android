@@ -3,7 +3,6 @@ package org.thoughtcrime.securesms.jobs;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
-
 import org.thoughtcrime.securesms.ApplicationContext;
 import org.thoughtcrime.securesms.database.Address;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
@@ -23,12 +22,15 @@ public abstract class PushReceivedJob extends ContextJob {
   }
 
   public void handle(SignalServiceEnvelope envelope) {
-    Address   source    = Address.fromExternal(context, envelope.getSource());
+    Address source = Address.fromExternal(context, envelope.getSource());
     Recipient recipient = Recipient.from(context, source, false);
 
     if (!isActiveNumber(recipient)) {
-      DatabaseFactory.getRecipientDatabase(context).setRegistered(recipient, RecipientDatabase.RegisteredState.REGISTERED);
-      ApplicationContext.getInstance(context).getJobManager().add(new DirectoryRefreshJob(context, recipient, false));
+      DatabaseFactory.getRecipientDatabase(context)
+          .setRegistered(recipient, RecipientDatabase.RegisteredState.REGISTERED);
+      ApplicationContext.getInstance(context)
+          .getJobManager()
+          .add(new DirectoryRefreshJob(context, recipient, false));
     }
 
     if (envelope.isReceipt()) {
@@ -41,7 +43,7 @@ public abstract class PushReceivedJob extends ContextJob {
   }
 
   private void handleMessage(SignalServiceEnvelope envelope, Address source) {
-    Recipient  recipients = Recipient.from(context, source, false);
+    Recipient recipients = Recipient.from(context, source, false);
     JobManager jobManager = ApplicationContext.getInstance(context).getJobManager();
 
     if (!recipients.isBlocked()) {
@@ -54,13 +56,14 @@ public abstract class PushReceivedJob extends ContextJob {
 
   private void handleReceipt(SignalServiceEnvelope envelope) {
     Log.w(TAG, String.format("Received receipt: (XXXXX, %d)", envelope.getTimestamp()));
-    DatabaseFactory.getMmsSmsDatabase(context).incrementDeliveryReceiptCount(new SyncMessageId(Address.fromExternal(context, envelope.getSource()),
-                                                                                               envelope.getTimestamp()), System.currentTimeMillis());
+    DatabaseFactory.getMmsSmsDatabase(context)
+        .incrementDeliveryReceiptCount(
+            new SyncMessageId(
+                Address.fromExternal(context, envelope.getSource()), envelope.getTimestamp()),
+            System.currentTimeMillis());
   }
 
   private boolean isActiveNumber(@NonNull Recipient recipient) {
     return recipient.resolve().getRegistered() == RecipientDatabase.RegisteredState.REGISTERED;
   }
-
-
 }

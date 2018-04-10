@@ -28,5 +28,4 @@ public class IncomingGroupMessage extends IncomingTextMessage {
   public boolean isQuit() {
     return groupContext.getType().getNumber() == GroupContext.Type.QUIT_VALUE;
   }
-
 }

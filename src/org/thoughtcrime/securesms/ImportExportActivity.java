@@ -2,14 +2,12 @@ package org.thoughtcrime.securesms;
 
 import android.os.Bundle;
 import android.view.MenuItem;
-
 import org.thoughtcrime.securesms.util.DynamicLanguage;
 import org.thoughtcrime.securesms.util.DynamicTheme;
 
-
 public class ImportExportActivity extends PassphraseRequiredActionBarActivity {
 
-  private DynamicTheme    dynamicTheme    = new DynamicTheme();
+  private DynamicTheme dynamicTheme = new DynamicTheme();
   private DynamicLanguage dynamicLanguage = new DynamicLanguage();
 
   @Override
@@ -21,7 +19,8 @@ public class ImportExportActivity extends PassphraseRequiredActionBarActivity {
   protected void onCreate(Bundle savedInstanceState, boolean ready) {
     assert getSupportActionBar() != null;
     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    initFragment(android.R.id.content, new ImportExportFragment(), dynamicLanguage.getCurrentLocale());
+    initFragment(
+        android.R.id.content, new ImportExportFragment(), dynamicLanguage.getCurrentLocale());
   }
 
   @Override
@@ -35,7 +34,9 @@ public class ImportExportActivity extends PassphraseRequiredActionBarActivity {
     super.onOptionsItemSelected(item);
 
     switch (item.getItemId()) {
-      case android.R.id.home:  finish();  return true;
+      case android.R.id.home:
+        finish();
+        return true;
     }
 
     return false;

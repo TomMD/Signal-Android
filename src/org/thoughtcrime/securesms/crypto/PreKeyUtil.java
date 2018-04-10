@@ -18,7 +18,8 @@
 package org.thoughtcrime.securesms.crypto;
 
 import android.content.Context;
-
+import java.util.LinkedList;
+import java.util.List;
 import org.thoughtcrime.securesms.crypto.storage.TextSecurePreKeyStore;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
 import org.whispersystems.libsignal.IdentityKeyPair;
@@ -31,9 +32,6 @@ import org.whispersystems.libsignal.state.SignedPreKeyRecord;
 import org.whispersystems.libsignal.state.SignedPreKeyStore;
 import org.whispersystems.libsignal.util.Medium;
 
-import java.util.LinkedList;
-import java.util.List;
-
 public class PreKeyUtil {
 
   @SuppressWarnings("unused")
@@ -41,32 +39,37 @@ public class PreKeyUtil {
 
   private static final int BATCH_SIZE = 100;
 
-  public synchronized static List<PreKeyRecord> generatePreKeys(Context context) {
-    PreKeyStore        preKeyStore    = new TextSecurePreKeyStore(context);
-    List<PreKeyRecord> records        = new LinkedList<>();
-    int                preKeyIdOffset = TextSecurePreferences.getNextPreKeyId(context);
+  public static synchronized List<PreKeyRecord> generatePreKeys(Context context) {
+    PreKeyStore preKeyStore = new TextSecurePreKeyStore(context);
+    List<PreKeyRecord> records = new LinkedList<>();
+    int preKeyIdOffset = TextSecurePreferences.getNextPreKeyId(context);
 
-    for (int i=0;i<BATCH_SIZE;i++) {
-      int          preKeyId = (preKeyIdOffset + i) % Medium.MAX_VALUE;
-      ECKeyPair    keyPair  = Curve.generateKeyPair();
-      PreKeyRecord record   = new PreKeyRecord(preKeyId, keyPair);
+    for (int i = 0; i < BATCH_SIZE; i++) {
+      int preKeyId = (preKeyIdOffset + i) % Medium.MAX_VALUE;
+      ECKeyPair keyPair = Curve.generateKeyPair();
+      PreKeyRecord record = new PreKeyRecord(preKeyId, keyPair);
 
       preKeyStore.storePreKey(preKeyId, record);
       records.add(record);
     }
 
-    TextSecurePreferences.setNextPreKeyId(context, (preKeyIdOffset + BATCH_SIZE + 1) % Medium.MAX_VALUE);
+    TextSecurePreferences.setNextPreKeyId(
+        context, (preKeyIdOffset + BATCH_SIZE + 1) % Medium.MAX_VALUE);
 
     return records;
   }
 
-  public synchronized static SignedPreKeyRecord generateSignedPreKey(Context context, IdentityKeyPair identityKeyPair, boolean active) {
+  public static synchronized SignedPreKeyRecord generateSignedPreKey(
+      Context context, IdentityKeyPair identityKeyPair, boolean active) {
     try {
-      SignedPreKeyStore  signedPreKeyStore = new TextSecurePreKeyStore(context);
-      int                signedPreKeyId    = TextSecurePreferences.getNextSignedPreKeyId(context);
-      ECKeyPair          keyPair           = Curve.generateKeyPair();
-      byte[]             signature         = Curve.calculateSignature(identityKeyPair.getPrivateKey(), keyPair.getPublicKey().serialize());
-      SignedPreKeyRecord record            = new SignedPreKeyRecord(signedPreKeyId, System.currentTimeMillis(), keyPair, signature);
+      SignedPreKeyStore signedPreKeyStore = new TextSecurePreKeyStore(context);
+      int signedPreKeyId = TextSecurePreferences.getNextSignedPreKeyId(context);
+      ECKeyPair keyPair = Curve.generateKeyPair();
+      byte[] signature =
+          Curve.calculateSignature(
+              identityKeyPair.getPrivateKey(), keyPair.getPublicKey().serialize());
+      SignedPreKeyRecord record =
+          new SignedPreKeyRecord(signedPreKeyId, System.currentTimeMillis(), keyPair, signature);
 
       signedPreKeyStore.storeSignedPreKey(signedPreKeyId, record);
       TextSecurePreferences.setNextSignedPreKeyId(context, (signedPreKeyId + 1) % Medium.MAX_VALUE);
@@ -88,5 +91,4 @@ public class PreKeyUtil {
   public static synchronized int getActiveSignedPreKeyId(Context context) {
     return TextSecurePreferences.getActiveSignedPreKeyId(context);
   }
-
 }

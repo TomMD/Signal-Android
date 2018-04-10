@@ -30,7 +30,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.Toast;
-
+import java.util.List;
 import org.thoughtcrime.securesms.components.RatingManager;
 import org.thoughtcrime.securesms.components.SearchToolbar;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
@@ -46,20 +46,17 @@ import org.thoughtcrime.securesms.util.DynamicNoActionBarTheme;
 import org.thoughtcrime.securesms.util.DynamicTheme;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
 
-import java.util.List;
-
 public class ConversationListActivity extends PassphraseRequiredActionBarActivity
-    implements ConversationListFragment.ConversationSelectedListener
-{
+    implements ConversationListFragment.ConversationSelectedListener {
   @SuppressWarnings("unused")
   private static final String TAG = ConversationListActivity.class.getSimpleName();
 
-  private final DynamicTheme    dynamicTheme    = new DynamicNoActionBarTheme();
+  private final DynamicTheme dynamicTheme = new DynamicNoActionBarTheme();
   private final DynamicLanguage dynamicLanguage = new DynamicLanguage();
 
   private ConversationListFragment fragment;
-  private SearchToolbar            searchToolbar;
-  private ImageView                searchAction;
+  private SearchToolbar searchToolbar;
+  private ImageView searchAction;
 
   @Override
   protected void onPreCreate() {
@@ -75,8 +72,12 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
     setSupportActionBar(toolbar);
 
     searchToolbar = findViewById(R.id.search_toolbar);
-    searchAction  = findViewById(R.id.search_action);
-    fragment      = initFragment(R.id.fragment_container, new ConversationListFragment(), dynamicLanguage.getCurrentLocale());
+    searchAction = findViewById(R.id.search_action);
+    fragment =
+        initFragment(
+            R.id.fragment_container,
+            new ConversationListFragment(),
+            dynamicLanguage.getCurrentLocale());
 
     initializeSearchListener();
 
@@ -103,38 +104,47 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
 
     inflater.inflate(R.menu.text_secure_normal, menu);
 
-    menu.findItem(R.id.menu_clear_passphrase).setVisible(!TextSecurePreferences.isPasswordDisabled(this));
+    menu.findItem(R.id.menu_clear_passphrase)
+        .setVisible(!TextSecurePreferences.isPasswordDisabled(this));
 
     super.onPrepareOptionsMenu(menu);
     return true;
   }
 
   private void initializeSearchListener() {
-    searchAction.setOnClickListener(v -> {
-      Permissions.with(this)
-                 .request(Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS)
-                 .ifNecessary()
-                 .onAllGranted(() -> searchToolbar.display(searchAction.getX() + (searchAction.getWidth() / 2),
-                                                           searchAction.getY() + (searchAction.getHeight() / 2)))
-                 .withPermanentDenialDialog(getString(R.string.ConversationListActivity_signal_needs_contacts_permission_in_order_to_search_your_contacts_but_it_has_been_permanently_denied))
-                 .execute();
-    });
+    searchAction.setOnClickListener(
+        v -> {
+          Permissions.with(this)
+              .request(Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS)
+              .ifNecessary()
+              .onAllGranted(
+                  () ->
+                      searchToolbar.display(
+                          searchAction.getX() + (searchAction.getWidth() / 2),
+                          searchAction.getY() + (searchAction.getHeight() / 2)))
+              .withPermanentDenialDialog(
+                  getString(
+                      R.string
+                          .ConversationListActivity_signal_needs_contacts_permission_in_order_to_search_your_contacts_but_it_has_been_permanently_denied))
+              .execute();
+        });
 
-    searchToolbar.setListener(new SearchToolbar.SearchListener() {
-      @Override
-      public void onSearchTextChange(String text) {
-        if (fragment != null) {
-          fragment.setQueryFilter(text);
-        }
-      }
+    searchToolbar.setListener(
+        new SearchToolbar.SearchListener() {
+          @Override
+          public void onSearchTextChange(String text) {
+            if (fragment != null) {
+              fragment.setQueryFilter(text);
+            }
+          }
 
-      @Override
-      public void onSearchReset() {
-        if (fragment != null) {
-          fragment.resetQueryFilter();
-        }
-      }
-    });
+          @Override
+          public void onSearchReset() {
+            if (fragment != null) {
+              fragment.resetQueryFilter();
+            }
+          }
+        });
   }
 
   @Override
@@ -142,20 +152,35 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
     super.onOptionsItemSelected(item);
 
     switch (item.getItemId()) {
-    case R.id.menu_new_group:         createGroup();           return true;
-    case R.id.menu_settings:          handleDisplaySettings(); return true;
-    case R.id.menu_clear_passphrase:  handleClearPassphrase(); return true;
-    case R.id.menu_mark_all_read:     handleMarkAllRead();     return true;
-    case R.id.menu_import_export:     handleImportExport();    return true;
-    case R.id.menu_invite:            handleInvite();          return true;
-    case R.id.menu_help:              handleHelp();            return true;
+      case R.id.menu_new_group:
+        createGroup();
+        return true;
+      case R.id.menu_settings:
+        handleDisplaySettings();
+        return true;
+      case R.id.menu_clear_passphrase:
+        handleClearPassphrase();
+        return true;
+      case R.id.menu_mark_all_read:
+        handleMarkAllRead();
+        return true;
+      case R.id.menu_import_export:
+        handleImportExport();
+        return true;
+      case R.id.menu_invite:
+        handleInvite();
+        return true;
+      case R.id.menu_help:
+        handleHelp();
+        return true;
     }
 
     return false;
   }
 
   @Override
-  public void onCreateConversation(long threadId, Recipient recipient, int distributionType, long lastSeen) {
+  public void onCreateConversation(
+      long threadId, Recipient recipient, int distributionType, long lastSeen) {
     Intent intent = new Intent(this, ConversationActivity.class);
     intent.putExtra(ConversationActivity.ADDRESS_EXTRA, recipient.getAddress());
     intent.putExtra(ConversationActivity.THREAD_ID_EXTRA, threadId);
@@ -176,7 +201,7 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
   @Override
   public void onBackPressed() {
     if (searchToolbar.isVisible()) searchToolbar.collapse();
-    else                           super.onBackPressed();
+    else super.onBackPressed();
   }
 
   private void createGroup() {
@@ -204,8 +229,9 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
     new AsyncTask<Void, Void, Void>() {
       @Override
       protected Void doInBackground(Void... params) {
-        Context                 context    = ConversationListActivity.this;
-        List<MarkedMessageInfo> messageIds = DatabaseFactory.getThreadDatabase(context).setAllThreadsRead();
+        Context context = ConversationListActivity.this;
+        List<MarkedMessageInfo> messageIds =
+            DatabaseFactory.getThreadDatabase(context).setAllThreadsRead();
 
         MessageNotifier.updateNotification(context);
         MarkReadReceiver.process(context, messageIds);
@@ -221,9 +247,14 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
 
   private void handleHelp() {
     try {
-      startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://support.whispersystems.org")));
+      startActivity(
+          new Intent(Intent.ACTION_VIEW, Uri.parse("https://support.whispersystems.org")));
     } catch (ActivityNotFoundException e) {
-      Toast.makeText(this, R.string.ConversationListActivity_there_is_no_browser_installed_on_your_device, Toast.LENGTH_LONG).show();
+      Toast.makeText(
+              this,
+              R.string.ConversationListActivity_there_is_no_browser_installed_on_your_device,
+              Toast.LENGTH_LONG)
+          .show();
     }
   }
 }

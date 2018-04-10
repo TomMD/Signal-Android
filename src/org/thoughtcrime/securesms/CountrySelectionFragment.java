@@ -13,14 +13,12 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-
-
-import org.thoughtcrime.securesms.database.loaders.CountryListLoader;
-
 import java.util.ArrayList;
 import java.util.Map;
+import org.thoughtcrime.securesms.database.loaders.CountryListLoader;
 
-public class CountrySelectionFragment extends ListFragment implements LoaderManager.LoaderCallbacks<ArrayList<Map<String, String>>> {
+public class CountrySelectionFragment extends ListFragment
+    implements LoaderManager.LoaderCallbacks<ArrayList<Map<String, String>>> {
 
   private EditText countryFilter;
   private CountrySelectedListener listener;
@@ -33,7 +31,7 @@ public class CountrySelectionFragment extends ListFragment implements LoaderMana
   @Override
   public void onActivityCreated(Bundle bundle) {
     super.onActivityCreated(bundle);
-    this.countryFilter = (EditText)getView().findViewById(R.id.country_search);
+    this.countryFilter = (EditText) getView().findViewById(R.id.country_search);
     this.countryFilter.addTextChangedListener(new FilterWatcher());
     getLoaderManager().initLoader(0, null, this).forceLoad();
   }
@@ -41,15 +39,15 @@ public class CountrySelectionFragment extends ListFragment implements LoaderMana
   @Override
   public void onAttach(Activity activity) {
     super.onAttach(activity);
-    this.listener = (CountrySelectedListener)activity;
+    this.listener = (CountrySelectedListener) activity;
   }
 
   @Override
   public void onListItemClick(ListView listView, View view, int position, long id) {
-    Map<String, String> item = (Map<String, String>)this.getListAdapter().getItem(position);
+    Map<String, String> item = (Map<String, String>) this.getListAdapter().getItem(position);
     if (this.listener != null) {
-      this.listener.countrySelected(item.get("country_name"),
-                                    Integer.parseInt(item.get("country_code").substring(1)));
+      this.listener.countrySelected(
+          item.get("country_name"), Integer.parseInt(item.get("country_code").substring(1)));
     }
   }
 
@@ -59,15 +57,17 @@ public class CountrySelectionFragment extends ListFragment implements LoaderMana
   }
 
   @Override
-  public void onLoadFinished(Loader<ArrayList<Map<String, String>>> loader,
-                             ArrayList<Map<String, String>> results)
-  {
+  public void onLoadFinished(
+      Loader<ArrayList<Map<String, String>>> loader, ArrayList<Map<String, String>> results) {
     String[] from = {"country_name", "country_code"};
-    int[] to      = {R.id.country_name, R.id.country_code};
-    this.setListAdapter(new SimpleAdapter(getActivity(), results, R.layout.country_list_item, from, to));
+    int[] to = {R.id.country_name, R.id.country_code};
+    this.setListAdapter(
+        new SimpleAdapter(getActivity(), results, R.layout.country_list_item, from, to));
 
     if (this.countryFilter != null && this.countryFilter.getText().length() != 0) {
-      ((SimpleAdapter)getListAdapter()).getFilter().filter(this.countryFilter.getText().toString());
+      ((SimpleAdapter) getListAdapter())
+          .getFilter()
+          .filter(this.countryFilter.getText().toString());
     }
   }
 
@@ -85,16 +85,14 @@ public class CountrySelectionFragment extends ListFragment implements LoaderMana
     @Override
     public void afterTextChanged(Editable s) {
       if (getListAdapter() != null) {
-        ((SimpleAdapter)getListAdapter()).getFilter().filter(s.toString());
+        ((SimpleAdapter) getListAdapter()).getFilter().filter(s.toString());
       }
     }
 
     @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-    }
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
     @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
-    }
+    public void onTextChanged(CharSequence s, int start, int before, int count) {}
   }
 }

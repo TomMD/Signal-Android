@@ -7,11 +7,9 @@ import android.content.Context;
 import android.content.SyncResult;
 import android.os.Bundle;
 import android.util.Log;
-
+import java.io.IOException;
 import org.thoughtcrime.securesms.util.DirectoryHelper;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
-
-import java.io.IOException;
 
 public class ContactsSyncAdapter extends AbstractThreadedSyncAdapter {
 
@@ -22,10 +20,13 @@ public class ContactsSyncAdapter extends AbstractThreadedSyncAdapter {
   }
 
   @Override
-  public void onPerformSync(Account account, Bundle extras, String authority,
-                            ContentProviderClient provider, SyncResult syncResult)
-  {
-    Log.w(TAG, "onPerformSync(" + authority +")");
+  public void onPerformSync(
+      Account account,
+      Bundle extras,
+      String authority,
+      ContentProviderClient provider,
+      SyncResult syncResult) {
+    Log.w(TAG, "onPerformSync(" + authority + ")");
 
     if (TextSecurePreferences.isPushRegistered(getContext())) {
       try {
@@ -45,5 +46,4 @@ public class ContactsSyncAdapter extends AbstractThreadedSyncAdapter {
   public void onSyncCanceled(Thread thread) {
     Log.w(TAG, "onSyncCanceled(" + thread + ")");
   }
-
 }

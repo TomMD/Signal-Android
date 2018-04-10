@@ -1,18 +1,16 @@
 /**
  * Copyright (C) 2014 Open Whisper Systems
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * <p>This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * <p>You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  */
 package org.thoughtcrime.securesms.components;
 
@@ -27,35 +25,33 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Surface;
 import android.view.View;
-
+import java.lang.reflect.Field;
+import java.util.HashSet;
+import java.util.Set;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.util.ServiceUtil;
 import org.thoughtcrime.securesms.util.Util;
 
-import java.lang.reflect.Field;
-import java.util.HashSet;
-import java.util.Set;
-
 /**
- * LinearLayout that, when a view container, will report back when it thinks a soft keyboard
- * has been opened and what its height would be.
+ * LinearLayout that, when a view container, will report back when it thinks a soft keyboard has
+ * been opened and what its height would be.
  */
 public class KeyboardAwareLinearLayout extends LinearLayoutCompat {
   private static final String TAG = KeyboardAwareLinearLayout.class.getSimpleName();
 
-  private final Rect                          rect                       = new Rect();
-  private final Set<OnKeyboardHiddenListener> hiddenListeners            = new HashSet<>();
-  private final Set<OnKeyboardShownListener>  shownListeners             = new HashSet<>();
-  private final int                           minKeyboardSize;
-  private final int                           minCustomKeyboardSize;
-  private final int                           defaultCustomKeyboardSize;
-  private final int                           minCustomKeyboardTopMargin;
-  private final int                           statusBarHeight;
+  private final Rect rect = new Rect();
+  private final Set<OnKeyboardHiddenListener> hiddenListeners = new HashSet<>();
+  private final Set<OnKeyboardShownListener> shownListeners = new HashSet<>();
+  private final int minKeyboardSize;
+  private final int minCustomKeyboardSize;
+  private final int defaultCustomKeyboardSize;
+  private final int minCustomKeyboardTopMargin;
+  private final int statusBarHeight;
 
   private int viewInset;
 
   private boolean keyboardOpen = false;
-  private int     rotation     = -1;
+  private int rotation = -1;
 
   public KeyboardAwareLinearLayout(Context context) {
     this(context, null);
@@ -68,15 +64,18 @@ public class KeyboardAwareLinearLayout extends LinearLayoutCompat {
   public KeyboardAwareLinearLayout(Context context, AttributeSet attrs, int defStyle) {
     super(context, attrs, defStyle);
     final int statusBarRes = getResources().getIdentifier("status_bar_height", "dimen", "android");
-    minKeyboardSize            = getResources().getDimensionPixelSize(R.dimen.min_keyboard_size);
-    minCustomKeyboardSize      = getResources().getDimensionPixelSize(R.dimen.min_custom_keyboard_size);
-    defaultCustomKeyboardSize  = getResources().getDimensionPixelSize(R.dimen.default_custom_keyboard_size);
-    minCustomKeyboardTopMargin = getResources().getDimensionPixelSize(R.dimen.min_custom_keyboard_top_margin);
-    statusBarHeight            = statusBarRes > 0 ? getResources().getDimensionPixelSize(statusBarRes) : 0;
-    viewInset                  = getViewInset();
+    minKeyboardSize = getResources().getDimensionPixelSize(R.dimen.min_keyboard_size);
+    minCustomKeyboardSize = getResources().getDimensionPixelSize(R.dimen.min_custom_keyboard_size);
+    defaultCustomKeyboardSize =
+        getResources().getDimensionPixelSize(R.dimen.default_custom_keyboard_size);
+    minCustomKeyboardTopMargin =
+        getResources().getDimensionPixelSize(R.dimen.min_custom_keyboard_top_margin);
+    statusBarHeight = statusBarRes > 0 ? getResources().getDimensionPixelSize(statusBarRes) : 0;
+    viewInset = getViewInset();
   }
 
-  @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+  @Override
+  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     updateRotation();
     updateKeyboardState();
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -97,7 +96,8 @@ public class KeyboardAwareLinearLayout extends LinearLayoutCompat {
       return;
     }
 
-    if (viewInset == 0 && Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) viewInset = getViewInset();
+    if (viewInset == 0 && Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP)
+      viewInset = getViewInset();
     final int availableHeight = this.getRootView().getHeight() - statusBarHeight - viewInset;
     getWindowVisibleDisplayFrame(rect);
 
@@ -105,7 +105,7 @@ public class KeyboardAwareLinearLayout extends LinearLayoutCompat {
 
     if (keyboardHeight > minKeyboardSize) {
       if (getKeyboardHeight() != keyboardHeight) setKeyboardPortraitHeight(keyboardHeight);
-      if (!keyboardOpen)                         onKeyboardOpen(keyboardHeight);
+      if (!keyboardOpen) onKeyboardOpen(keyboardHeight);
     } else if (keyboardOpen) {
       onKeyboardClose();
     }
@@ -120,7 +120,7 @@ public class KeyboardAwareLinearLayout extends LinearLayoutCompat {
       if (attachInfo != null) {
         Field stableInsetsField = attachInfo.getClass().getDeclaredField("mStableInsets");
         stableInsetsField.setAccessible(true);
-        Rect insets = (Rect)stableInsetsField.get(attachInfo);
+        Rect insets = (Rect) stableInsetsField.get(attachInfo);
         return insets.bottom;
       }
     } catch (NoSuchFieldException nsfe) {
@@ -156,6 +156,7 @@ public class KeyboardAwareLinearLayout extends LinearLayoutCompat {
     int rotation = getDeviceRotation();
     return rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270;
   }
+
   private int getDeviceRotation() {
     return ServiceUtil.getWindowManager(getContext()).getDefaultDisplay().getRotation();
   }
@@ -165,24 +166,32 @@ public class KeyboardAwareLinearLayout extends LinearLayoutCompat {
   }
 
   private int getKeyboardPortraitHeight() {
-    int keyboardHeight = PreferenceManager.getDefaultSharedPreferences(getContext())
-                                          .getInt("keyboard_height_portrait", defaultCustomKeyboardSize);
-    return Util.clamp(keyboardHeight, minCustomKeyboardSize, getRootView().getHeight() - minCustomKeyboardTopMargin);
+    int keyboardHeight =
+        PreferenceManager.getDefaultSharedPreferences(getContext())
+            .getInt("keyboard_height_portrait", defaultCustomKeyboardSize);
+    return Util.clamp(
+        keyboardHeight,
+        minCustomKeyboardSize,
+        getRootView().getHeight() - minCustomKeyboardTopMargin);
   }
 
   private void setKeyboardPortraitHeight(int height) {
     PreferenceManager.getDefaultSharedPreferences(getContext())
-                     .edit().putInt("keyboard_height_portrait", height).apply();
+        .edit()
+        .putInt("keyboard_height_portrait", height)
+        .apply();
   }
 
   public void postOnKeyboardClose(final Runnable runnable) {
     if (keyboardOpen) {
-      addOnKeyboardHiddenListener(new OnKeyboardHiddenListener() {
-        @Override public void onKeyboardHidden() {
-          removeOnKeyboardHiddenListener(this);
-          runnable.run();
-        }
-      });
+      addOnKeyboardHiddenListener(
+          new OnKeyboardHiddenListener() {
+            @Override
+            public void onKeyboardHidden() {
+              removeOnKeyboardHiddenListener(this);
+              runnable.run();
+            }
+          });
     } else {
       runnable.run();
     }
@@ -190,12 +199,14 @@ public class KeyboardAwareLinearLayout extends LinearLayoutCompat {
 
   public void postOnKeyboardOpen(final Runnable runnable) {
     if (!keyboardOpen) {
-      addOnKeyboardShownListener(new OnKeyboardShownListener() {
-        @Override public void onKeyboardShown() {
-          removeOnKeyboardShownListener(this);
-          runnable.run();
-        }
-      });
+      addOnKeyboardShownListener(
+          new OnKeyboardShownListener() {
+            @Override
+            public void onKeyboardShown() {
+              removeOnKeyboardShownListener(this);
+              runnable.run();
+            }
+          });
     } else {
       runnable.run();
     }

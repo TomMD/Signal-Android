@@ -17,7 +17,6 @@ import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.permissions.Permissions;
 import org.thoughtcrime.securesms.util.ViewUtil;
@@ -26,9 +25,9 @@ public class MicrophoneRecorderView extends FrameLayout implements View.OnTouchL
 
   public static final int ANIMATION_DURATION = 200;
 
-  private           FloatingRecordButton floatingRecordButton;
-  private @Nullable Listener             listener;
-  private           boolean              actionInProgress;
+  private FloatingRecordButton floatingRecordButton;
+  private @Nullable Listener listener;
+  private boolean actionInProgress;
 
   public MicrophoneRecorderView(Context context) {
     super(context);
@@ -95,9 +94,13 @@ public class MicrophoneRecorderView extends FrameLayout implements View.OnTouchL
 
   public interface Listener {
     void onRecordPressed(float x);
+
     void onRecordReleased(float x);
+
     void onRecordCanceled(float x);
+
     void onRecordMoved(float x, float absoluteX);
+
     void onRecordPermissionRequired();
   }
 
@@ -110,29 +113,37 @@ public class MicrophoneRecorderView extends FrameLayout implements View.OnTouchL
 
     public FloatingRecordButton(Context context, ImageView recordButtonFab) {
       this.recordButtonFab = recordButtonFab;
-      this.recordButtonFab.getBackground().setColorFilter(context.getResources()
-                                                                 .getColor(R.color.red_500),
-                                                          PorterDuff.Mode.SRC_IN);
+      this.recordButtonFab
+          .getBackground()
+          .setColorFilter(context.getResources().getColor(R.color.red_500), PorterDuff.Mode.SRC_IN);
     }
 
     public void display(float x) {
       this.startPositionX = x;
-      this.lastPositionX  = x;
+      this.lastPositionX = x;
 
       recordButtonFab.setVisibility(View.VISIBLE);
 
-      float translation = ViewCompat.getLayoutDirection(recordButtonFab) ==
-          ViewCompat.LAYOUT_DIRECTION_LTR ? -.25f : .25f;
+      float translation =
+          ViewCompat.getLayoutDirection(recordButtonFab) == ViewCompat.LAYOUT_DIRECTION_LTR
+              ? -.25f
+              : .25f;
 
       AnimationSet animation = new AnimationSet(true);
-      animation.addAnimation(new TranslateAnimation(Animation.RELATIVE_TO_SELF, translation,
-                                                    Animation.RELATIVE_TO_SELF, translation,
-                                                    Animation.RELATIVE_TO_SELF, -.25f,
-                                                    Animation.RELATIVE_TO_SELF, -.25f));
+      animation.addAnimation(
+          new TranslateAnimation(
+              Animation.RELATIVE_TO_SELF,
+              translation,
+              Animation.RELATIVE_TO_SELF,
+              translation,
+              Animation.RELATIVE_TO_SELF,
+              -.25f,
+              Animation.RELATIVE_TO_SELF,
+              -.25f));
 
-      animation.addAnimation(new ScaleAnimation(.5f, 1f, .5f, 1f,
-                                                Animation.RELATIVE_TO_SELF, .5f,
-                                                Animation.RELATIVE_TO_SELF, .5f));
+      animation.addAnimation(
+          new ScaleAnimation(
+              .5f, 1f, .5f, 1f, Animation.RELATIVE_TO_SELF, .5f, Animation.RELATIVE_TO_SELF, .5f));
 
       animation.setFillBefore(true);
       animation.setFillAfter(true);
@@ -145,13 +156,19 @@ public class MicrophoneRecorderView extends FrameLayout implements View.OnTouchL
     public void moveTo(float x) {
       this.lastPositionX = x;
 
-      float offset          = getOffset(x);
-      int   widthAdjustment = getWidthAdjustment();
+      float offset = getOffset(x);
+      int widthAdjustment = getWidthAdjustment();
 
-      Animation translateAnimation = new TranslateAnimation(Animation.ABSOLUTE, widthAdjustment + offset,
-                                                            Animation.ABSOLUTE, widthAdjustment + offset,
-                                                            Animation.RELATIVE_TO_SELF, -.25f,
-                                                            Animation.RELATIVE_TO_SELF, -.25f);
+      Animation translateAnimation =
+          new TranslateAnimation(
+              Animation.ABSOLUTE,
+              widthAdjustment + offset,
+              Animation.ABSOLUTE,
+              widthAdjustment + offset,
+              Animation.RELATIVE_TO_SELF,
+              -.25f,
+              Animation.RELATIVE_TO_SELF,
+              -.25f);
 
       translateAnimation.setDuration(0);
       translateAnimation.setFillAfter(true);
@@ -163,18 +180,24 @@ public class MicrophoneRecorderView extends FrameLayout implements View.OnTouchL
     public void hide(float x) {
       this.lastPositionX = x;
 
-      float offset          = getOffset(x);
-      int   widthAdjustment = getWidthAdjustment();
+      float offset = getOffset(x);
+      int widthAdjustment = getWidthAdjustment();
 
       AnimationSet animation = new AnimationSet(false);
-      Animation scaleAnimation = new ScaleAnimation(1, 0.5f, 1, 0.5f,
-                                                    Animation.RELATIVE_TO_SELF, 0.5f,
-                                                    Animation.RELATIVE_TO_SELF, 0.5f);
+      Animation scaleAnimation =
+          new ScaleAnimation(
+              1, 0.5f, 1, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
 
-      Animation translateAnimation = new TranslateAnimation(Animation.ABSOLUTE, offset + widthAdjustment,
-                                                            Animation.ABSOLUTE, widthAdjustment,
-                                                            Animation.RELATIVE_TO_SELF, -.25f,
-                                                            Animation.RELATIVE_TO_SELF, -.25f);
+      Animation translateAnimation =
+          new TranslateAnimation(
+              Animation.ABSOLUTE,
+              offset + widthAdjustment,
+              Animation.ABSOLUTE,
+              widthAdjustment,
+              Animation.RELATIVE_TO_SELF,
+              -.25f,
+              Animation.RELATIVE_TO_SELF,
+              -.25f);
 
       scaleAnimation.setInterpolator(new AnticipateOvershootInterpolator(1.5f));
       translateAnimation.setInterpolator(new DecelerateInterpolator());
@@ -191,15 +214,16 @@ public class MicrophoneRecorderView extends FrameLayout implements View.OnTouchL
     }
 
     private float getOffset(float x) {
-      return ViewCompat.getLayoutDirection(recordButtonFab) == ViewCompat.LAYOUT_DIRECTION_LTR ?
-          -Math.max(0, this.startPositionX - x) : Math.max(0, x - this.startPositionX);
+      return ViewCompat.getLayoutDirection(recordButtonFab) == ViewCompat.LAYOUT_DIRECTION_LTR
+          ? -Math.max(0, this.startPositionX - x)
+          : Math.max(0, x - this.startPositionX);
     }
 
     private int getWidthAdjustment() {
       int width = recordButtonFab.getWidth() / 4;
-      return ViewCompat.getLayoutDirection(recordButtonFab) == ViewCompat.LAYOUT_DIRECTION_LTR ? -width : width;
+      return ViewCompat.getLayoutDirection(recordButtonFab) == ViewCompat.LAYOUT_DIRECTION_LTR
+          ? -width
+          : width;
     }
-
   }
-
 }

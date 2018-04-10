@@ -15,23 +15,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
+import java.io.IOException;
 import org.thoughtcrime.securesms.database.NoExternalStorageException;
 import org.thoughtcrime.securesms.database.PlaintextBackupImporter;
 import org.thoughtcrime.securesms.permissions.Permissions;
 import org.thoughtcrime.securesms.service.ApplicationMigrationService;
-
-import java.io.IOException;
-
 
 public class ImportExportFragment extends Fragment {
 
   @SuppressWarnings("unused")
   private static final String TAG = ImportExportFragment.class.getSimpleName();
 
-  private static final int SUCCESS    = 0;
+  private static final int SUCCESS = 0;
   private static final int NO_SD_CARD = 1;
-  private static final int ERROR_IO   = 2;
+  private static final int ERROR_IO = 2;
 
   private ProgressDialog progressDialog;
 
@@ -42,8 +39,8 @@ public class ImportExportFragment extends Fragment {
 
   @Override
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle bundle) {
-    View layout              = inflater.inflate(R.layout.import_export_fragment, container, false);
-    View importSmsView       = layout.findViewById(R.id.import_sms             );
+    View layout = inflater.inflate(R.layout.import_export_fragment, container, false);
+    View importSmsView = layout.findViewById(R.id.import_sms);
     View importPlaintextView = layout.findViewById(R.id.import_plaintext_backup);
 
     importSmsView.setOnClickListener(v -> handleImportSms());
@@ -63,7 +60,8 @@ public class ImportExportFragment extends Fragment {
   }
 
   @Override
-  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+  public void onRequestPermissionsResult(
+      int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
     Permissions.onRequestPermissionsResult(this, requestCode, permissions, grantResults);
   }
 
@@ -72,26 +70,41 @@ public class ImportExportFragment extends Fragment {
     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
     builder.setIconAttribute(R.attr.dialog_info_icon);
     builder.setTitle(getActivity().getString(R.string.ImportFragment_import_system_sms_database));
-    builder.setMessage(getActivity().getString(R.string.ImportFragment_this_will_import_messages_from_the_system));
-    builder.setPositiveButton(getActivity().getString(R.string.ImportFragment_import), (dialog, which) -> {
-      Permissions.with(this)
-                 .request(Manifest.permission.READ_SMS)
-                 .ifNecessary()
-                 .withPermanentDenialDialog(getString(R.string.ImportExportFragment_signal_needs_the_sms_permission_in_order_to_import_sms_messages))
-                 .onAllGranted(() -> {
-                   Intent intent = new Intent(getActivity(), ApplicationMigrationService.class);
-                   intent.setAction(ApplicationMigrationService.MIGRATE_DATABASE);
-                   getActivity().startService(intent);
+    builder.setMessage(
+        getActivity().getString(R.string.ImportFragment_this_will_import_messages_from_the_system));
+    builder.setPositiveButton(
+        getActivity().getString(R.string.ImportFragment_import),
+        (dialog, which) -> {
+          Permissions.with(this)
+              .request(Manifest.permission.READ_SMS)
+              .ifNecessary()
+              .withPermanentDenialDialog(
+                  getString(
+                      R.string
+                          .ImportExportFragment_signal_needs_the_sms_permission_in_order_to_import_sms_messages))
+              .onAllGranted(
+                  () -> {
+                    Intent intent = new Intent(getActivity(), ApplicationMigrationService.class);
+                    intent.setAction(ApplicationMigrationService.MIGRATE_DATABASE);
+                    getActivity().startService(intent);
 
-                   Intent nextIntent = new Intent(getActivity(), ConversationListActivity.class);
+                    Intent nextIntent = new Intent(getActivity(), ConversationListActivity.class);
 
-                   Intent activityIntent = new Intent(getActivity(), DatabaseMigrationActivity.class);
-                   activityIntent.putExtra("next_intent", nextIntent);
-                   getActivity().startActivity(activityIntent);
-                 })
-                 .onAnyDenied(() -> Toast.makeText(getContext(), R.string.ImportExportFragment_signal_needs_the_sms_permission_in_order_to_import_sms_messages_toast, Toast.LENGTH_LONG).show())
-                 .execute();
-    });
+                    Intent activityIntent =
+                        new Intent(getActivity(), DatabaseMigrationActivity.class);
+                    activityIntent.putExtra("next_intent", nextIntent);
+                    getActivity().startActivity(activityIntent);
+                  })
+              .onAnyDenied(
+                  () ->
+                      Toast.makeText(
+                              getContext(),
+                              R.string
+                                  .ImportExportFragment_signal_needs_the_sms_permission_in_order_to_import_sms_messages_toast,
+                              Toast.LENGTH_LONG)
+                          .show())
+              .execute();
+        });
     builder.setNegativeButton(getActivity().getString(R.string.ImportFragment_cancel), null);
     builder.show();
   }
@@ -102,16 +115,35 @@ public class ImportExportFragment extends Fragment {
     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
     builder.setIconAttribute(R.attr.dialog_alert_icon);
     builder.setTitle(getActivity().getString(R.string.ImportFragment_import_plaintext_backup));
-    builder.setMessage(getActivity().getString(R.string.ImportFragment_this_will_import_messages_from_a_plaintext_backup));
-    builder.setPositiveButton(getActivity().getString(R.string.ImportFragment_import), (dialog, which) -> {
-      Permissions.with(ImportExportFragment.this)
-                 .request(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
-                 .ifNecessary()
-                 .withPermanentDenialDialog(getString(R.string.ImportExportFragment_signal_needs_the_storage_permission_in_order_to_read_from_external_storage_but_it_has_been_permanently_denied))
-                 .onAllGranted(() -> new ImportPlaintextBackupTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR))
-                 .onAnyDenied(() -> Toast.makeText(getContext(), R.string.ImportExportFragment_signal_needs_the_storage_permission_in_order_to_read_from_external_storage, Toast.LENGTH_LONG).show())
-                 .execute();
-    });
+    builder.setMessage(
+        getActivity()
+            .getString(R.string.ImportFragment_this_will_import_messages_from_a_plaintext_backup));
+    builder.setPositiveButton(
+        getActivity().getString(R.string.ImportFragment_import),
+        (dialog, which) -> {
+          Permissions.with(ImportExportFragment.this)
+              .request(
+                  Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                  Manifest.permission.READ_EXTERNAL_STORAGE)
+              .ifNecessary()
+              .withPermanentDenialDialog(
+                  getString(
+                      R.string
+                          .ImportExportFragment_signal_needs_the_storage_permission_in_order_to_read_from_external_storage_but_it_has_been_permanently_denied))
+              .onAllGranted(
+                  () ->
+                      new ImportPlaintextBackupTask()
+                          .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR))
+              .onAnyDenied(
+                  () ->
+                      Toast.makeText(
+                              getContext(),
+                              R.string
+                                  .ImportExportFragment_signal_needs_the_storage_permission_in_order_to_read_from_external_storage,
+                              Toast.LENGTH_LONG)
+                          .show())
+              .execute();
+        });
     builder.setNegativeButton(getActivity().getString(R.string.ImportFragment_cancel), null);
     builder.show();
   }
@@ -121,36 +153,43 @@ public class ImportExportFragment extends Fragment {
 
     @Override
     protected void onPreExecute() {
-      progressDialog = ProgressDialog.show(getActivity(),
-                                           getActivity().getString(R.string.ImportFragment_importing),
-                                           getActivity().getString(R.string.ImportFragment_import_plaintext_backup_elipse),
-                                           true, false);
+      progressDialog =
+          ProgressDialog.show(
+              getActivity(),
+              getActivity().getString(R.string.ImportFragment_importing),
+              getActivity().getString(R.string.ImportFragment_import_plaintext_backup_elipse),
+              true,
+              false);
     }
 
     protected void onPostExecute(Integer result) {
       Context context = getActivity();
 
-      if (progressDialog != null)
-        progressDialog.dismiss();
+      if (progressDialog != null) progressDialog.dismiss();
 
-      if (context == null)
-        return;
+      if (context == null) return;
 
       switch (result) {
         case NO_SD_CARD:
-          Toast.makeText(context,
-                         context.getString(R.string.ImportFragment_no_plaintext_backup_found),
-                         Toast.LENGTH_LONG).show();
+          Toast.makeText(
+                  context,
+                  context.getString(R.string.ImportFragment_no_plaintext_backup_found),
+                  Toast.LENGTH_LONG)
+              .show();
           break;
         case ERROR_IO:
-          Toast.makeText(context,
-                         context.getString(R.string.ImportFragment_error_importing_backup),
-                         Toast.LENGTH_LONG).show();
+          Toast.makeText(
+                  context,
+                  context.getString(R.string.ImportFragment_error_importing_backup),
+                  Toast.LENGTH_LONG)
+              .show();
           break;
         case SUCCESS:
-          Toast.makeText(context,
-                         context.getString(R.string.ImportFragment_import_complete),
-                         Toast.LENGTH_LONG).show();
+          Toast.makeText(
+                  context,
+                  context.getString(R.string.ImportFragment_import_complete),
+                  Toast.LENGTH_LONG)
+              .show();
           break;
       }
     }

@@ -5,36 +5,32 @@ package org.thoughtcrime.securesms.webrtc;
 
 public final class WebRtcDataProtos {
   private WebRtcDataProtos() {}
-  public static void registerAllExtensions(
-      com.google.protobuf.ExtensionRegistry registry) {
-  }
-  public interface ConnectedOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
+
+  public static void registerAllExtensions(com.google.protobuf.ExtensionRegistry registry) {}
+
+  public interface ConnectedOrBuilder extends com.google.protobuf.MessageOrBuilder {
 
     // optional uint64 id = 1;
-    /**
-     * <code>optional uint64 id = 1;</code>
-     */
+    /** <code>optional uint64 id = 1;</code> */
     boolean hasId();
-    /**
-     * <code>optional uint64 id = 1;</code>
-     */
+    /** <code>optional uint64 id = 1;</code> */
     long getId();
   }
-  /**
-   * Protobuf type {@code signal.Connected}
-   */
-  public static final class Connected extends
-      com.google.protobuf.GeneratedMessage
+  /** Protobuf type {@code signal.Connected} */
+  public static final class Connected extends com.google.protobuf.GeneratedMessage
       implements ConnectedOrBuilder {
     // Use Connected.newBuilder() to construct.
     private Connected(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
       this.unknownFields = builder.getUnknownFields();
     }
-    private Connected(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private Connected(boolean noInit) {
+      this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
 
     private static final Connected defaultInstance;
+
     public static Connected getDefaultInstance() {
       return defaultInstance;
     }
@@ -44,11 +40,12 @@ public final class WebRtcDataProtos {
     }
 
     private final com.google.protobuf.UnknownFieldSet unknownFields;
+
     @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
+    public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
       return this.unknownFields;
     }
+
     private Connected(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -65,51 +62,56 @@ public final class WebRtcDataProtos {
             case 0:
               done = true;
               break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
+            default:
+              {
+                if (!parseUnknownField(
+                    input, unknownFields,
+                    extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
               }
-              break;
-            }
-            case 8: {
-              bitField0_ |= 0x00000001;
-              id_ = input.readUInt64();
-              break;
-            }
+            case 8:
+              {
+                bitField0_ |= 0x00000001;
+                id_ = input.readUInt64();
+                break;
+              }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
+        throw new com.google.protobuf.InvalidProtocolBufferException(e.getMessage())
+            .setUnfinishedMessage(this);
       } finally {
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
     }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.internal_static_signal_Connected_descriptor;
+
+    public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+      return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos
+          .internal_static_signal_Connected_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.internal_static_signal_Connected_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.class, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.Builder.class);
+      return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos
+          .internal_static_signal_Connected_fieldAccessorTable.ensureFieldAccessorsInitialized(
+          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.class,
+          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.Builder.class);
     }
 
     public static com.google.protobuf.Parser<Connected> PARSER =
         new com.google.protobuf.AbstractParser<Connected>() {
-      public Connected parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Connected(input, extensionRegistry);
-      }
-    };
+          public Connected parsePartialFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return new Connected(input, extensionRegistry);
+          }
+        };
 
     @java.lang.Override
     public com.google.protobuf.Parser<Connected> getParserForType() {
@@ -120,15 +122,11 @@ public final class WebRtcDataProtos {
     // optional uint64 id = 1;
     public static final int ID_FIELD_NUMBER = 1;
     private long id_;
-    /**
-     * <code>optional uint64 id = 1;</code>
-     */
+    /** <code>optional uint64 id = 1;</code> */
     public boolean hasId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    /**
-     * <code>optional uint64 id = 1;</code>
-     */
+    /** <code>optional uint64 id = 1;</code> */
     public long getId() {
       return id_;
     }
@@ -136,7 +134,9 @@ public final class WebRtcDataProtos {
     private void initFields() {
       id_ = 0L;
     }
+
     private byte memoizedIsInitialized = -1;
+
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
@@ -145,8 +145,7 @@ public final class WebRtcDataProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
+    public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeUInt64(1, id_);
@@ -155,14 +154,14 @@ public final class WebRtcDataProtos {
     }
 
     private int memoizedSerializedSize = -1;
+
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
 
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(1, id_);
+        size += com.google.protobuf.CodedOutputStream.computeUInt64Size(1, id_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -170,9 +169,9 @@ public final class WebRtcDataProtos {
     }
 
     private static final long serialVersionUID = 0L;
+
     @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
+    protected java.lang.Object writeReplace() throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
 
@@ -181,47 +180,52 @@ public final class WebRtcDataProtos {
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+
+    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected parseFrom(
+        byte[] data) throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
+
+    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected parseFrom(
+        java.io.InputStream input) throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
+
+    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected parseDelimitedFrom(
+        java.io.InputStream input) throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
+        com.google.protobuf.CodedInputStream input) throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -229,35 +233,42 @@ public final class WebRtcDataProtos {
       return PARSER.parseFrom(input, extensionRegistry);
     }
 
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected prototype) {
+    public static Builder newBuilder() {
+      return Builder.create();
+    }
+
+    public Builder newBuilderForType() {
+      return newBuilder();
+    }
+
+    public static Builder newBuilder(
+        org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected prototype) {
       return newBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() { return newBuilder(this); }
+
+    public Builder toBuilder() {
+      return newBuilder(this);
+    }
 
     @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+    protected Builder newBuilderForType(com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code signal.Connected}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.ConnectedOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.internal_static_signal_Connected_descriptor;
+    /** Protobuf type {@code signal.Connected} */
+    public static final class Builder extends com.google.protobuf.GeneratedMessage.Builder<Builder>
+        implements org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.ConnectedOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos
+            .internal_static_signal_Connected_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.internal_static_signal_Connected_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.class, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.Builder.class);
+        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos
+            .internal_static_signal_Connected_fieldAccessorTable.ensureFieldAccessorsInitialized(
+            org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.class,
+            org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.Builder.class);
       }
 
       // Construct using org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.newBuilder()
@@ -265,15 +276,15 @@ public final class WebRtcDataProtos {
         maybeForceBuilderInitialization();
       }
 
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      private Builder(com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
+
       private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-        }
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {}
       }
+
       private static Builder create() {
         return new Builder();
       }
@@ -289,12 +300,13 @@ public final class WebRtcDataProtos {
         return create().mergeFrom(buildPartial());
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.internal_static_signal_Connected_descriptor;
+      public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos
+            .internal_static_signal_Connected_descriptor;
       }
 
-      public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected getDefaultInstanceForType() {
+      public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected
+          getDefaultInstanceForType() {
         return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.getDefaultInstance();
       }
 
@@ -307,7 +319,8 @@ public final class WebRtcDataProtos {
       }
 
       public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected buildPartial() {
-        org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected result = new org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected(this);
+        org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected result =
+            new org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -321,7 +334,7 @@ public final class WebRtcDataProtos {
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected) {
-          return mergeFrom((org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected)other);
+          return mergeFrom((org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected) other);
         } else {
           super.mergeFrom(other);
           return this;
@@ -329,7 +342,9 @@ public final class WebRtcDataProtos {
       }
 
       public Builder mergeFrom(org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected other) {
-        if (other == org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.getDefaultInstance()) return this;
+        if (other
+            == org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.getDefaultInstance())
+          return this;
         if (other.hasId()) {
           setId(other.getId());
         }
@@ -349,7 +364,9 @@ public final class WebRtcDataProtos {
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected) e.getUnfinishedMessage();
+          parsedMessage =
+              (org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected)
+                  e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -358,34 +375,27 @@ public final class WebRtcDataProtos {
         }
         return this;
       }
+
       private int bitField0_;
 
       // optional uint64 id = 1;
-      private long id_ ;
-      /**
-       * <code>optional uint64 id = 1;</code>
-       */
+      private long id_;
+      /** <code>optional uint64 id = 1;</code> */
       public boolean hasId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>optional uint64 id = 1;</code>
-       */
+      /** <code>optional uint64 id = 1;</code> */
       public long getId() {
         return id_;
       }
-      /**
-       * <code>optional uint64 id = 1;</code>
-       */
+      /** <code>optional uint64 id = 1;</code> */
       public Builder setId(long value) {
         bitField0_ |= 0x00000001;
         id_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint64 id = 1;</code>
-       */
+      /** <code>optional uint64 id = 1;</code> */
       public Builder clearId() {
         bitField0_ = (bitField0_ & ~0x00000001);
         id_ = 0L;
@@ -404,33 +414,29 @@ public final class WebRtcDataProtos {
     // @@protoc_insertion_point(class_scope:signal.Connected)
   }
 
-  public interface HangupOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
+  public interface HangupOrBuilder extends com.google.protobuf.MessageOrBuilder {
 
     // optional uint64 id = 1;
-    /**
-     * <code>optional uint64 id = 1;</code>
-     */
+    /** <code>optional uint64 id = 1;</code> */
     boolean hasId();
-    /**
-     * <code>optional uint64 id = 1;</code>
-     */
+    /** <code>optional uint64 id = 1;</code> */
     long getId();
   }
-  /**
-   * Protobuf type {@code signal.Hangup}
-   */
-  public static final class Hangup extends
-      com.google.protobuf.GeneratedMessage
+  /** Protobuf type {@code signal.Hangup} */
+  public static final class Hangup extends com.google.protobuf.GeneratedMessage
       implements HangupOrBuilder {
     // Use Hangup.newBuilder() to construct.
     private Hangup(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
       this.unknownFields = builder.getUnknownFields();
     }
-    private Hangup(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private Hangup(boolean noInit) {
+      this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
 
     private static final Hangup defaultInstance;
+
     public static Hangup getDefaultInstance() {
       return defaultInstance;
     }
@@ -440,11 +446,12 @@ public final class WebRtcDataProtos {
     }
 
     private final com.google.protobuf.UnknownFieldSet unknownFields;
+
     @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
+    public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
       return this.unknownFields;
     }
+
     private Hangup(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -461,51 +468,56 @@ public final class WebRtcDataProtos {
             case 0:
               done = true;
               break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
+            default:
+              {
+                if (!parseUnknownField(
+                    input, unknownFields,
+                    extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
               }
-              break;
-            }
-            case 8: {
-              bitField0_ |= 0x00000001;
-              id_ = input.readUInt64();
-              break;
-            }
+            case 8:
+              {
+                bitField0_ |= 0x00000001;
+                id_ = input.readUInt64();
+                break;
+              }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
+        throw new com.google.protobuf.InvalidProtocolBufferException(e.getMessage())
+            .setUnfinishedMessage(this);
       } finally {
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
     }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.internal_static_signal_Hangup_descriptor;
+
+    public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+      return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos
+          .internal_static_signal_Hangup_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.internal_static_signal_Hangup_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.class, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.Builder.class);
+      return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos
+          .internal_static_signal_Hangup_fieldAccessorTable.ensureFieldAccessorsInitialized(
+          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.class,
+          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.Builder.class);
     }
 
     public static com.google.protobuf.Parser<Hangup> PARSER =
         new com.google.protobuf.AbstractParser<Hangup>() {
-      public Hangup parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Hangup(input, extensionRegistry);
-      }
-    };
+          public Hangup parsePartialFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return new Hangup(input, extensionRegistry);
+          }
+        };
 
     @java.lang.Override
     public com.google.protobuf.Parser<Hangup> getParserForType() {
@@ -516,15 +528,11 @@ public final class WebRtcDataProtos {
     // optional uint64 id = 1;
     public static final int ID_FIELD_NUMBER = 1;
     private long id_;
-    /**
-     * <code>optional uint64 id = 1;</code>
-     */
+    /** <code>optional uint64 id = 1;</code> */
     public boolean hasId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    /**
-     * <code>optional uint64 id = 1;</code>
-     */
+    /** <code>optional uint64 id = 1;</code> */
     public long getId() {
       return id_;
     }
@@ -532,7 +540,9 @@ public final class WebRtcDataProtos {
     private void initFields() {
       id_ = 0L;
     }
+
     private byte memoizedIsInitialized = -1;
+
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
@@ -541,8 +551,7 @@ public final class WebRtcDataProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
+    public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeUInt64(1, id_);
@@ -551,14 +560,14 @@ public final class WebRtcDataProtos {
     }
 
     private int memoizedSerializedSize = -1;
+
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
 
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(1, id_);
+        size += com.google.protobuf.CodedOutputStream.computeUInt64Size(1, id_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -566,9 +575,9 @@ public final class WebRtcDataProtos {
     }
 
     private static final long serialVersionUID = 0L;
+
     @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
+    protected java.lang.Object writeReplace() throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
 
@@ -577,47 +586,52 @@ public final class WebRtcDataProtos {
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
+
+    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup parseFrom(
+        java.io.InputStream input) throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
+
+    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup parseDelimitedFrom(
+        java.io.InputStream input) throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
+        com.google.protobuf.CodedInputStream input) throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -625,35 +639,42 @@ public final class WebRtcDataProtos {
       return PARSER.parseFrom(input, extensionRegistry);
     }
 
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup prototype) {
+    public static Builder newBuilder() {
+      return Builder.create();
+    }
+
+    public Builder newBuilderForType() {
+      return newBuilder();
+    }
+
+    public static Builder newBuilder(
+        org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup prototype) {
       return newBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() { return newBuilder(this); }
+
+    public Builder toBuilder() {
+      return newBuilder(this);
+    }
 
     @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+    protected Builder newBuilderForType(com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code signal.Hangup}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.HangupOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.internal_static_signal_Hangup_descriptor;
+    /** Protobuf type {@code signal.Hangup} */
+    public static final class Builder extends com.google.protobuf.GeneratedMessage.Builder<Builder>
+        implements org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.HangupOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos
+            .internal_static_signal_Hangup_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.internal_static_signal_Hangup_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.class, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.Builder.class);
+        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos
+            .internal_static_signal_Hangup_fieldAccessorTable.ensureFieldAccessorsInitialized(
+            org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.class,
+            org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.Builder.class);
       }
 
       // Construct using org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.newBuilder()
@@ -661,15 +682,15 @@ public final class WebRtcDataProtos {
         maybeForceBuilderInitialization();
       }
 
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      private Builder(com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
+
       private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-        }
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {}
       }
+
       private static Builder create() {
         return new Builder();
       }
@@ -685,9 +706,9 @@ public final class WebRtcDataProtos {
         return create().mergeFrom(buildPartial());
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.internal_static_signal_Hangup_descriptor;
+      public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos
+            .internal_static_signal_Hangup_descriptor;
       }
 
       public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup getDefaultInstanceForType() {
@@ -703,7 +724,8 @@ public final class WebRtcDataProtos {
       }
 
       public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup buildPartial() {
-        org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup result = new org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup(this);
+        org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup result =
+            new org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -717,7 +739,7 @@ public final class WebRtcDataProtos {
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup) {
-          return mergeFrom((org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup)other);
+          return mergeFrom((org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup) other);
         } else {
           super.mergeFrom(other);
           return this;
@@ -725,7 +747,8 @@ public final class WebRtcDataProtos {
       }
 
       public Builder mergeFrom(org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup other) {
-        if (other == org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.getDefaultInstance()) return this;
+        if (other == org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.getDefaultInstance())
+          return this;
         if (other.hasId()) {
           setId(other.getId());
         }
@@ -745,7 +768,8 @@ public final class WebRtcDataProtos {
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup) e.getUnfinishedMessage();
+          parsedMessage =
+              (org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup) e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -754,34 +778,27 @@ public final class WebRtcDataProtos {
         }
         return this;
       }
+
       private int bitField0_;
 
       // optional uint64 id = 1;
-      private long id_ ;
-      /**
-       * <code>optional uint64 id = 1;</code>
-       */
+      private long id_;
+      /** <code>optional uint64 id = 1;</code> */
       public boolean hasId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>optional uint64 id = 1;</code>
-       */
+      /** <code>optional uint64 id = 1;</code> */
       public long getId() {
         return id_;
       }
-      /**
-       * <code>optional uint64 id = 1;</code>
-       */
+      /** <code>optional uint64 id = 1;</code> */
       public Builder setId(long value) {
         bitField0_ |= 0x00000001;
         id_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint64 id = 1;</code>
-       */
+      /** <code>optional uint64 id = 1;</code> */
       public Builder clearId() {
         bitField0_ = (bitField0_ & ~0x00000001);
         id_ = 0L;
@@ -800,43 +817,35 @@ public final class WebRtcDataProtos {
     // @@protoc_insertion_point(class_scope:signal.Hangup)
   }
 
-  public interface VideoStreamingStatusOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
+  public interface VideoStreamingStatusOrBuilder extends com.google.protobuf.MessageOrBuilder {
 
     // optional uint64 id = 1;
-    /**
-     * <code>optional uint64 id = 1;</code>
-     */
+    /** <code>optional uint64 id = 1;</code> */
     boolean hasId();
-    /**
-     * <code>optional uint64 id = 1;</code>
-     */
+    /** <code>optional uint64 id = 1;</code> */
     long getId();
 
     // optional bool enabled = 2;
-    /**
-     * <code>optional bool enabled = 2;</code>
-     */
+    /** <code>optional bool enabled = 2;</code> */
     boolean hasEnabled();
-    /**
-     * <code>optional bool enabled = 2;</code>
-     */
+    /** <code>optional bool enabled = 2;</code> */
     boolean getEnabled();
   }
-  /**
-   * Protobuf type {@code signal.VideoStreamingStatus}
-   */
-  public static final class VideoStreamingStatus extends
-      com.google.protobuf.GeneratedMessage
+  /** Protobuf type {@code signal.VideoStreamingStatus} */
+  public static final class VideoStreamingStatus extends com.google.protobuf.GeneratedMessage
       implements VideoStreamingStatusOrBuilder {
     // Use VideoStreamingStatus.newBuilder() to construct.
     private VideoStreamingStatus(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
       this.unknownFields = builder.getUnknownFields();
     }
-    private VideoStreamingStatus(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private VideoStreamingStatus(boolean noInit) {
+      this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
 
     private static final VideoStreamingStatus defaultInstance;
+
     public static VideoStreamingStatus getDefaultInstance() {
       return defaultInstance;
     }
@@ -846,11 +855,12 @@ public final class WebRtcDataProtos {
     }
 
     private final com.google.protobuf.UnknownFieldSet unknownFields;
+
     @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
+    public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
       return this.unknownFields;
     }
+
     private VideoStreamingStatus(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -867,56 +877,64 @@ public final class WebRtcDataProtos {
             case 0:
               done = true;
               break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
+            default:
+              {
+                if (!parseUnknownField(
+                    input, unknownFields,
+                    extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
               }
-              break;
-            }
-            case 8: {
-              bitField0_ |= 0x00000001;
-              id_ = input.readUInt64();
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              enabled_ = input.readBool();
-              break;
-            }
+            case 8:
+              {
+                bitField0_ |= 0x00000001;
+                id_ = input.readUInt64();
+                break;
+              }
+            case 16:
+              {
+                bitField0_ |= 0x00000002;
+                enabled_ = input.readBool();
+                break;
+              }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
+        throw new com.google.protobuf.InvalidProtocolBufferException(e.getMessage())
+            .setUnfinishedMessage(this);
       } finally {
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
     }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.internal_static_signal_VideoStreamingStatus_descriptor;
+
+    public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+      return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos
+          .internal_static_signal_VideoStreamingStatus_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.internal_static_signal_VideoStreamingStatus_fieldAccessorTable
+      return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos
+          .internal_static_signal_VideoStreamingStatus_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.class, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.Builder.class);
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.class,
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.Builder
+                  .class);
     }
 
     public static com.google.protobuf.Parser<VideoStreamingStatus> PARSER =
         new com.google.protobuf.AbstractParser<VideoStreamingStatus>() {
-      public VideoStreamingStatus parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new VideoStreamingStatus(input, extensionRegistry);
-      }
-    };
+          public VideoStreamingStatus parsePartialFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return new VideoStreamingStatus(input, extensionRegistry);
+          }
+        };
 
     @java.lang.Override
     public com.google.protobuf.Parser<VideoStreamingStatus> getParserForType() {
@@ -927,15 +945,11 @@ public final class WebRtcDataProtos {
     // optional uint64 id = 1;
     public static final int ID_FIELD_NUMBER = 1;
     private long id_;
-    /**
-     * <code>optional uint64 id = 1;</code>
-     */
+    /** <code>optional uint64 id = 1;</code> */
     public boolean hasId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    /**
-     * <code>optional uint64 id = 1;</code>
-     */
+    /** <code>optional uint64 id = 1;</code> */
     public long getId() {
       return id_;
     }
@@ -943,15 +957,11 @@ public final class WebRtcDataProtos {
     // optional bool enabled = 2;
     public static final int ENABLED_FIELD_NUMBER = 2;
     private boolean enabled_;
-    /**
-     * <code>optional bool enabled = 2;</code>
-     */
+    /** <code>optional bool enabled = 2;</code> */
     public boolean hasEnabled() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
-    /**
-     * <code>optional bool enabled = 2;</code>
-     */
+    /** <code>optional bool enabled = 2;</code> */
     public boolean getEnabled() {
       return enabled_;
     }
@@ -960,7 +970,9 @@ public final class WebRtcDataProtos {
       id_ = 0L;
       enabled_ = false;
     }
+
     private byte memoizedIsInitialized = -1;
+
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
@@ -969,8 +981,7 @@ public final class WebRtcDataProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
+    public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeUInt64(1, id_);
@@ -982,18 +993,17 @@ public final class WebRtcDataProtos {
     }
 
     private int memoizedSerializedSize = -1;
+
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
 
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(1, id_);
+        size += com.google.protobuf.CodedOutputStream.computeUInt64Size(1, id_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(2, enabled_);
+        size += com.google.protobuf.CodedOutputStream.computeBoolSize(2, enabled_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1001,9 +1011,9 @@ public final class WebRtcDataProtos {
     }
 
     private static final long serialVersionUID = 0L;
+
     @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
+    protected java.lang.Object writeReplace() throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
 
@@ -1012,47 +1022,53 @@ public final class WebRtcDataProtos {
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+
+    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus parseFrom(
+        byte[] data) throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
+
+    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus parseFrom(
+        java.io.InputStream input) throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
+
+    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus
+        parseDelimitedFrom(java.io.InputStream input) throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
+
+    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus
+        parseDelimitedFrom(
+            java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
+        com.google.protobuf.CodedInputStream input) throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1060,51 +1076,62 @@ public final class WebRtcDataProtos {
       return PARSER.parseFrom(input, extensionRegistry);
     }
 
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus prototype) {
+    public static Builder newBuilder() {
+      return Builder.create();
+    }
+
+    public Builder newBuilderForType() {
+      return newBuilder();
+    }
+
+    public static Builder newBuilder(
+        org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus prototype) {
       return newBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() { return newBuilder(this); }
+
+    public Builder toBuilder() {
+      return newBuilder(this);
+    }
 
     @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+    protected Builder newBuilderForType(com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code signal.VideoStreamingStatus}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatusOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.internal_static_signal_VideoStreamingStatus_descriptor;
+    /** Protobuf type {@code signal.VideoStreamingStatus} */
+    public static final class Builder extends com.google.protobuf.GeneratedMessage.Builder<Builder>
+        implements org.thoughtcrime.securesms.webrtc.WebRtcDataProtos
+            .VideoStreamingStatusOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos
+            .internal_static_signal_VideoStreamingStatus_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.internal_static_signal_VideoStreamingStatus_fieldAccessorTable
+        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos
+            .internal_static_signal_VideoStreamingStatus_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.class, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.Builder.class);
+                org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.class,
+                org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.Builder
+                    .class);
       }
 
-      // Construct using org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.newBuilder()
+      // Construct using
+      // org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
 
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      private Builder(com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
+
       private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-        }
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {}
       }
+
       private static Builder create() {
         return new Builder();
       }
@@ -1122,25 +1149,30 @@ public final class WebRtcDataProtos {
         return create().mergeFrom(buildPartial());
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.internal_static_signal_VideoStreamingStatus_descriptor;
+      public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos
+            .internal_static_signal_VideoStreamingStatus_descriptor;
       }
 
-      public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus getDefaultInstanceForType() {
-        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.getDefaultInstance();
+      public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus
+          getDefaultInstanceForType() {
+        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus
+            .getDefaultInstance();
       }
 
       public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus build() {
-        org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus result = buildPartial();
+        org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus result =
+            buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus buildPartial() {
-        org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus result = new org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus(this);
+      public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus
+          buildPartial() {
+        org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus result =
+            new org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -1157,16 +1189,21 @@ public final class WebRtcDataProtos {
       }
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus) {
-          return mergeFrom((org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus)other);
+        if (other
+            instanceof org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus) {
+          return mergeFrom(
+              (org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus) other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus other) {
-        if (other == org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.getDefaultInstance()) return this;
+      public Builder mergeFrom(
+          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus other) {
+        if (other
+            == org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus
+                .getDefaultInstance()) return this;
         if (other.hasId()) {
           setId(other.getId());
         }
@@ -1185,11 +1222,14 @@ public final class WebRtcDataProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus parsedMessage = null;
+        org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus parsedMessage =
+            null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus) e.getUnfinishedMessage();
+          parsedMessage =
+              (org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus)
+                  e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -1198,34 +1238,27 @@ public final class WebRtcDataProtos {
         }
         return this;
       }
+
       private int bitField0_;
 
       // optional uint64 id = 1;
-      private long id_ ;
-      /**
-       * <code>optional uint64 id = 1;</code>
-       */
+      private long id_;
+      /** <code>optional uint64 id = 1;</code> */
       public boolean hasId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>optional uint64 id = 1;</code>
-       */
+      /** <code>optional uint64 id = 1;</code> */
       public long getId() {
         return id_;
       }
-      /**
-       * <code>optional uint64 id = 1;</code>
-       */
+      /** <code>optional uint64 id = 1;</code> */
       public Builder setId(long value) {
         bitField0_ |= 0x00000001;
         id_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint64 id = 1;</code>
-       */
+      /** <code>optional uint64 id = 1;</code> */
       public Builder clearId() {
         bitField0_ = (bitField0_ & ~0x00000001);
         id_ = 0L;
@@ -1234,31 +1267,23 @@ public final class WebRtcDataProtos {
       }
 
       // optional bool enabled = 2;
-      private boolean enabled_ ;
-      /**
-       * <code>optional bool enabled = 2;</code>
-       */
+      private boolean enabled_;
+      /** <code>optional bool enabled = 2;</code> */
       public boolean hasEnabled() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-      /**
-       * <code>optional bool enabled = 2;</code>
-       */
+      /** <code>optional bool enabled = 2;</code> */
       public boolean getEnabled() {
         return enabled_;
       }
-      /**
-       * <code>optional bool enabled = 2;</code>
-       */
+      /** <code>optional bool enabled = 2;</code> */
       public Builder setEnabled(boolean value) {
         bitField0_ |= 0x00000002;
         enabled_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional bool enabled = 2;</code>
-       */
+      /** <code>optional bool enabled = 2;</code> */
       public Builder clearEnabled() {
         bitField0_ = (bitField0_ & ~0x00000002);
         enabled_ = false;
@@ -1277,65 +1302,49 @@ public final class WebRtcDataProtos {
     // @@protoc_insertion_point(class_scope:signal.VideoStreamingStatus)
   }
 
-  public interface DataOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
+  public interface DataOrBuilder extends com.google.protobuf.MessageOrBuilder {
 
     // optional .signal.Connected connected = 1;
-    /**
-     * <code>optional .signal.Connected connected = 1;</code>
-     */
+    /** <code>optional .signal.Connected connected = 1;</code> */
     boolean hasConnected();
-    /**
-     * <code>optional .signal.Connected connected = 1;</code>
-     */
+    /** <code>optional .signal.Connected connected = 1;</code> */
     org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected getConnected();
-    /**
-     * <code>optional .signal.Connected connected = 1;</code>
-     */
+    /** <code>optional .signal.Connected connected = 1;</code> */
     org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.ConnectedOrBuilder getConnectedOrBuilder();
 
     // optional .signal.Hangup hangup = 2;
-    /**
-     * <code>optional .signal.Hangup hangup = 2;</code>
-     */
+    /** <code>optional .signal.Hangup hangup = 2;</code> */
     boolean hasHangup();
-    /**
-     * <code>optional .signal.Hangup hangup = 2;</code>
-     */
+    /** <code>optional .signal.Hangup hangup = 2;</code> */
     org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup getHangup();
-    /**
-     * <code>optional .signal.Hangup hangup = 2;</code>
-     */
+    /** <code>optional .signal.Hangup hangup = 2;</code> */
     org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.HangupOrBuilder getHangupOrBuilder();
 
     // optional .signal.VideoStreamingStatus videoStreamingStatus = 3;
-    /**
-     * <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code>
-     */
+    /** <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code> */
     boolean hasVideoStreamingStatus();
-    /**
-     * <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code>
-     */
-    org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus getVideoStreamingStatus();
-    /**
-     * <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code>
-     */
-    org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatusOrBuilder getVideoStreamingStatusOrBuilder();
+    /** <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code> */
+    org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus
+        getVideoStreamingStatus();
+    /** <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code> */
+    org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatusOrBuilder
+        getVideoStreamingStatusOrBuilder();
   }
-  /**
-   * Protobuf type {@code signal.Data}
-   */
-  public static final class Data extends
-      com.google.protobuf.GeneratedMessage
+  /** Protobuf type {@code signal.Data} */
+  public static final class Data extends com.google.protobuf.GeneratedMessage
       implements DataOrBuilder {
     // Use Data.newBuilder() to construct.
     private Data(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
       this.unknownFields = builder.getUnknownFields();
     }
-    private Data(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private Data(boolean noInit) {
+      this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
 
     private static final Data defaultInstance;
+
     public static Data getDefaultInstance() {
       return defaultInstance;
     }
@@ -1345,11 +1354,12 @@ public final class WebRtcDataProtos {
     }
 
     private final com.google.protobuf.UnknownFieldSet unknownFields;
+
     @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
+    public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
       return this.unknownFields;
     }
+
     private Data(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1366,85 +1376,104 @@ public final class WebRtcDataProtos {
             case 0:
               done = true;
               break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
+            default:
+              {
+                if (!parseUnknownField(
+                    input, unknownFields,
+                    extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
               }
-              break;
-            }
-            case 10: {
-              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000001) == 0x00000001)) {
-                subBuilder = connected_.toBuilder();
+            case 10:
+              {
+                org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.Builder subBuilder =
+                    null;
+                if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                  subBuilder = connected_.toBuilder();
+                }
+                connected_ =
+                    input.readMessage(
+                        org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.PARSER,
+                        extensionRegistry);
+                if (subBuilder != null) {
+                  subBuilder.mergeFrom(connected_);
+                  connected_ = subBuilder.buildPartial();
+                }
+                bitField0_ |= 0x00000001;
+                break;
               }
-              connected_ = input.readMessage(org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(connected_);
-                connected_ = subBuilder.buildPartial();
+            case 18:
+              {
+                org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.Builder subBuilder = null;
+                if (((bitField0_ & 0x00000002) == 0x00000002)) {
+                  subBuilder = hangup_.toBuilder();
+                }
+                hangup_ =
+                    input.readMessage(
+                        org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.PARSER,
+                        extensionRegistry);
+                if (subBuilder != null) {
+                  subBuilder.mergeFrom(hangup_);
+                  hangup_ = subBuilder.buildPartial();
+                }
+                bitField0_ |= 0x00000002;
+                break;
               }
-              bitField0_ |= 0x00000001;
-              break;
-            }
-            case 18: {
-              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000002) == 0x00000002)) {
-                subBuilder = hangup_.toBuilder();
+            case 26:
+              {
+                org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.Builder
+                    subBuilder = null;
+                if (((bitField0_ & 0x00000004) == 0x00000004)) {
+                  subBuilder = videoStreamingStatus_.toBuilder();
+                }
+                videoStreamingStatus_ =
+                    input.readMessage(
+                        org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus
+                            .PARSER,
+                        extensionRegistry);
+                if (subBuilder != null) {
+                  subBuilder.mergeFrom(videoStreamingStatus_);
+                  videoStreamingStatus_ = subBuilder.buildPartial();
+                }
+                bitField0_ |= 0x00000004;
+                break;
               }
-              hangup_ = input.readMessage(org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(hangup_);
-                hangup_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000002;
-              break;
-            }
-            case 26: {
-              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000004) == 0x00000004)) {
-                subBuilder = videoStreamingStatus_.toBuilder();
-              }
-              videoStreamingStatus_ = input.readMessage(org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(videoStreamingStatus_);
-                videoStreamingStatus_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000004;
-              break;
-            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
+        throw new com.google.protobuf.InvalidProtocolBufferException(e.getMessage())
+            .setUnfinishedMessage(this);
       } finally {
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
     }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.internal_static_signal_Data_descriptor;
+
+    public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+      return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos
+          .internal_static_signal_Data_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.internal_static_signal_Data_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data.class, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data.Builder.class);
+      return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos
+          .internal_static_signal_Data_fieldAccessorTable.ensureFieldAccessorsInitialized(
+          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data.class,
+          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data.Builder.class);
     }
 
     public static com.google.protobuf.Parser<Data> PARSER =
         new com.google.protobuf.AbstractParser<Data>() {
-      public Data parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Data(input, extensionRegistry);
-      }
-    };
+          public Data parsePartialFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return new Data(input, extensionRegistry);
+          }
+        };
 
     @java.lang.Override
     public com.google.protobuf.Parser<Data> getParserForType() {
@@ -1455,75 +1484,66 @@ public final class WebRtcDataProtos {
     // optional .signal.Connected connected = 1;
     public static final int CONNECTED_FIELD_NUMBER = 1;
     private org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected connected_;
-    /**
-     * <code>optional .signal.Connected connected = 1;</code>
-     */
+    /** <code>optional .signal.Connected connected = 1;</code> */
     public boolean hasConnected() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    /**
-     * <code>optional .signal.Connected connected = 1;</code>
-     */
+    /** <code>optional .signal.Connected connected = 1;</code> */
     public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected getConnected() {
       return connected_;
     }
-    /**
-     * <code>optional .signal.Connected connected = 1;</code>
-     */
-    public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.ConnectedOrBuilder getConnectedOrBuilder() {
+    /** <code>optional .signal.Connected connected = 1;</code> */
+    public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.ConnectedOrBuilder
+        getConnectedOrBuilder() {
       return connected_;
     }
 
     // optional .signal.Hangup hangup = 2;
     public static final int HANGUP_FIELD_NUMBER = 2;
     private org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup hangup_;
-    /**
-     * <code>optional .signal.Hangup hangup = 2;</code>
-     */
+    /** <code>optional .signal.Hangup hangup = 2;</code> */
     public boolean hasHangup() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
-    /**
-     * <code>optional .signal.Hangup hangup = 2;</code>
-     */
+    /** <code>optional .signal.Hangup hangup = 2;</code> */
     public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup getHangup() {
       return hangup_;
     }
-    /**
-     * <code>optional .signal.Hangup hangup = 2;</code>
-     */
+    /** <code>optional .signal.Hangup hangup = 2;</code> */
     public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.HangupOrBuilder getHangupOrBuilder() {
       return hangup_;
     }
 
     // optional .signal.VideoStreamingStatus videoStreamingStatus = 3;
     public static final int VIDEOSTREAMINGSTATUS_FIELD_NUMBER = 3;
-    private org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus videoStreamingStatus_;
-    /**
-     * <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code>
-     */
+    private org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus
+        videoStreamingStatus_;
+    /** <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code> */
     public boolean hasVideoStreamingStatus() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
-    /**
-     * <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code>
-     */
-    public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus getVideoStreamingStatus() {
+    /** <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code> */
+    public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus
+        getVideoStreamingStatus() {
       return videoStreamingStatus_;
     }
-    /**
-     * <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code>
-     */
-    public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatusOrBuilder getVideoStreamingStatusOrBuilder() {
+    /** <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code> */
+    public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatusOrBuilder
+        getVideoStreamingStatusOrBuilder() {
       return videoStreamingStatus_;
     }
 
     private void initFields() {
-      connected_ = org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.getDefaultInstance();
+      connected_ =
+          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.getDefaultInstance();
       hangup_ = org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.getDefaultInstance();
-      videoStreamingStatus_ = org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.getDefaultInstance();
+      videoStreamingStatus_ =
+          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus
+              .getDefaultInstance();
     }
+
     private byte memoizedIsInitialized = -1;
+
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
@@ -1532,8 +1552,7 @@ public final class WebRtcDataProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
+    public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeMessage(1, connected_);
@@ -1548,22 +1567,20 @@ public final class WebRtcDataProtos {
     }
 
     private int memoizedSerializedSize = -1;
+
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
 
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, connected_);
+        size += com.google.protobuf.CodedOutputStream.computeMessageSize(1, connected_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, hangup_);
+        size += com.google.protobuf.CodedOutputStream.computeMessageSize(2, hangup_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, videoStreamingStatus_);
+        size += com.google.protobuf.CodedOutputStream.computeMessageSize(3, videoStreamingStatus_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1571,9 +1588,9 @@ public final class WebRtcDataProtos {
     }
 
     private static final long serialVersionUID = 0L;
+
     @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
+    protected java.lang.Object writeReplace() throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
 
@@ -1582,47 +1599,52 @@ public final class WebRtcDataProtos {
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
+
+    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data parseFrom(
+        java.io.InputStream input) throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
+
+    public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data parseDelimitedFrom(
+        java.io.InputStream input) throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
+        com.google.protobuf.CodedInputStream input) throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
+
     public static org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1630,35 +1652,42 @@ public final class WebRtcDataProtos {
       return PARSER.parseFrom(input, extensionRegistry);
     }
 
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data prototype) {
+    public static Builder newBuilder() {
+      return Builder.create();
+    }
+
+    public Builder newBuilderForType() {
+      return newBuilder();
+    }
+
+    public static Builder newBuilder(
+        org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data prototype) {
       return newBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() { return newBuilder(this); }
+
+    public Builder toBuilder() {
+      return newBuilder(this);
+    }
 
     @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+    protected Builder newBuilderForType(com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code signal.Data}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.DataOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.internal_static_signal_Data_descriptor;
+    /** Protobuf type {@code signal.Data} */
+    public static final class Builder extends com.google.protobuf.GeneratedMessage.Builder<Builder>
+        implements org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.DataOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos
+            .internal_static_signal_Data_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.internal_static_signal_Data_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data.class, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data.Builder.class);
+        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos
+            .internal_static_signal_Data_fieldAccessorTable.ensureFieldAccessorsInitialized(
+            org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data.class,
+            org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data.Builder.class);
       }
 
       // Construct using org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data.newBuilder()
@@ -1666,11 +1695,11 @@ public final class WebRtcDataProtos {
         maybeForceBuilderInitialization();
       }
 
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      private Builder(com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
+
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
           getConnectedFieldBuilder();
@@ -1678,6 +1707,7 @@ public final class WebRtcDataProtos {
           getVideoStreamingStatusFieldBuilder();
         }
       }
+
       private static Builder create() {
         return new Builder();
       }
@@ -1685,7 +1715,8 @@ public final class WebRtcDataProtos {
       public Builder clear() {
         super.clear();
         if (connectedBuilder_ == null) {
-          connected_ = org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.getDefaultInstance();
+          connected_ =
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.getDefaultInstance();
         } else {
           connectedBuilder_.clear();
         }
@@ -1697,7 +1728,9 @@ public final class WebRtcDataProtos {
         }
         bitField0_ = (bitField0_ & ~0x00000002);
         if (videoStreamingStatusBuilder_ == null) {
-          videoStreamingStatus_ = org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.getDefaultInstance();
+          videoStreamingStatus_ =
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus
+                  .getDefaultInstance();
         } else {
           videoStreamingStatusBuilder_.clear();
         }
@@ -1709,9 +1742,9 @@ public final class WebRtcDataProtos {
         return create().mergeFrom(buildPartial());
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.internal_static_signal_Data_descriptor;
+      public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+        return org.thoughtcrime.securesms.webrtc.WebRtcDataProtos
+            .internal_static_signal_Data_descriptor;
       }
 
       public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data getDefaultInstanceForType() {
@@ -1727,7 +1760,8 @@ public final class WebRtcDataProtos {
       }
 
       public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data buildPartial() {
-        org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data result = new org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data(this);
+        org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data result =
+            new org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -1761,7 +1795,7 @@ public final class WebRtcDataProtos {
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data) {
-          return mergeFrom((org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data)other);
+          return mergeFrom((org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data) other);
         } else {
           super.mergeFrom(other);
           return this;
@@ -1769,7 +1803,8 @@ public final class WebRtcDataProtos {
       }
 
       public Builder mergeFrom(org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data other) {
-        if (other == org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data.getDefaultInstance()) return this;
+        if (other == org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data.getDefaultInstance())
+          return this;
         if (other.hasConnected()) {
           mergeConnected(other.getConnected());
         }
@@ -1795,7 +1830,8 @@ public final class WebRtcDataProtos {
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data) e.getUnfinishedMessage();
+          parsedMessage =
+              (org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Data) e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -1804,21 +1840,22 @@ public final class WebRtcDataProtos {
         }
         return this;
       }
+
       private int bitField0_;
 
       // optional .signal.Connected connected = 1;
-      private org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected connected_ = org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.getDefaultInstance();
+      private org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected connected_ =
+          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
-          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.Builder, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.ConnectedOrBuilder> connectedBuilder_;
-      /**
-       * <code>optional .signal.Connected connected = 1;</code>
-       */
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected,
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.Builder,
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.ConnectedOrBuilder>
+          connectedBuilder_;
+      /** <code>optional .signal.Connected connected = 1;</code> */
       public boolean hasConnected() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>optional .signal.Connected connected = 1;</code>
-       */
+      /** <code>optional .signal.Connected connected = 1;</code> */
       public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected getConnected() {
         if (connectedBuilder_ == null) {
           return connected_;
@@ -1826,10 +1863,9 @@ public final class WebRtcDataProtos {
           return connectedBuilder_.getMessage();
         }
       }
-      /**
-       * <code>optional .signal.Connected connected = 1;</code>
-       */
-      public Builder setConnected(org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected value) {
+      /** <code>optional .signal.Connected connected = 1;</code> */
+      public Builder setConnected(
+          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected value) {
         if (connectedBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -1842,9 +1878,7 @@ public final class WebRtcDataProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
-      /**
-       * <code>optional .signal.Connected connected = 1;</code>
-       */
+      /** <code>optional .signal.Connected connected = 1;</code> */
       public Builder setConnected(
           org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.Builder builderForValue) {
         if (connectedBuilder_ == null) {
@@ -1856,15 +1890,18 @@ public final class WebRtcDataProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
-      /**
-       * <code>optional .signal.Connected connected = 1;</code>
-       */
-      public Builder mergeConnected(org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected value) {
+      /** <code>optional .signal.Connected connected = 1;</code> */
+      public Builder mergeConnected(
+          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected value) {
         if (connectedBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001) &&
-              connected_ != org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.getDefaultInstance()) {
+          if (((bitField0_ & 0x00000001) == 0x00000001)
+              && connected_
+                  != org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected
+                      .getDefaultInstance()) {
             connected_ =
-              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.newBuilder(connected_).mergeFrom(value).buildPartial();
+                org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.newBuilder(connected_)
+                    .mergeFrom(value)
+                    .buildPartial();
           } else {
             connected_ = value;
           }
@@ -1875,12 +1912,11 @@ public final class WebRtcDataProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
-      /**
-       * <code>optional .signal.Connected connected = 1;</code>
-       */
+      /** <code>optional .signal.Connected connected = 1;</code> */
       public Builder clearConnected() {
         if (connectedBuilder_ == null) {
-          connected_ = org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.getDefaultInstance();
+          connected_ =
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.getDefaultInstance();
           onChanged();
         } else {
           connectedBuilder_.clear();
@@ -1888,54 +1924,53 @@ public final class WebRtcDataProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      /**
-       * <code>optional .signal.Connected connected = 1;</code>
-       */
-      public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.Builder getConnectedBuilder() {
+      /** <code>optional .signal.Connected connected = 1;</code> */
+      public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.Builder
+          getConnectedBuilder() {
         bitField0_ |= 0x00000001;
         onChanged();
         return getConnectedFieldBuilder().getBuilder();
       }
-      /**
-       * <code>optional .signal.Connected connected = 1;</code>
-       */
-      public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.ConnectedOrBuilder getConnectedOrBuilder() {
+      /** <code>optional .signal.Connected connected = 1;</code> */
+      public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.ConnectedOrBuilder
+          getConnectedOrBuilder() {
         if (connectedBuilder_ != null) {
           return connectedBuilder_.getMessageOrBuilder();
         } else {
           return connected_;
         }
       }
-      /**
-       * <code>optional .signal.Connected connected = 1;</code>
-       */
+      /** <code>optional .signal.Connected connected = 1;</code> */
       private com.google.protobuf.SingleFieldBuilder<
-          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.Builder, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.ConnectedOrBuilder> 
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected,
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.Builder,
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.ConnectedOrBuilder>
           getConnectedFieldBuilder() {
         if (connectedBuilder_ == null) {
-          connectedBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.Builder, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.ConnectedOrBuilder>(
-                  connected_,
-                  getParentForChildren(),
-                  isClean());
+          connectedBuilder_ =
+              new com.google.protobuf.SingleFieldBuilder<
+                  org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected,
+                  org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Connected.Builder,
+                  org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.ConnectedOrBuilder>(
+                  connected_, getParentForChildren(), isClean());
           connected_ = null;
         }
         return connectedBuilder_;
       }
 
       // optional .signal.Hangup hangup = 2;
-      private org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup hangup_ = org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.getDefaultInstance();
+      private org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup hangup_ =
+          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
-          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.Builder, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.HangupOrBuilder> hangupBuilder_;
-      /**
-       * <code>optional .signal.Hangup hangup = 2;</code>
-       */
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup,
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.Builder,
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.HangupOrBuilder>
+          hangupBuilder_;
+      /** <code>optional .signal.Hangup hangup = 2;</code> */
       public boolean hasHangup() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-      /**
-       * <code>optional .signal.Hangup hangup = 2;</code>
-       */
+      /** <code>optional .signal.Hangup hangup = 2;</code> */
       public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup getHangup() {
         if (hangupBuilder_ == null) {
           return hangup_;
@@ -1943,9 +1978,7 @@ public final class WebRtcDataProtos {
           return hangupBuilder_.getMessage();
         }
       }
-      /**
-       * <code>optional .signal.Hangup hangup = 2;</code>
-       */
+      /** <code>optional .signal.Hangup hangup = 2;</code> */
       public Builder setHangup(org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup value) {
         if (hangupBuilder_ == null) {
           if (value == null) {
@@ -1959,9 +1992,7 @@ public final class WebRtcDataProtos {
         bitField0_ |= 0x00000002;
         return this;
       }
-      /**
-       * <code>optional .signal.Hangup hangup = 2;</code>
-       */
+      /** <code>optional .signal.Hangup hangup = 2;</code> */
       public Builder setHangup(
           org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.Builder builderForValue) {
         if (hangupBuilder_ == null) {
@@ -1973,15 +2004,17 @@ public final class WebRtcDataProtos {
         bitField0_ |= 0x00000002;
         return this;
       }
-      /**
-       * <code>optional .signal.Hangup hangup = 2;</code>
-       */
+      /** <code>optional .signal.Hangup hangup = 2;</code> */
       public Builder mergeHangup(org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup value) {
         if (hangupBuilder_ == null) {
-          if (((bitField0_ & 0x00000002) == 0x00000002) &&
-              hangup_ != org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.getDefaultInstance()) {
+          if (((bitField0_ & 0x00000002) == 0x00000002)
+              && hangup_
+                  != org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup
+                      .getDefaultInstance()) {
             hangup_ =
-              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.newBuilder(hangup_).mergeFrom(value).buildPartial();
+                org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.newBuilder(hangup_)
+                    .mergeFrom(value)
+                    .buildPartial();
           } else {
             hangup_ = value;
           }
@@ -1992,9 +2025,7 @@ public final class WebRtcDataProtos {
         bitField0_ |= 0x00000002;
         return this;
       }
-      /**
-       * <code>optional .signal.Hangup hangup = 2;</code>
-       */
+      /** <code>optional .signal.Hangup hangup = 2;</code> */
       public Builder clearHangup() {
         if (hangupBuilder_ == null) {
           hangup_ = org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.getDefaultInstance();
@@ -2005,65 +2036,65 @@ public final class WebRtcDataProtos {
         bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
-      /**
-       * <code>optional .signal.Hangup hangup = 2;</code>
-       */
+      /** <code>optional .signal.Hangup hangup = 2;</code> */
       public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.Builder getHangupBuilder() {
         bitField0_ |= 0x00000002;
         onChanged();
         return getHangupFieldBuilder().getBuilder();
       }
-      /**
-       * <code>optional .signal.Hangup hangup = 2;</code>
-       */
-      public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.HangupOrBuilder getHangupOrBuilder() {
+      /** <code>optional .signal.Hangup hangup = 2;</code> */
+      public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.HangupOrBuilder
+          getHangupOrBuilder() {
         if (hangupBuilder_ != null) {
           return hangupBuilder_.getMessageOrBuilder();
         } else {
           return hangup_;
         }
       }
-      /**
-       * <code>optional .signal.Hangup hangup = 2;</code>
-       */
+      /** <code>optional .signal.Hangup hangup = 2;</code> */
       private com.google.protobuf.SingleFieldBuilder<
-          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.Builder, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.HangupOrBuilder> 
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup,
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.Builder,
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.HangupOrBuilder>
           getHangupFieldBuilder() {
         if (hangupBuilder_ == null) {
-          hangupBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.Builder, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.HangupOrBuilder>(
-                  hangup_,
-                  getParentForChildren(),
-                  isClean());
+          hangupBuilder_ =
+              new com.google.protobuf.SingleFieldBuilder<
+                  org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup,
+                  org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.Hangup.Builder,
+                  org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.HangupOrBuilder>(
+                  hangup_, getParentForChildren(), isClean());
           hangup_ = null;
         }
         return hangupBuilder_;
       }
 
       // optional .signal.VideoStreamingStatus videoStreamingStatus = 3;
-      private org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus videoStreamingStatus_ = org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.getDefaultInstance();
+      private org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus
+          videoStreamingStatus_ =
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus
+                  .getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
-          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.Builder, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatusOrBuilder> videoStreamingStatusBuilder_;
-      /**
-       * <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code>
-       */
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus,
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.Builder,
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatusOrBuilder>
+          videoStreamingStatusBuilder_;
+      /** <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code> */
       public boolean hasVideoStreamingStatus() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
-      /**
-       * <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code>
-       */
-      public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus getVideoStreamingStatus() {
+      /** <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code> */
+      public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus
+          getVideoStreamingStatus() {
         if (videoStreamingStatusBuilder_ == null) {
           return videoStreamingStatus_;
         } else {
           return videoStreamingStatusBuilder_.getMessage();
         }
       }
-      /**
-       * <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code>
-       */
-      public Builder setVideoStreamingStatus(org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus value) {
+      /** <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code> */
+      public Builder setVideoStreamingStatus(
+          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus value) {
         if (videoStreamingStatusBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -2076,11 +2107,10 @@ public final class WebRtcDataProtos {
         bitField0_ |= 0x00000004;
         return this;
       }
-      /**
-       * <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code>
-       */
+      /** <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code> */
       public Builder setVideoStreamingStatus(
-          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.Builder builderForValue) {
+          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.Builder
+              builderForValue) {
         if (videoStreamingStatusBuilder_ == null) {
           videoStreamingStatus_ = builderForValue.build();
           onChanged();
@@ -2090,15 +2120,19 @@ public final class WebRtcDataProtos {
         bitField0_ |= 0x00000004;
         return this;
       }
-      /**
-       * <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code>
-       */
-      public Builder mergeVideoStreamingStatus(org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus value) {
+      /** <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code> */
+      public Builder mergeVideoStreamingStatus(
+          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus value) {
         if (videoStreamingStatusBuilder_ == null) {
-          if (((bitField0_ & 0x00000004) == 0x00000004) &&
-              videoStreamingStatus_ != org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.getDefaultInstance()) {
+          if (((bitField0_ & 0x00000004) == 0x00000004)
+              && videoStreamingStatus_
+                  != org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus
+                      .getDefaultInstance()) {
             videoStreamingStatus_ =
-              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.newBuilder(videoStreamingStatus_).mergeFrom(value).buildPartial();
+                org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.newBuilder(
+                        videoStreamingStatus_)
+                    .mergeFrom(value)
+                    .buildPartial();
           } else {
             videoStreamingStatus_ = value;
           }
@@ -2109,12 +2143,12 @@ public final class WebRtcDataProtos {
         bitField0_ |= 0x00000004;
         return this;
       }
-      /**
-       * <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code>
-       */
+      /** <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code> */
       public Builder clearVideoStreamingStatus() {
         if (videoStreamingStatusBuilder_ == null) {
-          videoStreamingStatus_ = org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.getDefaultInstance();
+          videoStreamingStatus_ =
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus
+                  .getDefaultInstance();
           onChanged();
         } else {
           videoStreamingStatusBuilder_.clear();
@@ -2122,36 +2156,35 @@ public final class WebRtcDataProtos {
         bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
-      /**
-       * <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code>
-       */
-      public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.Builder getVideoStreamingStatusBuilder() {
+      /** <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code> */
+      public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.Builder
+          getVideoStreamingStatusBuilder() {
         bitField0_ |= 0x00000004;
         onChanged();
         return getVideoStreamingStatusFieldBuilder().getBuilder();
       }
-      /**
-       * <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code>
-       */
-      public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatusOrBuilder getVideoStreamingStatusOrBuilder() {
+      /** <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code> */
+      public org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatusOrBuilder
+          getVideoStreamingStatusOrBuilder() {
         if (videoStreamingStatusBuilder_ != null) {
           return videoStreamingStatusBuilder_.getMessageOrBuilder();
         } else {
           return videoStreamingStatus_;
         }
       }
-      /**
-       * <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code>
-       */
+      /** <code>optional .signal.VideoStreamingStatus videoStreamingStatus = 3;</code> */
       private com.google.protobuf.SingleFieldBuilder<
-          org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.Builder, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatusOrBuilder> 
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus,
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.Builder,
+              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatusOrBuilder>
           getVideoStreamingStatusFieldBuilder() {
         if (videoStreamingStatusBuilder_ == null) {
-          videoStreamingStatusBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.Builder, org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatusOrBuilder>(
-                  videoStreamingStatus_,
-                  getParentForChildren(),
-                  isClean());
+          videoStreamingStatusBuilder_ =
+              new com.google.protobuf.SingleFieldBuilder<
+                  org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus,
+                  org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatus.Builder,
+                  org.thoughtcrime.securesms.webrtc.WebRtcDataProtos.VideoStreamingStatusOrBuilder>(
+                  videoStreamingStatus_, getParentForChildren(), isClean());
           videoStreamingStatus_ = null;
         }
         return videoStreamingStatusBuilder_;
@@ -2169,79 +2202,77 @@ public final class WebRtcDataProtos {
   }
 
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_signal_Connected_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_signal_Connected_descriptor;
+  private static com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_signal_Connected_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_signal_Hangup_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_signal_Hangup_descriptor;
+  private static com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_signal_Hangup_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_signal_VideoStreamingStatus_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_signal_VideoStreamingStatus_descriptor;
+  private static com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_signal_VideoStreamingStatus_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_signal_Data_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+  private static com.google.protobuf.Descriptors.Descriptor internal_static_signal_Data_descriptor;
+  private static com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_signal_Data_fieldAccessorTable;
 
-  public static com.google.protobuf.Descriptors.FileDescriptor
-      getDescriptor() {
+  public static com.google.protobuf.Descriptors.FileDescriptor getDescriptor() {
     return descriptor;
   }
-  private static com.google.protobuf.Descriptors.FileDescriptor
-      descriptor;
+
+  private static com.google.protobuf.Descriptors.FileDescriptor descriptor;
+
   static {
     java.lang.String[] descriptorData = {
-      "\n\020WebRtcData.proto\022\006signal\"\027\n\tConnected\022" +
-      "\n\n\002id\030\001 \001(\004\"\024\n\006Hangup\022\n\n\002id\030\001 \001(\004\"3\n\024Vid" +
-      "eoStreamingStatus\022\n\n\002id\030\001 \001(\004\022\017\n\007enabled" +
-      "\030\002 \001(\010\"\210\001\n\004Data\022$\n\tconnected\030\001 \001(\0132\021.sig" +
-      "nal.Connected\022\036\n\006hangup\030\002 \001(\0132\016.signal.H" +
-      "angup\022:\n\024videoStreamingStatus\030\003 \001(\0132\034.si" +
-      "gnal.VideoStreamingStatusB5\n!org.thought" +
-      "crime.securesms.webrtcB\020WebRtcDataProtos"
+      "\n\020WebRtcData.proto\022\006signal\"\027\n\tConnected\022"
+          + "\n\n\002id\030\001 \001(\004\"\024\n\006Hangup\022\n\n\002id\030\001 \001(\004\"3\n\024Vid"
+          + "eoStreamingStatus\022\n\n\002id\030\001 \001(\004\022\017\n\007enabled"
+          + "\030\002 \001(\010\"\210\001\n\004Data\022$\n\tconnected\030\001 \001(\0132\021.sig"
+          + "nal.Connected\022\036\n\006hangup\030\002 \001(\0132\016.signal.H"
+          + "angup\022:\n\024videoStreamingStatus\030\003 \001(\0132\034.si"
+          + "gnal.VideoStreamingStatusB5\n!org.thought"
+          + "crime.securesms.webrtcB\020WebRtcDataProtos"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-      new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
-        public com.google.protobuf.ExtensionRegistry assignDescriptors(
-            com.google.protobuf.Descriptors.FileDescriptor root) {
-          descriptor = root;
-          internal_static_signal_Connected_descriptor =
-            getDescriptor().getMessageTypes().get(0);
-          internal_static_signal_Connected_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_signal_Connected_descriptor,
-              new java.lang.String[] { "Id", });
-          internal_static_signal_Hangup_descriptor =
-            getDescriptor().getMessageTypes().get(1);
-          internal_static_signal_Hangup_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_signal_Hangup_descriptor,
-              new java.lang.String[] { "Id", });
-          internal_static_signal_VideoStreamingStatus_descriptor =
-            getDescriptor().getMessageTypes().get(2);
-          internal_static_signal_VideoStreamingStatus_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_signal_VideoStreamingStatus_descriptor,
-              new java.lang.String[] { "Id", "Enabled", });
-          internal_static_signal_Data_descriptor =
-            getDescriptor().getMessageTypes().get(3);
-          internal_static_signal_Data_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_signal_Data_descriptor,
-              new java.lang.String[] { "Connected", "Hangup", "VideoStreamingStatus", });
-          return null;
-        }
-      };
-    com.google.protobuf.Descriptors.FileDescriptor
-      .internalBuildGeneratedFileFrom(descriptorData,
-        new com.google.protobuf.Descriptors.FileDescriptor[] {
-        }, assigner);
+        new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
+          public com.google.protobuf.ExtensionRegistry assignDescriptors(
+              com.google.protobuf.Descriptors.FileDescriptor root) {
+            descriptor = root;
+            internal_static_signal_Connected_descriptor = getDescriptor().getMessageTypes().get(0);
+            internal_static_signal_Connected_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+                    internal_static_signal_Connected_descriptor,
+                    new java.lang.String[] {
+                      "Id",
+                    });
+            internal_static_signal_Hangup_descriptor = getDescriptor().getMessageTypes().get(1);
+            internal_static_signal_Hangup_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+                    internal_static_signal_Hangup_descriptor,
+                    new java.lang.String[] {
+                      "Id",
+                    });
+            internal_static_signal_VideoStreamingStatus_descriptor =
+                getDescriptor().getMessageTypes().get(2);
+            internal_static_signal_VideoStreamingStatus_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+                    internal_static_signal_VideoStreamingStatus_descriptor,
+                    new java.lang.String[] {
+                      "Id", "Enabled",
+                    });
+            internal_static_signal_Data_descriptor = getDescriptor().getMessageTypes().get(3);
+            internal_static_signal_Data_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+                    internal_static_signal_Data_descriptor,
+                    new java.lang.String[] {
+                      "Connected", "Hangup", "VideoStreamingStatus",
+                    });
+            return null;
+          }
+        };
+    com.google.protobuf.Descriptors.FileDescriptor.internalBuildGeneratedFileFrom(
+        descriptorData, new com.google.protobuf.Descriptors.FileDescriptor[] {}, assigner);
   }
 
   // @@protoc_insertion_point(outer_class_scope)

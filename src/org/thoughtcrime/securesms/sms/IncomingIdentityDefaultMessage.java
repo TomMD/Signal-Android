@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms.sms;
 
-
 public class IncomingIdentityDefaultMessage extends IncomingTextMessage {
 
   public IncomingIdentityDefaultMessage(IncomingTextMessage base) {
@@ -11,5 +10,4 @@ public class IncomingIdentityDefaultMessage extends IncomingTextMessage {
   public boolean isIdentityDefault() {
     return true;
   }
-
 }

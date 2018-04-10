@@ -6,10 +6,8 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
-
-import org.thoughtcrime.securesms.R;
-
 import java.io.IOException;
+import org.thoughtcrime.securesms.R;
 
 public class OutgoingRinger {
 
@@ -26,18 +24,18 @@ public class OutgoingRinger {
   private MediaPlayer mediaPlayer;
 
   public OutgoingRinger(@NonNull Context context) {
-    this.context        = context;
+    this.context = context;
   }
-  
+
   public void start(Type type) {
     int soundId;
 
-    if      (type == Type.SONAR)   soundId = R.raw.redphone_sonarping;
+    if (type == Type.SONAR) soundId = R.raw.redphone_sonarping;
     else if (type == Type.RINGING) soundId = R.raw.redphone_outring;
-    else if (type == Type.BUSY)    soundId = R.raw.redphone_busy;
+    else if (type == Type.BUSY) soundId = R.raw.redphone_busy;
     else throw new IllegalArgumentException("Not a valid sound type");
 
-    if( mediaPlayer != null ) {
+    if (mediaPlayer != null) {
       mediaPlayer.release();
     }
 
@@ -46,7 +44,7 @@ public class OutgoingRinger {
     mediaPlayer.setLooping(true);
 
     String packageName = context.getPackageName();
-    Uri    dataUri     = Uri.parse("android.resource://" + packageName + "/" + soundId);
+    Uri dataUri = Uri.parse("android.resource://" + packageName + "/" + soundId);
 
     try {
       mediaPlayer.setDataSource(context, dataUri);

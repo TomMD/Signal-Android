@@ -2,17 +2,15 @@ package org.thoughtcrime.securesms.database.loaders;
 
 import android.content.Context;
 import android.util.Log;
-
-import org.thoughtcrime.securesms.util.AsyncLoader;
-import org.whispersystems.signalservice.api.SignalServiceAccountManager;
-import org.whispersystems.signalservice.api.messages.multidevice.DeviceInfo;
-import org.whispersystems.signalservice.api.push.SignalServiceAddress;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import org.thoughtcrime.securesms.util.AsyncLoader;
+import org.whispersystems.signalservice.api.SignalServiceAccountManager;
+import org.whispersystems.signalservice.api.messages.multidevice.DeviceInfo;
+import org.whispersystems.signalservice.api.push.SignalServiceAddress;
 
 public class DeviceListLoader extends AsyncLoader<List<DeviceInfo>> {
 
@@ -28,7 +26,7 @@ public class DeviceListLoader extends AsyncLoader<List<DeviceInfo>> {
   @Override
   public List<DeviceInfo> loadInBackground() {
     try {
-      List<DeviceInfo>     devices  = accountManager.getDevices();
+      List<DeviceInfo> devices = accountManager.getDevices();
       Iterator<DeviceInfo> iterator = devices.iterator();
 
       while (iterator.hasNext()) {
@@ -50,9 +48,9 @@ public class DeviceListLoader extends AsyncLoader<List<DeviceInfo>> {
 
     @Override
     public int compare(DeviceInfo lhs, DeviceInfo rhs) {
-      if      (lhs.getCreated() < rhs.getCreated())  return -1;
+      if (lhs.getCreated() < rhs.getCreated()) return -1;
       else if (lhs.getCreated() != rhs.getCreated()) return 1;
-      else                                           return 0;
+      else return 0;
     }
   }
 }

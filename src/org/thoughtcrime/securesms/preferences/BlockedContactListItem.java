@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.components.AvatarImageView;
 import org.thoughtcrime.securesms.mms.GlideRequests;
@@ -16,9 +15,9 @@ import org.thoughtcrime.securesms.util.Util;
 public class BlockedContactListItem extends RelativeLayout implements RecipientModifiedListener {
 
   private AvatarImageView contactPhotoImage;
-  private TextView        nameView;
-  private GlideRequests   glideRequests;
-  private Recipient       recipient;
+  private TextView nameView;
+  private GlideRequests glideRequests;
+  private Recipient recipient;
 
   public BlockedContactListItem(Context context) {
     super(context);
@@ -36,12 +35,12 @@ public class BlockedContactListItem extends RelativeLayout implements RecipientM
   public void onFinishInflate() {
     super.onFinishInflate();
     this.contactPhotoImage = findViewById(R.id.contact_photo_image);
-    this.nameView          = findViewById(R.id.name);
+    this.nameView = findViewById(R.id.name);
   }
 
   public void set(@NonNull GlideRequests glideRequests, @NonNull Recipient recipients) {
     this.glideRequests = glideRequests;
-    this.recipient     = recipients;
+    this.recipient = recipients;
 
     onModified(recipients);
     recipients.addListener(this);
@@ -50,12 +49,13 @@ public class BlockedContactListItem extends RelativeLayout implements RecipientM
   @Override
   public void onModified(final Recipient recipients) {
     final AvatarImageView contactPhotoImage = this.contactPhotoImage;
-    final TextView        nameView          = this.nameView;
+    final TextView nameView = this.nameView;
 
-    Util.runOnMain(() -> {
-      contactPhotoImage.setAvatar(glideRequests, recipients, false);
-      nameView.setText(recipients.toShortString());
-    });
+    Util.runOnMain(
+        () -> {
+          contactPhotoImage.setAvatar(glideRequests, recipients, false);
+          nameView.setText(recipients.toShortString());
+        });
   }
 
   public Recipient getRecipient() {

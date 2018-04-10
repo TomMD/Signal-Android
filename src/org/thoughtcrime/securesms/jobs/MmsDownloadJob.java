@@ -4,13 +4,18 @@ import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
 import com.google.android.mms.pdu_alt.CharacterSets;
 import com.google.android.mms.pdu_alt.EncodedStringValue;
 import com.google.android.mms.pdu_alt.PduBody;
 import com.google.android.mms.pdu_alt.PduPart;
 import com.google.android.mms.pdu_alt.RetrieveConf;
-
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.thoughtcrime.securesms.attachments.Attachment;
 import org.thoughtcrime.securesms.attachments.UriAttachment;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
@@ -39,35 +44,29 @@ import org.whispersystems.libsignal.LegacyMessageException;
 import org.whispersystems.libsignal.NoSessionException;
 import org.whispersystems.libsignal.util.guava.Optional;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 public class MmsDownloadJob extends MasterSecretJob {
 
   private static final long serialVersionUID = 1L;
 
   private static final String TAG = MmsDownloadJob.class.getSimpleName();
 
-  private final long    messageId;
-  private final long    threadId;
+  private final long messageId;
+  private final long threadId;
   private final boolean automatic;
 
   public MmsDownloadJob(Context context, long messageId, long threadId, boolean automatic) {
-    super(context, JobParameters.newBuilder()
-                                .withPersistence()
-                                .withRequirement(new MasterSecretRequirement(context))
-                                .withRequirement(new NetworkRequirement(context))
-                                .withGroupId("mms-operation")
-                                .withWakeLock(true, 30, TimeUnit.SECONDS)
-                                .create());
+    super(
+        context,
+        JobParameters.newBuilder()
+            .withPersistence()
+            .withRequirement(new MasterSecretRequirement(context))
+            .withRequirement(new NetworkRequirement(context))
+            .withGroupId("mms-operation")
+            .withWakeLock(true, 30, TimeUnit.SECONDS)
+            .create());
 
     this.messageId = messageId;
-    this.threadId  = threadId;
+    this.threadId = threadId;
     this.automatic = automatic;
   }
 
@@ -81,7 +80,7 @@ public class MmsDownloadJob extends MasterSecretJob {
 
   @Override
   public void onRun(MasterSecret masterSecret) {
-    MmsDatabase                               database     = DatabaseFactory.getMmsDatabase(context);
+    MmsDatabase database = DatabaseFactory.getMmsDatabase(context);
     Optional<MmsDatabase.MmsNotificationInfo> notification = database.getNotification(messageId);
 
     if (!notification.isPresent()) {
@@ -101,11 +100,12 @@ public class MmsDownloadJob extends MasterSecretJob {
       database.markDownloadState(messageId, MmsDatabase.Status.DOWNLOAD_CONNECTING);
 
       String contentLocation = notification.get().getContentLocation();
-      byte[] transactionId   = new byte[0];
+      byte[] transactionId = new byte[0];
 
       try {
         if (notification.get().getTransactionId() != null) {
-          transactionId = notification.get().getTransactionId().getBytes(CharacterSets.MIMENAME_ISO_8859_1);
+          transactionId =
+              notification.get().getTransactionId().getBytes(CharacterSets.MIMENAME_ISO_8859_1);
         } else {
           Log.w(TAG, "No transaction ID!");
         }
@@ -113,29 +113,38 @@ public class MmsDownloadJob extends MasterSecretJob {
         Log.w(TAG, e);
       }
 
-      Log.w(TAG, "Downloading mms at " + Uri.parse(contentLocation).getHost() + ", subscription ID: " + notification.get().getSubscriptionId());
+      Log.w(
+          TAG,
+          "Downloading mms at "
+              + Uri.parse(contentLocation).getHost()
+              + ", subscription ID: "
+              + notification.get().getSubscriptionId());
 
-      RetrieveConf retrieveConf = new CompatMmsConnection(context).retrieve(contentLocation, transactionId, notification.get().getSubscriptionId());
+      RetrieveConf retrieveConf =
+          new CompatMmsConnection(context)
+              .retrieve(contentLocation, transactionId, notification.get().getSubscriptionId());
 
       if (retrieveConf == null) {
         throw new MmsException("RetrieveConf was null");
       }
 
-      storeRetrievedMms(contentLocation, messageId, threadId, retrieveConf, notification.get().getSubscriptionId(), notification.get().getFrom());
+      storeRetrievedMms(
+          contentLocation,
+          messageId,
+          threadId,
+          retrieveConf,
+          notification.get().getSubscriptionId(),
+          notification.get().getFrom());
     } catch (ApnUnavailableException e) {
       Log.w(TAG, e);
-      handleDownloadError(messageId, threadId, MmsDatabase.Status.DOWNLOAD_APN_UNAVAILABLE,
-                          automatic);
+      handleDownloadError(
+          messageId, threadId, MmsDatabase.Status.DOWNLOAD_APN_UNAVAILABLE, automatic);
     } catch (MmsException e) {
       Log.w(TAG, e);
-      handleDownloadError(messageId, threadId,
-                          MmsDatabase.Status.DOWNLOAD_HARD_FAILURE,
-                          automatic);
+      handleDownloadError(messageId, threadId, MmsDatabase.Status.DOWNLOAD_HARD_FAILURE, automatic);
     } catch (MmsRadioException | IOException e) {
       Log.w(TAG, e);
-      handleDownloadError(messageId, threadId,
-                          MmsDatabase.Status.DOWNLOAD_SOFT_FAILURE,
-                          automatic);
+      handleDownloadError(messageId, threadId, MmsDatabase.Status.DOWNLOAD_SOFT_FAILURE, automatic);
     } catch (DuplicateMessageException e) {
       Log.w(TAG, e);
       database.markAsDecryptDuplicate(messageId, threadId);
@@ -167,20 +176,23 @@ public class MmsDownloadJob extends MasterSecretJob {
     return false;
   }
 
-  private void storeRetrievedMms(String contentLocation,
-                                 long messageId, long threadId, RetrieveConf retrieved,
-                                 int subscriptionId, @Nullable Address notificationFrom)
+  private void storeRetrievedMms(
+      String contentLocation,
+      long messageId,
+      long threadId,
+      RetrieveConf retrieved,
+      int subscriptionId,
+      @Nullable Address notificationFrom)
       throws MmsException, NoSessionException, DuplicateMessageException, InvalidMessageException,
-             LegacyMessageException
-  {
-    MmsDatabase           database    = DatabaseFactory.getMmsDatabase(context);
-    SingleUseBlobProvider provider    = SingleUseBlobProvider.getInstance();
-    Optional<Address>     group       = Optional.absent();
-    Set<Address>          members     = new HashSet<>();
-    String                body        = null;
-    List<Attachment>      attachments = new LinkedList<>();
+          LegacyMessageException {
+    MmsDatabase database = DatabaseFactory.getMmsDatabase(context);
+    SingleUseBlobProvider provider = SingleUseBlobProvider.getInstance();
+    Optional<Address> group = Optional.absent();
+    Set<Address> members = new HashSet<>();
+    String body = null;
+    List<Attachment> attachments = new LinkedList<>();
 
-    Address               from;
+    Address from;
 
     if (retrieved.getFrom() != null) {
       from = Address.fromExternal(context, Util.toIsoString(retrieved.getFrom().getTextString()));
@@ -209,28 +221,40 @@ public class MmsDownloadJob extends MasterSecretJob {
       body = PartParser.getMessageText(retrieved.getBody());
       PduBody media = PartParser.getSupportedMediaParts(retrieved.getBody());
 
-      for (int i=0;i<media.getPartsNum();i++) {
+      for (int i = 0; i < media.getPartsNum(); i++) {
         PduPart part = media.getPart(i);
 
         if (part.getData() != null) {
-          Uri    uri  = provider.createUri(part.getData());
+          Uri uri = provider.createUri(part.getData());
           String name = null;
 
           if (part.getName() != null) name = Util.toIsoString(part.getName());
 
-          attachments.add(new UriAttachment(uri, Util.toIsoString(part.getContentType()),
-                                            AttachmentDatabase.TRANSFER_PROGRESS_DONE,
-                                            part.getData().length, name, false));
+          attachments.add(
+              new UriAttachment(
+                  uri,
+                  Util.toIsoString(part.getContentType()),
+                  AttachmentDatabase.TRANSFER_PROGRESS_DONE,
+                  part.getData().length,
+                  name,
+                  false));
         }
       }
     }
 
     if (members.size() > 2) {
-      group = Optional.of(Address.fromSerialized(DatabaseFactory.getGroupDatabase(context).getOrCreateGroupForMembers(new LinkedList<>(members), true)));
+      group =
+          Optional.of(
+              Address.fromSerialized(
+                  DatabaseFactory.getGroupDatabase(context)
+                      .getOrCreateGroupForMembers(new LinkedList<>(members), true)));
     }
 
-    IncomingMediaMessage   message      = new IncomingMediaMessage(from, group, body, retrieved.getDate() * 1000L, attachments, subscriptionId, 0, false);
-    Optional<InsertResult> insertResult = database.insertMessageInbox(message, contentLocation, threadId);
+    IncomingMediaMessage message =
+        new IncomingMediaMessage(
+            from, group, body, retrieved.getDate() * 1000L, attachments, subscriptionId, 0, false);
+    Optional<InsertResult> insertResult =
+        database.insertMessageInbox(message, contentLocation, threadId);
 
     if (insertResult.isPresent()) {
       database.delete(messageId);
@@ -238,8 +262,8 @@ public class MmsDownloadJob extends MasterSecretJob {
     }
   }
 
-  private void handleDownloadError(long messageId, long threadId, int downloadStatus, boolean automatic)
-  {
+  private void handleDownloadError(
+      long messageId, long threadId, int downloadStatus, boolean automatic) {
     MmsDatabase db = DatabaseFactory.getMmsDatabase(context);
 
     db.markDownloadState(messageId, downloadStatus);

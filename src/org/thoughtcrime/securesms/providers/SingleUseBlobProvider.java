@@ -3,7 +3,6 @@ package org.thoughtcrime.securesms.providers;
 import android.content.ContentUris;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,9 +16,9 @@ public class SingleUseBlobProvider {
   @SuppressWarnings("unused")
   private static final String TAG = SingleUseBlobProvider.class.getSimpleName();
 
-  public  static final String AUTHORITY   = "org.thoughtcrime.securesms";
-  public  static final String PATH        = "memory/*/#";
-  private static final Uri    CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/memory");
+  public static final String AUTHORITY = "org.thoughtcrime.securesms";
+  public static final String PATH = "memory/*/#";
+  private static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/memory");
 
   private final Map<Long, byte[]> cache = new HashMap<>();
 
@@ -48,8 +47,6 @@ public class SingleUseBlobProvider {
     cache.remove(id);
 
     if (cached != null) return new ByteArrayInputStream(cached);
-    else                throw new IOException("ID not found: " + id);
-
+    else throw new IOException("ID not found: " + id);
   }
-
 }

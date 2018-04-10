@@ -2,7 +2,8 @@ package org.thoughtcrime.securesms.jobs;
 
 import android.content.Context;
 import android.util.Log;
-
+import java.io.IOException;
+import javax.inject.Inject;
 import org.thoughtcrime.securesms.ApplicationContext;
 import org.thoughtcrime.securesms.database.Address;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
@@ -21,10 +22,6 @@ import org.whispersystems.signalservice.api.crypto.UntrustedIdentityException;
 import org.whispersystems.signalservice.api.messages.SignalServiceDataMessage;
 import org.whispersystems.signalservice.api.push.SignalServiceAddress;
 import org.whispersystems.signalservice.api.push.exceptions.UnregisteredUserException;
-
-import java.io.IOException;
-
-import javax.inject.Inject;
 
 public class PushTextSendJob extends PushSendJob implements InjectableType {
 
@@ -46,9 +43,10 @@ public class PushTextSendJob extends PushSendJob implements InjectableType {
 
   @Override
   public void onPushSend() throws NoSuchMessageException, RetryLaterException {
-    ExpiringMessageManager expirationManager = ApplicationContext.getInstance(context).getExpiringMessageManager();
-    SmsDatabase            database          = DatabaseFactory.getSmsDatabase(context);
-    SmsMessageRecord       record            = database.getMessage(messageId);
+    ExpiringMessageManager expirationManager =
+        ApplicationContext.getInstance(context).getExpiringMessageManager();
+    SmsDatabase database = DatabaseFactory.getSmsDatabase(context);
+    SmsMessageRecord record = database.getMessage(messageId);
 
     try {
       Log.w(TAG, "Sending message: " + messageId);
@@ -64,11 +62,15 @@ public class PushTextSendJob extends PushSendJob implements InjectableType {
     } catch (InsecureFallbackApprovalException e) {
       Log.w(TAG, e);
       database.markAsPendingInsecureSmsFallback(record.getId());
-      MessageNotifier.notifyMessageDeliveryFailed(context, record.getRecipient(), record.getThreadId());
-      ApplicationContext.getInstance(context).getJobManager().add(new DirectoryRefreshJob(context, false));
+      MessageNotifier.notifyMessageDeliveryFailed(
+          context, record.getRecipient(), record.getThreadId());
+      ApplicationContext.getInstance(context)
+          .getJobManager()
+          .add(new DirectoryRefreshJob(context, false));
     } catch (UntrustedIdentityException e) {
       Log.w(TAG, e);
-      database.addMismatchedIdentity(record.getId(), Address.fromSerialized(e.getE164Number()), e.getIdentityKey());
+      database.addMismatchedIdentity(
+          record.getId(), Address.fromSerialized(e.getE164Number()), e.getIdentityKey());
       database.markAsSentFailed(record.getId());
       database.markAsPush(record.getId());
     }
@@ -85,8 +87,9 @@ public class PushTextSendJob extends PushSendJob implements InjectableType {
   public void onCanceled() {
     DatabaseFactory.getSmsDatabase(context).markAsSentFailed(messageId);
 
-    long      threadId  = DatabaseFactory.getSmsDatabase(context).getThreadIdForMessage(messageId);
-    Recipient recipient = DatabaseFactory.getThreadDatabase(context).getRecipientForThreadId(threadId);
+    long threadId = DatabaseFactory.getSmsDatabase(context).getThreadIdForMessage(messageId);
+    Recipient recipient =
+        DatabaseFactory.getThreadDatabase(context).getRecipientForThreadId(threadId);
 
     if (threadId != -1 && recipient != null) {
       MessageNotifier.notifyMessageDeliveryFailed(context, recipient, threadId);
@@ -94,19 +97,18 @@ public class PushTextSendJob extends PushSendJob implements InjectableType {
   }
 
   private void deliver(SmsMessageRecord message)
-      throws UntrustedIdentityException, InsecureFallbackApprovalException, RetryLaterException
-  {
+      throws UntrustedIdentityException, InsecureFallbackApprovalException, RetryLaterException {
     try {
-      SignalServiceAddress       address           = getPushAddress(message.getIndividualRecipient().getAddress());
-      Optional<byte[]>           profileKey        = getProfileKey(message.getIndividualRecipient());
-      SignalServiceDataMessage   textSecureMessage = SignalServiceDataMessage.newBuilder()
-                                                                             .withTimestamp(message.getDateSent())
-                                                                             .withBody(message.getBody())
-                                                                             .withExpiration((int)(message.getExpiresIn() / 1000))
-                                                                             .withProfileKey(profileKey.orNull())
-                                                                             .asEndSessionMessage(message.isEndSession())
-                                                                             .build();
-
+      SignalServiceAddress address = getPushAddress(message.getIndividualRecipient().getAddress());
+      Optional<byte[]> profileKey = getProfileKey(message.getIndividualRecipient());
+      SignalServiceDataMessage textSecureMessage =
+          SignalServiceDataMessage.newBuilder()
+              .withTimestamp(message.getDateSent())
+              .withBody(message.getBody())
+              .withExpiration((int) (message.getExpiresIn() / 1000))
+              .withProfileKey(profileKey.orNull())
+              .asEndSessionMessage(message.isEndSession())
+              .build();
 
       messageSender.sendMessage(address, textSecureMessage);
     } catch (UnregisteredUserException e) {

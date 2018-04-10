@@ -2,7 +2,8 @@ package org.thoughtcrime.securesms.jobs;
 
 import android.content.Context;
 import android.util.Log;
-
+import java.io.IOException;
+import javax.inject.Inject;
 import org.thoughtcrime.securesms.crypto.IdentityKeyUtil;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.crypto.PreKeyUtil;
@@ -16,10 +17,6 @@ import org.whispersystems.libsignal.state.SignedPreKeyRecord;
 import org.whispersystems.signalservice.api.SignalServiceAccountManager;
 import org.whispersystems.signalservice.api.push.exceptions.PushNetworkException;
 
-import java.io.IOException;
-
-import javax.inject.Inject;
-
 public class CreateSignedPreKeyJob extends MasterSecretJob implements InjectableType {
 
   private static final long serialVersionUID = 1L;
@@ -29,12 +26,14 @@ public class CreateSignedPreKeyJob extends MasterSecretJob implements Injectable
   @Inject transient SignalServiceAccountManager accountManager;
 
   public CreateSignedPreKeyJob(Context context) {
-    super(context, JobParameters.newBuilder()
-                                .withPersistence()
-                                .withRequirement(new NetworkRequirement(context))
-                                .withRequirement(new MasterSecretRequirement(context))
-                                .withGroupId(CreateSignedPreKeyJob.class.getSimpleName())
-                                .create());
+    super(
+        context,
+        JobParameters.newBuilder()
+            .withPersistence()
+            .withRequirement(new NetworkRequirement(context))
+            .withRequirement(new MasterSecretRequirement(context))
+            .withGroupId(CreateSignedPreKeyJob.class.getSimpleName())
+            .create());
   }
 
   @Override
@@ -52,8 +51,9 @@ public class CreateSignedPreKeyJob extends MasterSecretJob implements Injectable
       return;
     }
 
-    IdentityKeyPair    identityKeyPair    = IdentityKeyUtil.getIdentityKeyPair(context);
-    SignedPreKeyRecord signedPreKeyRecord = PreKeyUtil.generateSignedPreKey(context, identityKeyPair, true);
+    IdentityKeyPair identityKeyPair = IdentityKeyUtil.getIdentityKeyPair(context);
+    SignedPreKeyRecord signedPreKeyRecord =
+        PreKeyUtil.generateSignedPreKey(context, identityKeyPair, true);
 
     accountManager.setSignedPreKey(signedPreKeyRecord);
     TextSecurePreferences.setSignedPreKeyRegistered(context, true);

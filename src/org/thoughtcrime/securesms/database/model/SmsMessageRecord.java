@@ -19,40 +19,58 @@ package org.thoughtcrime.securesms.database.model;
 
 import android.content.Context;
 import android.text.SpannableString;
-
+import java.util.LinkedList;
+import java.util.List;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.database.MmsSmsColumns;
 import org.thoughtcrime.securesms.database.SmsDatabase;
 import org.thoughtcrime.securesms.database.documents.IdentityKeyMismatch;
 import org.thoughtcrime.securesms.recipients.Recipient;
 
-import java.util.LinkedList;
-import java.util.List;
-
 /**
  * The message record model which represents standard SMS messages.
  *
  * @author Moxie Marlinspike
- *
  */
-
 public class SmsMessageRecord extends MessageRecord {
 
-  public SmsMessageRecord(Context context, long id,
-                          String body, Recipient recipient,
-                          Recipient individualRecipient,
-                          int recipientDeviceId,
-                          long dateSent, long dateReceived,
-                          int deliveryReceiptCount,
-                          long type, long threadId,
-                          int status, List<IdentityKeyMismatch> mismatches,
-                          int subscriptionId, long expiresIn, long expireStarted,
-                          int readReceiptCount)
-  {
-    super(context, id, body, recipient, individualRecipient, recipientDeviceId,
-          dateSent, dateReceived, threadId, status, deliveryReceiptCount, type,
-          mismatches, new LinkedList<>(), subscriptionId,
-          expiresIn, expireStarted, readReceiptCount);
+  public SmsMessageRecord(
+      Context context,
+      long id,
+      String body,
+      Recipient recipient,
+      Recipient individualRecipient,
+      int recipientDeviceId,
+      long dateSent,
+      long dateReceived,
+      int deliveryReceiptCount,
+      long type,
+      long threadId,
+      int status,
+      List<IdentityKeyMismatch> mismatches,
+      int subscriptionId,
+      long expiresIn,
+      long expireStarted,
+      int readReceiptCount) {
+    super(
+        context,
+        id,
+        body,
+        recipient,
+        individualRecipient,
+        recipientDeviceId,
+        dateSent,
+        dateReceived,
+        threadId,
+        status,
+        deliveryReceiptCount,
+        type,
+        mismatches,
+        new LinkedList<>(),
+        subscriptionId,
+        expiresIn,
+        expireStarted,
+        readReceiptCount);
   }
 
   public long getType() {
@@ -64,25 +82,41 @@ public class SmsMessageRecord extends MessageRecord {
     if (SmsDatabase.Types.isFailedDecryptType(type)) {
       return emphasisAdded(context.getString(R.string.MessageDisplayHelper_bad_encrypted_message));
     } else if (isCorruptedKeyExchange()) {
-      return emphasisAdded(context.getString(R.string.SmsMessageRecord_received_corrupted_key_exchange_message));
+      return emphasisAdded(
+          context.getString(R.string.SmsMessageRecord_received_corrupted_key_exchange_message));
     } else if (isInvalidVersionKeyExchange()) {
-      return emphasisAdded(context.getString(R.string.SmsMessageRecord_received_key_exchange_message_for_invalid_protocol_version));
+      return emphasisAdded(
+          context.getString(
+              R.string
+                  .SmsMessageRecord_received_key_exchange_message_for_invalid_protocol_version));
     } else if (MmsSmsColumns.Types.isLegacyType(type)) {
-      return emphasisAdded(context.getString(R.string.MessageRecord_message_encrypted_with_a_legacy_protocol_version_that_is_no_longer_supported));
+      return emphasisAdded(
+          context.getString(
+              R.string
+                  .MessageRecord_message_encrypted_with_a_legacy_protocol_version_that_is_no_longer_supported));
     } else if (isBundleKeyExchange()) {
-      return emphasisAdded(context.getString(R.string.SmsMessageRecord_received_message_with_new_safety_number_tap_to_process));
+      return emphasisAdded(
+          context.getString(
+              R.string.SmsMessageRecord_received_message_with_new_safety_number_tap_to_process));
     } else if (isKeyExchange() && isOutgoing()) {
       return new SpannableString("");
     } else if (isKeyExchange() && !isOutgoing()) {
-      return emphasisAdded(context.getString(R.string.ConversationItem_received_key_exchange_message_tap_to_process));
+      return emphasisAdded(
+          context.getString(
+              R.string.ConversationItem_received_key_exchange_message_tap_to_process));
     } else if (SmsDatabase.Types.isDuplicateMessageType(type)) {
       return emphasisAdded(context.getString(R.string.SmsMessageRecord_duplicate_message));
     } else if (SmsDatabase.Types.isNoRemoteSessionType(type)) {
-      return emphasisAdded(context.getString(R.string.MessageDisplayHelper_message_encrypted_for_non_existing_session));
+      return emphasisAdded(
+          context.getString(
+              R.string.MessageDisplayHelper_message_encrypted_for_non_existing_session));
     } else if (isEndSession() && isOutgoing()) {
       return emphasisAdded(context.getString(R.string.SmsMessageRecord_secure_session_reset));
     } else if (isEndSession()) {
-      return emphasisAdded(context.getString(R.string.SmsMessageRecord_secure_session_reset_s, getIndividualRecipient().toShortString()));
+      return emphasisAdded(
+          context.getString(
+              R.string.SmsMessageRecord_secure_session_reset_s,
+              getIndividualRecipient().toShortString()));
     } else {
       return super.getDisplayBody();
     }

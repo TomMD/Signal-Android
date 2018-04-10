@@ -1,18 +1,16 @@
 /**
  * Copyright (C) 2015 Open Whisper Systems
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * <p>This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * <p>You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  */
 package org.thoughtcrime.securesms.providers;
 
@@ -25,17 +23,17 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 public class MmsBodyProvider extends ContentProvider {
-  private static final String TAG                = MmsBodyProvider.class.getSimpleName();
-  private static final String CONTENT_URI_STRING = "content://org.thoughtcrime.provider.securesms.mms/mms";
-  public  static final Uri    CONTENT_URI        = Uri.parse(CONTENT_URI_STRING);
-  private static final int    SINGLE_ROW         = 1;
+  private static final String TAG = MmsBodyProvider.class.getSimpleName();
+  private static final String CONTENT_URI_STRING =
+      "content://org.thoughtcrime.provider.securesms.mms/mms";
+  public static final Uri CONTENT_URI = Uri.parse(CONTENT_URI_STRING);
+  private static final int SINGLE_ROW = 1;
 
   private static final UriMatcher uriMatcher;
 
@@ -49,7 +47,6 @@ public class MmsBodyProvider extends ContentProvider {
     return true;
   }
 
-
   private File getFile(Uri uri) {
     long id = Long.parseLong(uri.getPathSegments().get(1));
     return new File(getContext().getCacheDir(), id + ".mmsbody");
@@ -60,21 +57,27 @@ public class MmsBodyProvider extends ContentProvider {
     Log.w(TAG, "openFile(" + uri + ", " + mode + ")");
 
     switch (uriMatcher.match(uri)) {
-    case SINGLE_ROW:
-      Log.w(TAG, "Fetching message body for a single row...");
-      File tmpFile = getFile(uri);
+      case SINGLE_ROW:
+        Log.w(TAG, "Fetching message body for a single row...");
+        File tmpFile = getFile(uri);
 
-      final int fileMode;
-      switch (mode) {
-      case "w": fileMode = ParcelFileDescriptor.MODE_TRUNCATE |
-                           ParcelFileDescriptor.MODE_CREATE   |
-                           ParcelFileDescriptor.MODE_WRITE_ONLY; break;
-      case "r": fileMode = ParcelFileDescriptor.MODE_READ_ONLY;  break;
-      default:  throw new IllegalArgumentException("requested file mode unsupported");
-      }
+        final int fileMode;
+        switch (mode) {
+          case "w":
+            fileMode =
+                ParcelFileDescriptor.MODE_TRUNCATE
+                    | ParcelFileDescriptor.MODE_CREATE
+                    | ParcelFileDescriptor.MODE_WRITE_ONLY;
+            break;
+          case "r":
+            fileMode = ParcelFileDescriptor.MODE_READ_ONLY;
+            break;
+          default:
+            throw new IllegalArgumentException("requested file mode unsupported");
+        }
 
-      Log.w(TAG, "returning file " + tmpFile.getAbsolutePath());
-      return ParcelFileDescriptor.open(tmpFile, fileMode);
+        Log.w(TAG, "returning file " + tmpFile.getAbsolutePath());
+        return ParcelFileDescriptor.open(tmpFile, fileMode);
     }
 
     throw new FileNotFoundException("Request for bad message.");
@@ -83,8 +86,8 @@ public class MmsBodyProvider extends ContentProvider {
   @Override
   public int delete(Uri uri, String arg1, String[] arg2) {
     switch (uriMatcher.match(uri)) {
-    case SINGLE_ROW:
-      return getFile(uri).delete() ? 1 : 0;
+      case SINGLE_ROW:
+        return getFile(uri).delete() ? 1 : 0;
     }
     return 0;
   }
@@ -108,13 +111,16 @@ public class MmsBodyProvider extends ContentProvider {
   public int update(Uri arg0, ContentValues arg1, String arg2, String[] arg3) {
     return 0;
   }
+
   public static Pointer makeTemporaryPointer(Context context) {
-    return new Pointer(context, ContentUris.withAppendedId(MmsBodyProvider.CONTENT_URI, System.currentTimeMillis()));
+    return new Pointer(
+        context,
+        ContentUris.withAppendedId(MmsBodyProvider.CONTENT_URI, System.currentTimeMillis()));
   }
 
   public static class Pointer {
     private final Context context;
-    private final Uri     uri;
+    private final Uri uri;
 
     public Pointer(Context context, Uri uri) {
       this.context = context;

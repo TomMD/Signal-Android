@@ -1,7 +1,6 @@
 package org.thoughtcrime.securesms.jobs.requirements;
 
 import android.content.Context;
-
 import org.whispersystems.jobqueue.dependencies.ContextDependent;
 import org.whispersystems.jobqueue.requirements.NetworkRequirement;
 import org.whispersystems.jobqueue.requirements.Requirement;

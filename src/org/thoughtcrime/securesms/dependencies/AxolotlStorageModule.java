@@ -1,15 +1,16 @@
 package org.thoughtcrime.securesms.dependencies;
 
 import android.content.Context;
-
+import dagger.Module;
+import dagger.Provides;
 import org.thoughtcrime.securesms.crypto.storage.SignalProtocolStoreImpl;
 import org.thoughtcrime.securesms.jobs.CleanPreKeysJob;
 import org.whispersystems.libsignal.state.SignedPreKeyStore;
 
-import dagger.Module;
-import dagger.Provides;
-
-@Module (complete = false, injects = {CleanPreKeysJob.class})
+@Module(
+  complete = false,
+  injects = {CleanPreKeysJob.class}
+)
 public class AxolotlStorageModule {
 
   private final Context context;
@@ -18,7 +19,8 @@ public class AxolotlStorageModule {
     this.context = context;
   }
 
-  @Provides SignedPreKeyStoreFactory provideSignedPreKeyStoreFactory() {
+  @Provides
+  SignedPreKeyStoreFactory provideSignedPreKeyStoreFactory() {
     return new SignedPreKeyStoreFactory() {
       @Override
       public SignedPreKeyStore create() {

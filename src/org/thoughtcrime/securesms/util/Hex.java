@@ -1,34 +1,30 @@
 /**
  * Copyright (C) 2011 Whisper Systems
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * <p>This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * <p>You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>.
  */
 package org.thoughtcrime.securesms.util;
 
 import java.io.IOException;
 
-/**
- * Utility for generating hex dumps.
- */
+/** Utility for generating hex dumps. */
 public class Hex {
 
-  private final static int HEX_DIGITS_START = 10;
-  private final static int ASCII_TEXT_START = HEX_DIGITS_START + (16*2 + (16/2));
+  private static final int HEX_DIGITS_START = 10;
+  private static final int ASCII_TEXT_START = HEX_DIGITS_START + (16 * 2 + (16 / 2));
 
-  final static String EOL = System.getProperty("line.separator");
+  static final String EOL = System.getProperty("line.separator");
 
-  private final static char[] HEX_DIGITS = {
+  private static final char[] HEX_DIGITS = {
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
   };
 
@@ -47,7 +43,7 @@ public class Hex {
 
   public static String toStringCondensed(byte[] bytes) {
     StringBuffer buf = new StringBuffer();
-    for (int i=0;i<bytes.length;i++) {
+    for (int i = 0; i < bytes.length; i++) {
       appendHexChar(buf, bytes[i]);
     }
     return buf.toString();
@@ -55,7 +51,7 @@ public class Hex {
 
   public static byte[] fromStringCondensed(String encoded) throws IOException {
     final char[] data = encoded.toCharArray();
-    final int    len  = data.length;
+    final int len = data.length;
 
     if ((len & 0x01) != 0) {
       throw new IOException("Odd number of characters.");
@@ -95,15 +91,16 @@ public class Hex {
     return buf.toString();
   }
 
-  private static void appendDumpLine(StringBuffer buf, int line, byte[] bytes, int lineOffset, int lineLength) {
+  private static void appendDumpLine(
+      StringBuffer buf, int line, byte[] bytes, int lineOffset, int lineLength) {
     buf.append(HEX_DIGITS[(line >> 28) & 0xf]);
     buf.append(HEX_DIGITS[(line >> 24) & 0xf]);
     buf.append(HEX_DIGITS[(line >> 20) & 0xf]);
     buf.append(HEX_DIGITS[(line >> 16) & 0xf]);
     buf.append(HEX_DIGITS[(line >> 12) & 0xf]);
-    buf.append(HEX_DIGITS[(line >>  8) & 0xf]);
-    buf.append(HEX_DIGITS[(line >>  4) & 0xf]);
-    buf.append(HEX_DIGITS[(line      ) & 0xf]);
+    buf.append(HEX_DIGITS[(line >> 8) & 0xf]);
+    buf.append(HEX_DIGITS[(line >> 4) & 0xf]);
+    buf.append(HEX_DIGITS[(line) & 0xf]);
     buf.append(": ");
 
     for (int i = 0; i < 16; i++) {
@@ -123,7 +120,7 @@ public class Hex {
       int idx = i + lineOffset;
       int b = bytes[idx];
       if (b >= 0x20 && b <= 0x7e) {
-        buf.append((char)b);
+        buf.append((char) b);
       } else {
         buf.append('.');
       }
@@ -134,5 +131,4 @@ public class Hex {
     buf.append(HEX_DIGITS[(b >> 4) & 0xf]);
     buf.append(HEX_DIGITS[b & 0xf]);
   }
-
 }

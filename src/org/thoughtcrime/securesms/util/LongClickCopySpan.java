@@ -8,7 +8,6 @@ import android.text.TextPaint;
 import android.text.style.URLSpan;
 import android.view.View;
 import android.widget.Toast;
-
 import org.thoughtcrime.securesms.R;
 
 public class LongClickCopySpan extends URLSpan {
@@ -16,8 +15,7 @@ public class LongClickCopySpan extends URLSpan {
   private static final String PREFIX_TEL = "tel:";
 
   private boolean isHighlighted;
-  @ColorInt
-  private int highlightColor;
+  @ColorInt private int highlightColor;
 
   public LongClickCopySpan(String url) {
     super(url);
@@ -27,8 +25,11 @@ public class LongClickCopySpan extends URLSpan {
     Context context = widget.getContext();
     String preparedUrl = prepareUrl(getURL());
     copyUrl(context, preparedUrl);
-    Toast.makeText(context,
-            context.getString(R.string.ConversationItem_copied_text, preparedUrl), Toast.LENGTH_SHORT).show();
+    Toast.makeText(
+            context,
+            context.getString(R.string.ConversationItem_copied_text, preparedUrl),
+            Toast.LENGTH_SHORT)
+        .show();
   }
 
   @Override
@@ -46,8 +47,9 @@ public class LongClickCopySpan extends URLSpan {
   private void copyUrl(Context context, String url) {
     int sdk = android.os.Build.VERSION.SDK_INT;
     if (sdk < android.os.Build.VERSION_CODES.HONEYCOMB) {
-      @SuppressWarnings("deprecation") android.text.ClipboardManager clipboard =
-              (android.text.ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+      @SuppressWarnings("deprecation")
+      android.text.ClipboardManager clipboard =
+          (android.text.ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
       clipboard.setText(url);
     } else {
       copyUriSdk11(context, url);
@@ -57,7 +59,7 @@ public class LongClickCopySpan extends URLSpan {
   @TargetApi(android.os.Build.VERSION_CODES.HONEYCOMB)
   private void copyUriSdk11(Context context, String url) {
     android.content.ClipboardManager clipboard =
-            (android.content.ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        (android.content.ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
     ClipData clip = ClipData.newPlainText(context.getString(R.string.app_name), url);
     clipboard.setPrimaryClip(clip);
   }

@@ -6,12 +6,11 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
-
 import org.thoughtcrime.securesms.R;
 
 public class ImageDivet extends ImageView {
   private static final float CORNER_OFFSET = 12F;
-  private static final String[] POSITIONS  = new String[] {"bottom_right"};
+  private static final String[] POSITIONS = new String[] {"bottom_right"};
 
   private Drawable drawable;
 
@@ -45,17 +44,17 @@ public class ImageDivet extends ImageView {
   }
 
   private void setDrawable() {
-    int attributes[]     = new int[] {R.attr.lower_right_divet};
+    int attributes[] = new int[] {R.attr.lower_right_divet};
 
     TypedArray drawables = getContext().obtainStyledAttributes(attributes);
 
     switch (position) {
-    case 0:
-      drawable = drawables.getDrawable(0);
-      break;
+      case 0:
+        drawable = drawables.getDrawable(0);
+        break;
     }
 
-    drawableIntrinsicWidth  = drawable.getIntrinsicWidth();
+    drawableIntrinsicWidth = drawable.getIntrinsicWidth();
     drawableIntrinsicHeight = drawable.getIntrinsicHeight();
 
     drawables.recycle();
@@ -97,13 +96,10 @@ public class ImageDivet extends ImageView {
     final int bottom = getHeight();
 
     switch (position) {
-    case 0:
-     drawable.setBounds(
-         right - drawableIntrinsicWidth,
-         bottom - drawableIntrinsicHeight,
-         right,
-         bottom);
-     break;
+      case 0:
+        drawable.setBounds(
+            right - drawableIntrinsicWidth, bottom - drawableIntrinsicHeight, right, bottom);
+        break;
     }
   }
 }
